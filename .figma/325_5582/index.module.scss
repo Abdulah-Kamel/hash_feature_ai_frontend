@@ -1,0 +1,72 @@
+* {
+  box-sizing: border-box;
+}
+
+.frame2147223690 {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+  border: 1px solid #414247;
+  border-radius: 12px;
+  padding: 15px;
+  width: 936px;
+  height: 84px;
+  background-image: linear-gradient(180deg, #262626 0%, #262626cc 100%),
+    linear-gradient(180deg, #6e82f433 0%, #8191eb29 53.37%, #bc6cef33 96.63%);
+
+  .icons {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #6e83f5;
+    border-radius: 12px;
+    background: #6e83f5;
+    padding-right: 7px;
+    padding-left: 7px;
+    height: 40px;
+
+    .a {
+      flex-shrink: 0;
+      line-height: 22px;
+      letter-spacing: -0.4px;
+      color: #ffffff;
+      font-family: Alexandria, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 16px;
+    }
+  }
+
+  .frame2147223791 {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: flex-start;
+    row-gap: 8px;
+
+    .a2 {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      justify-content: flex-end;
+      width: 797px;
+      height: 24px;
+      letter-spacing: 0;
+      color: #ffffff;
+      font-family: Alexandria, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .a5 {
+      flex-shrink: 0;
+      align-self: stretch;
+      text-align: right;
+      letter-spacing: 0;
+      color: #c9ccdb;
+      font-family: Alexandria, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+    }
+  }
+}
