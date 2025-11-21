@@ -63,7 +63,7 @@ const index = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="py-5">
-                  <Link href="/new-file">
+                  <Link href="/dashboard/chat">
                     <Plus className="size-4" />
                     <span>ملف جديد</span>
                   </Link>
