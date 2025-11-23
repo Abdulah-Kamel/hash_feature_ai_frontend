@@ -6,8 +6,11 @@ import { PlusCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import FlashcardsSwitcher from "./FlashcardsSwitcher"
 import StageSwitcher from "./ٍStageSwitvher";
+import TestView from "./TestView";
+import StageCard from "./StageCard";
 
 export default function LeftPanel() {
+  const [testsMode, setTestsMode] = React.useState("list");
   const tabs = [
     { label: "الاختبارات", value: "tests" },
     { label: "كروت الفلاش", value: "flashcards" },
@@ -30,24 +33,42 @@ export default function LeftPanel() {
         </TabsList>
 
         <TabsContent value="stages" className="mt-4 space-y-4">
-          <Button className="w-full h-14 rounded-lg bg-primary/20 text-primary-foreground justify-center gap-2 cursor-pointer">
+          {/* <Button className="w-full h-14 rounded-lg bg-primary/20 text-primary-foreground justify-center gap-2 cursor-pointer">
             <PlusCircle className="size-6" />
             إنشاء مراحل
-          </Button>
+          </Button> */}
           <StageSwitcher />
         </TabsContent>
         <TabsContent value="flashcards" className="mt-4">
-          <Button className="w-full h-14 rounded-lg bg-primary/20 text-primary-foreground justify-center gap-2 cursor-pointer">
+          {/* <Button className="w-full h-14 rounded-lg bg-primary/20 text-primary-foreground justify-center gap-2 cursor-pointer">
             <PlusCircle className="size-6" />
             إنشاء كروت الفلاش
-          </Button>
+          </Button> */}
           <FlashcardsSwitcher />
         </TabsContent>
         <TabsContent value="tests" className="mt-4">
-          <Button className="w-full h-14 rounded-lg bg-primary/20 text-primary-foreground justify-center gap-2 cursor-pointer">
-            <PlusCircle className="size-6" />
-            إنشاء اختبارات
-          </Button>
+          {testsMode === "view" ? (
+            <TestView onBack={() => setTestsMode("list")} title="الدرس الأول" total={10} index={1} />
+          ) : (
+            <>
+              <Button className="w-full h-14 rounded-lg bg-primary/20 text-primary-foreground justify-center gap-2 cursor-pointer">
+                <PlusCircle className="size-6" />
+                إنشاء اختبارات
+              </Button>
+              <div className="mt-4 space-y-4">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <StageCard
+                    key={i}
+                    title={`القسم ${i + 1}`}
+                    stagesCount={5}
+                    progress={89}
+                    className="bg-secondary"
+                    onOpen={() => setTestsMode("view")}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </TabsContent>
       </Tabs>
     </Card>

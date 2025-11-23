@@ -8,6 +8,7 @@ import LeftPanel from "@/components/chat/LeftPanel";
 
 export default function ChatPage() {
   const [input, setInput] = React.useState("");
+  const [chatOpen, setChatOpen] = React.useState(true);
   const [messages, setMessages] = React.useState([
     {
       id: "m1",
@@ -64,15 +65,17 @@ export default function ChatPage() {
 
   return (
     <SidebarInset className="min-h-screen">
-      <ChatHeader />
+      <ChatHeader chatOpen={chatOpen} onToggle={() => setChatOpen((v) => !v)} />
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 min-h-[calc(100vh-64px)]">
-        <div className="xl:col-span-2 h-full">
-          <div className="h-full shadow-sm overflow-hidden flex flex-col border-l">
-            <ChatThread messages={messages} />
-            <ChatInput value={input} onChange={setInput} onSend={handleSend} />
+        {chatOpen && (
+          <div className="xl:col-span-2 h-full">
+            <div className="h-full shadow-sm overflow-hidden flex flex-col border-l">
+              <ChatThread messages={messages} />
+              <ChatInput value={input} onChange={setInput} onSend={handleSend} />
+            </div>
           </div>
-        </div>
-        <div className="xl:col-span-2">
+        )}
+        <div className={chatOpen ? "xl:col-span-2" : "xl:col-span-4"}>
           <LeftPanel />
         </div>
       </div>

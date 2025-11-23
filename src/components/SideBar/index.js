@@ -112,7 +112,7 @@ const index = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="py-5">
-                  <Link href="/settings">
+                  <Link href="/dashboard/settings">
                     <Settings className="size-4" />
                     <span>الإعدادات</span>
                   </Link>
