@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import googleIcon from "@/assets/google-icon.svg";
 import Image from "next/image";
-import { handleRegister } from "@/components/register/registerActions";
+import { handleRegister } from "@/server/actions/auth";
 import FormField from "@/components/form/FormField";
 import PasswordField from "@/components/form/PasswordField";
 import PhoneField from "@/components/form/PhoneField";
@@ -21,9 +21,13 @@ import PhoneInput, {
 } from "react-phone-number-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertCircleIcon } from "lucide-react";
 
 const RegisterForm = () => {
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [phoneValue, setPhoneValue] = useState("");
   const router = useRouter();
   const formSchema = z.object({
     name: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل").max(255),
@@ -40,15 +44,6 @@ const RegisterForm = () => {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/,
         "كلمة السر يجب أن تحتوي على حرف كبير، حرف صغير، رقم ورمز خاص"
       ),
-    //     confirmPassword: z.string(),
-    //     terms: z
-    //       .boolean()
-    //       .refine((val) => val === true, "يجب الموافقة على الشروط والأحكام"),
-    //     role: z.string(),
-    //   })
-    //   .refine((data) => data.password === data.confirmPassword, {
-    //     path: ["confirmPassword"],
-    //     message: "كلمات السر غير متطابقة",
   });
 
   const { handleSubmit, control, reset } = useForm({
@@ -58,8 +53,6 @@ const RegisterForm = () => {
       email: "",
       phone: "",
       password: "",
-      // confirmPassword: '',
-      // terms: false,
     },
   });
 
@@ -69,12 +62,12 @@ const RegisterForm = () => {
       email: "",
       phone: "",
       password: "",
-      // confirmPassword: '',
-      // terms: false,
     });
   }, [reset]);
 
   async function onSubmit(data) {
+    console.log("data", data);
+    setError("");
     setLoading(true);
     const result = await handleRegister(data);
     if (result.success) {
@@ -82,16 +75,16 @@ const RegisterForm = () => {
       toast.success("تم إنشاء حساب بنجاح", {
         position: "top-right",
         duration: 3000,
-        classNames: "toast-success text-black mt-14",
+        classNames: "toast-success mt-14",
       });
-      router.push("/otp");
+      router.push("/dashboard");
     } else {
       setLoading(false);
+      setError(result.error);
       toast.error(result.error, {
         position: "top-right",
         duration: 3000,
-        classNames: "toast-error text-black mt-14",
-        description: <p className="font-light text-black">{result.error}</p>,
+        classNames: "toast-error mt-14",
       });
     }
   }
@@ -116,6 +109,16 @@ const RegisterForm = () => {
           autoComplete="email"
           className="bg-card text-white placeholder:text-white"
         />
+        <PhoneField
+          control={control}
+          name="phone"
+          label="رقم الهاتف"
+          placeholder="رقم الهاتف"
+          PhoneInput={PhoneInput}
+          getCountryCallingCode={getCountryCallingCode}
+          value={phoneValue}
+          setValue={setPhoneValue}
+        />
         <PasswordField
           control={control}
           name="password"
@@ -124,6 +127,14 @@ const RegisterForm = () => {
           autoComplete="new-password"
           className="bg-card text-white placeholder:text-white"
         />
+
+        {error && (
+          <Alert variant="destructive" className="text-red-500">
+            <AlertCircleIcon />
+            <AlertTitle>خطأ اثناء انشاء الحساب</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex-col gap-2">
           <Button
@@ -138,11 +149,7 @@ const RegisterForm = () => {
             className="w-full cursor-pointer px-5 py-2 sm:py-6 rounded-lg mt-2 max-sm:text-xs"
             disabled={loading}
           >
-            {loading ? (
-              <Spinner className="size-8" />
-            ) : (
-              "اكمل عن طريق جوجل"
-            )}
+            {loading ? <Spinner className="size-8" /> : "اكمل عن طريق جوجل"}
             <Image
               src={googleIcon}
               alt="google logog icon"

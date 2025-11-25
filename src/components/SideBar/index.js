@@ -55,7 +55,7 @@ const index = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive className="py-5">
-                  <Link href="/dashboard">
+                  <Link href="/dashboard/overview">
                     <LayoutGrid className="size-4" />
                     <span>لوحة التحكم</span>
                   </Link>
@@ -112,7 +112,7 @@ const index = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="py-5">
-                  <Link href="/dashboard/settings">
+                  <Link href="/dashboard/settings/settings">
                     <Settings className="size-4" />
                     <span>الإعدادات</span>
                   </Link>

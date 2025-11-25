@@ -8,16 +8,16 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import googleIcon from "@/assets/google-icon.svg";
 import Image from "next/image";
-import { handleLogin } from "@/components/login/loginActions";
+import { handleLogin } from "@/server/actions/auth";
 import FormField from "@/components/form/FormField";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { AlertCircleIcon, Eye, EyeOff } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 const LoginForm = () => {
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,6 +47,7 @@ const LoginForm = () => {
   }, [reset]);
 
   async function onSubmit(data) {
+    setError("");
     setLoading(true);
     const result = await handleLogin(data);
     if (result.success) {
@@ -56,9 +57,10 @@ const LoginForm = () => {
         duration: 3000,
         classNames: "toast-success text-black mt-14",
       });
-      router.push("/");
+      router.push("/dashboard/overview");
     } else {
       setLoading(false);
+      setError(result.error);
       toast.error(result.error, {
         position: "top-right",
         duration: 3000,
@@ -120,7 +122,13 @@ const LoginForm = () => {
             </Field>
           )}
         />
-
+        {error && (
+          <Alert variant="destructive" className="text-red-500">
+            <AlertCircleIcon />
+            <AlertTitle>خطأ اثناء تسجيل الدخول</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         {/* Submit Buttons */}
         <div className="flex-col gap-2">
           <Button
@@ -135,11 +143,7 @@ const LoginForm = () => {
             className="w-full cursor-pointer px-5 py-2 sm:py-7 rounded-lg mt-2 text-lg font-medium max-sm:text-xs"
             disabled={loading}
           >
-            {loading ? (
-              <Spinner className="size-8" />
-            ) : (
-              "اكمل عن طريق جوجل"
-            )}
+            {loading ? <Spinner className="size-8" /> : "اكمل عن طريق جوجل"}
             <Image
               src={googleIcon}
               alt="google logog icon"

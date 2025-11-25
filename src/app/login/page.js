@@ -1,6 +1,6 @@
 import { NavBar } from "@/components/navbar";
 import Footer from "@/components/footer";
-
+import Container from "@/components/container";
 export const metadata = {
   title: "تسجيل الدخول",
   description:
@@ -31,11 +31,7 @@ export const metadata = {
     follow: true,
   },
 };
-import Container from "@/components/container";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Link from "next/link";
-import Image from "next/image";
-import googleIcon from "@/assets/google-icon.svg";
+
 import LoginCard from "@/components/login/loginCard";
 export default function loginPage() {
   return (

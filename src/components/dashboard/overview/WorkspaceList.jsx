@@ -1,0 +1,295 @@
+"use client";
+import { useEffect, useState } from "react";
+import { MoreHorizontal, X } from "lucide-react";
+import {
+  getFolders,
+  updateFolder,
+  deleteFolder,
+} from "@/server/actions/folders";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import useAuth from "@/hooks/use-auth";
+import { DialogClose } from "@radix-ui/react-dialog";
+
+export default function WorkspaceList() {
+  const [folders, setFolders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    const res = await getFolders();
+    if (!res?.success) {
+      setError(res?.error || "تعذر جلب المجلدات");
+      setFolders([]);
+      toast.error(res?.error || "تعذر جلب المجلدات", {
+        position: "top-right",
+        duration: 3000,
+        classNames: "toast-error mt-14",
+      });
+    } else {
+      const list = Array.isArray(res.data) ? res.data : [];
+      setFolders(list);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      setLoading(false);
+      setFolders([]);
+      return;
+    }
+    load();
+    const fn = () => load();
+    window.addEventListener("folders:refresh", fn);
+    return () => window.removeEventListener("folders:refresh", fn);
+  }, [authLoading, isAuthenticated]);
+
+  return (
+    <div className="mt-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg xl:text-xl font-semibold">مساحة العمل</h3>
+      </div>
+      {loading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card rounded-xl p-4 xl:p-5">
+              <div className="flex items-center gap-3">
+                <div className="grid grid-cols-3 gap-4 w-full">
+                  <div className="flex flex-col items-start gap-2">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-4 w-28" />
+                  </div>
+                </div>
+                <Skeleton className="h-6 w-6 rounded-md" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {error && !loading && (
+        <div className="text-sm text-destructive">{error}</div>
+      )}
+      {!loading && !error && (
+        <div className="space-y-4">
+          {folders.map((f) => {
+            const filesCount =
+              f.filesCount ??
+              (Array.isArray(f.files) ? f.files.length : undefined) ??
+              0;
+            const createdAt = f.createdAt ? new Date(f.createdAt) : null;
+            const dateStr = createdAt
+              ? createdAt.toLocaleDateString("ar-EG")
+              : "—";
+            return (
+              <div
+                key={f._id || f.id || f.name}
+                className="bg-card rounded-xl p-4 xl:p-5"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="grid grid-cols-3 gap-4 w-full">
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm text-foreground/70">
+                        اسم المجلد
+                      </span>
+                      <span className="text-sm font-medium">{f.name}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-foreground/70">
+                        عدد الملفات
+                      </span>
+                      <span className="text-sm">{filesCount}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-foreground/70">
+                        تاريخ الإنشاء
+                      </span>
+                      <span className="text-sm">{dateStr}</span>
+                    </div>
+                  </div>
+                  <DropdownMenu dir="rtl">
+                    <DropdownMenuTrigger asChild>
+                      <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10">
+                        <MoreHorizontal className="size-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelected(f);
+                          setEditName(f.name || "");
+                          setEditOpen(true);
+                        }}
+                      >
+                        تعديل
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelected(f);
+                          setDeleteOpen(true);
+                        }}
+                        className="text-destructive cursor-pointer"
+                      >
+                        حذف
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            );
+          })}
+          {folders.length === 0 && (
+            <div className="text-sm text-muted-foreground">
+              لا توجد مجلدات بعد
+            </div>
+          )}
+        </div>
+      )}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-[92vw]">
+          <DialogHeader className="flex flex-row items-center justify-between py-2">
+            <DialogClose className="cursor-pointer mb-0">
+              <X />
+            </DialogClose>
+            <DialogTitle className="text-xl font-semibold">
+              تعديل اسم المجلد
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="h-12 rounded-xl bg-card border-[#515355]"
+            />
+            <div className="flex items-center gap-4 justify-end">
+              <Button
+                className="py-5 rounded-lg px-8 cursor-pointer"
+                disabled={busy}
+                onClick={async () => {
+                  if (!selected) return;
+                  setBusy(true);
+                  const id = selected._id || selected.id;
+                  const res = await updateFolder(id, { name: editName });
+                  setBusy(false);
+                  if (!res?.success) {
+                    toast.error(res?.error || "فشل التعديل", {
+                      position: "top-right",
+                      duration: 3000,
+                      classNames: "toast-error mt-14",
+                    });
+                    return;
+                  }
+                  setFolders((prev) =>
+                    prev.map((x) =>
+                      x._id === id || x.id === id ? { ...x, name: editName } : x
+                    )
+                  );
+                  setEditOpen(false);
+                  toast.success("تم تعديل المجلد", {
+                    position: "top-right",
+                    duration: 3000,
+                    classNames: "toast-success mt-14",
+                  });
+                }}
+              >
+                حفظ
+              </Button>
+              <Button
+                variant="outline"
+                className="py-5 rounded-lg bg-card border-[#515355] cursor-pointer"
+                onClick={() => setEditOpen(false)}
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-[92vw]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              حذف المجلد
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm">
+              هل أنت متأكد من حذف المجلد {selected?.name}؟
+            </p>
+            <div className="flex items-center gap-4 justify-end">
+              <Button
+                className="py-5 rounded-lg px-8 cursor-pointer"
+                disabled={busy}
+                onClick={async () => {
+                  if (!selected) return;
+                  setBusy(true);
+                  const id = selected._id || selected.id;
+                  const res = await deleteFolder(id);
+                  setBusy(false);
+                  if (!res?.success) {
+                    toast.error(res?.error || "فشل الحذف", {
+                      position: "top-right",
+                      duration: 3000,
+                      classNames: "toast-error mt-14",
+                    });
+                    return;
+                  }
+                  setFolders((prev) =>
+                    prev.filter((x) => !(x._id === id || x.id === id))
+                  );
+                  setDeleteOpen(false);
+                  toast.success("تم حذف المجلد", {
+                    position: "top-right",
+                    duration: 3000,
+                    classNames: "toast-success mt-14",
+                  });
+                }}
+              >
+                حذف
+              </Button>
+              <Button
+                variant="outline"
+                className="py-5 rounded-lg bg-card border-[#515355] cursor-pointer"
+                onClick={() => setDeleteOpen(false)}
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
