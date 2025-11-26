@@ -23,7 +23,13 @@ export async function handleLogin(data) {
   const c = await cookies();
   const token = final?.token || final?.accessToken;
   const refreshToken = final?.refreshToken;
-  if (token) c.set("authToken", token, { httpOnly: true, sameSite: "strict", path: "/" });
+  if (token)
+    c.set("authToken", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      expires: new Date(Date.now() + 15 * 60 * 1000),
+    });
   if (refreshToken) c.set("refreshToken", refreshToken, { httpOnly: true, sameSite: "strict", path: "/" });
   return { success: true, data: final };
 }
