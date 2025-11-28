@@ -9,18 +9,18 @@ const Component = () => {
         <div className={styles.frame2}>
           <div className={styles.frame2147223522}>
             <img
-              src="../image/mi7l4gos-1nhr0jz.png"
+              src="../image/miiwiop4-l90coss.png"
               className={styles.moreVertical}
             />
           </div>
           <div className={styles.frame14}>
             <p className={styles.a}>مشاركة</p>
-            <img src="../image/mi7l4gos-5fa2uwq.svg" className={styles.lock} />
+            <img src="../image/miiwiop4-hcqmlua.svg" className={styles.lock} />
           </div>
           <div className={styles.frame3}>
             <p className={styles.a}>الشات</p>
             <div className={styles.autoWrapper}>
-              <img src="../image/mi7l4gos-ezr8bgp.png" className={styles.scanner} />
+              <img src="../image/miiwiop4-2vajssy.png" className={styles.scanner} />
             </div>
           </div>
         </div>
@@ -35,7 +35,7 @@ const Component = () => {
             </div>
             <div className={styles.frame2147223686}>
               <p className={styles.a4}>إنشاء مراحل</p>
-              <img src="../image/mi7l4got-1amgc7l.svg" className={styles.lock} />
+              <img src="../image/miiwiop4-i9a81u9.svg" className={styles.lock} />
             </div>
           </div>
           <div className={styles.frame2147223634}>
@@ -51,7 +51,7 @@ const Component = () => {
                   <div className={styles.frame}>
                     <p className={styles.a1125}>10:25</p>
                     <img
-                      src="../image/mi7l4gos-4gohab7.svg"
+                      src="../image/miiwiop4-es45dub.svg"
                       className={styles.checks}
                     />
                   </div>
@@ -63,13 +63,13 @@ const Component = () => {
                   <div className={styles.frame5}>
                     <p className={styles.a11252}>11:25</p>
                     <img
-                      src="../image/mi7l4gos-4qcncbw.svg"
+                      src="../image/miiwiop4-bxgtcnm.svg"
                       className={styles.checks2}
                     />
                   </div>
                 </div>
                 <img
-                  src="../image/mi7l4gp1-yp9udou.png"
+                  src="../image/miiwiopp-jg3zycl.png"
                   className={styles.avatar2}
                 />
               </div>
@@ -102,7 +102,7 @@ const Component = () => {
                   <div className={styles.frame6}>
                     <p className={styles.a1125}>12:25</p>
                     <img
-                      src="../image/mi7l4got-n9b4rex.svg"
+                      src="../image/miiwiop4-2l2jj27.svg"
                       className={styles.checks2}
                     />
                   </div>
@@ -115,7 +115,7 @@ const Component = () => {
                   <div className={styles.ellipse} />
                 </div>
                 <img
-                  src="../image/mi7l4gp1-yp9udou.png"
+                  src="../image/miiwiopp-jg3zycl.png"
                   className={styles.avatar2}
                 />
               </div>
@@ -123,25 +123,25 @@ const Component = () => {
             <div className={styles.frame13}>
               <div className={styles.frame11}>
                 <p className={styles.a5}>اكتب هنا</p>
-                <img src="../image/mi7l4got-6bixoxc.svg" className={styles.lock} />
+                <img src="../image/miiwiop4-il0c7ek.svg" className={styles.lock} />
               </div>
               <div className={styles.frame12}>
                 <div className={styles.button}>
                   <p className={styles.text}>ارسال</p>
                   <img
-                    src="../image/mi7l4got-2cobjr3.svg"
+                    src="../image/miiwiop4-spkiwo3.svg"
                     className={styles.paperPlaneRight}
                   />
                 </div>
                 <div className={styles.buttonIcon}>
                   <img
-                    src="../image/mi7l4got-ezz50xh.svg"
+                    src="../image/miiwiop4-nmdlzq7.svg"
                     className={styles.lock}
                   />
                 </div>
                 <div className={styles.buttonIcon}>
                   <img
-                    src="../image/mi7l4got-m3o987c.svg"
+                    src="../image/miiwiop4-knmhz9j.svg"
                     className={styles.lock}
                   />
                 </div>
@@ -151,7 +151,7 @@ const Component = () => {
         </div>
       </div>
       <div className={styles.frame1}>
-        <img src="../image/mi7l4gos-wqfqv3d.svg" className={styles.group33971} />
+        <img src="../image/miiwiop3-lpyalcw.svg" className={styles.group33971} />
         <div className={styles.frame2147223705}>
           <p className={styles.a6}>المصادر</p>
           <div className={styles.frame2147223703}>
@@ -159,7 +159,7 @@ const Component = () => {
               <p className={styles.a7}>مقدمة الذكاء الاصطناعي</p>
               <div className={styles.checkbox}>
                 <img
-                  src="../image/mi7l4gos-hla530j.svg"
+                  src="../image/miiwiop3-3z4kgpz.svg"
                   className={styles.systemIcons}
                 />
               </div>
@@ -172,15 +172,15 @@ const Component = () => {
         </div>
         <div className={styles.frame2147223707}>
           <p className={styles.a8}>أضف ملف جديد</p>
-          <img src="../image/mi7l4gos-koq3w42.svg" className={styles.add01} />
+          <img src="../image/miiwiop3-p8ulunj.svg" className={styles.add01} />
         </div>
         <div className={styles.line2} />
         <div className={styles.frame2147223640}>
-          <img src="../image/mi7l4gos-nlkrz6l.svg" className={styles.lock} />
+          <img src="../image/miiwiop3-b8jqai2.svg" className={styles.lock} />
           <p className={styles.a7}>القائمة الرئيسية</p>
         </div>
         <div className={styles.frame2147223650}>
-          <img src="../image/mi7l4gos-za36j4r.svg" className={styles.lock} />
+          <img src="../image/miiwiop3-52jngrc.svg" className={styles.lock} />
           <p className={styles.a8}>خطة مجانية</p>
         </div>
         <div className={styles.frame2147223649}>

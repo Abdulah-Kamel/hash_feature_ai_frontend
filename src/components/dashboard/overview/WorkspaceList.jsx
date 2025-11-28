@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import useAuth from "@/hooks/use-auth";
 import { DialogClose } from "@radix-ui/react-dialog";
+import Link from "next/link";
 
 export default function WorkspaceList() {
   const [folders, setFolders] = useState([]);
@@ -114,59 +115,62 @@ export default function WorkspaceList() {
               : "—";
             return (
               <div
+                className="bg-card flex rounded-xl p-4 xl:p-5"
                 key={f._id || f.id || f.name}
-                className="bg-card rounded-xl p-4 xl:p-5"
               >
-                <div className="flex items-center gap-3">
-                  <div className="grid grid-cols-3 gap-4 w-full">
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm text-foreground/70">
-                        اسم المجلد
-                      </span>
-                      <span className="text-sm font-medium">{f.name}</span>
+                <Link href={`/dashboard/folders/${f._id || f.id || f.name}`} className="flex-1">
+                  <div className="flex flex-1 items-center gap-3">
+                    <div className="grid grid-cols-3 gap-4 w-full">
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm text-foreground/70">
+                          اسم المجلد
+                        </span>
+                        <span className="text-sm font-medium">{f.name}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-foreground/70">
+                          عدد الملفات
+                        </span>
+                        <span className="text-sm">{filesCount}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-foreground/70">
+                          تاريخ الإنشاء
+                        </span>
+                        <span className="text-sm">{dateStr}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-foreground/70">
-                        عدد الملفات
-                      </span>
-                      <span className="text-sm">{filesCount}</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-foreground/70">
-                        تاريخ الإنشاء
-                      </span>
-                      <span className="text-sm">{dateStr}</span>
-                    </div>
+                    
                   </div>
-                  <DropdownMenu dir="rtl">
-                    <DropdownMenuTrigger asChild>
-                      <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10">
-                        <MoreHorizontal className="size-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelected(f);
-                          setEditName(f.name || "");
-                          setEditOpen(true);
-                        }}
-                      >
-                        تعديل
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelected(f);
-                          setDeleteOpen(true);
-                        }}
-                        className="text-destructive cursor-pointer"
-                      >
-                        حذف
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                </Link>
+                <DropdownMenu dir="rtl">
+                      <DropdownMenuTrigger asChild>
+                        <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10">
+                          <MoreHorizontal className="size-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelected(f);
+                            setEditName(f.name || "");
+                            setEditOpen(true);
+                          }}
+                        >
+                          تعديل
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelected(f);
+                            setDeleteOpen(true);
+                          }}
+                          className="text-destructive cursor-pointer"
+                        >
+                          حذف
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
               </div>
             );
           })}

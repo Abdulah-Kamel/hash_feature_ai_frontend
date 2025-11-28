@@ -27,10 +27,15 @@ import {
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import logo from "@/assets/logo.svg";
+import ChatSidebar from "@/components/chat/ChatSidebar";
 
-const index = () => {
+const index = ({ variant = "global" }) => {
+  if (variant === "chat") {
+    return <ChatSidebar />;
+  }
+
   return (
-    <Sidebar>
+    <Sidebar aria-label="الشريط الجانبي العام">
       <SidebarHeader className="p-4">
         <Link href="/" className="flex items-center gap-3">
           <Image src={logo} alt="Hash Plus Logo" className="h-8 w-auto" />

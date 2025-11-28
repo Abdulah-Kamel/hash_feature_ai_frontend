@@ -30,3 +30,21 @@ export async function uploadFiles(formData) {
   if (!res.ok) return { success: false, error: final?.message || res.statusText };
   return { success: true, data: final };
 }
+
+export async function fetchFolderFiles(folderId) {
+  const base = apiBase();
+  if (!base) return { success: false, error: "API base URL not configured" };
+  const c = await cookies();
+  const token = c.get("authToken")?.value;
+  if (!token) return { success: false, error: "No token provided" };
+  if (!folderId) return { success: false, error: "Missing folderId" };
+
+  const res = await fetch(`${base}/api/v1/folders/${folderId}/files`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  let final = null;
+  try { final = await res.json(); } catch {}
+  if (!res.ok) return { success: false, error: final?.message || res.statusText };
+  return { success: true, data: final };
+}

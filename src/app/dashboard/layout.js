@@ -1,7 +1,19 @@
-import React from "react";
+"use client"
+import React, { useEffect } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import Sidebar from "@/components/SideBar";
+import { usePathname } from "next/navigation";
+import { useSidebarVariant } from "@/store/sidebarStore";
 const layout = ({ children }) => {
+  const pathname = usePathname();
+  const variant = useSidebarVariant((s) => s.variant);
+  const setVariant = useSidebarVariant((s) => s.setVariant);
+
+  useEffect(() => {
+    const isChat = pathname?.startsWith("/dashboard/folders/");
+    setVariant(isChat ? "chat" : "global");
+  }, [pathname, setVariant]);
+
   return (
     <SidebarProvider
       style={{
@@ -9,7 +21,7 @@ const layout = ({ children }) => {
         "--sidebar-width-mobile": "19rem",
       }}
     >
-      <Sidebar />
+      <Sidebar variant={variant} />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );

@@ -15,8 +15,8 @@ function ChatMessage({ author, initials, time, outgoing = false, children }) {
       )}
       <div className={cn("max-w-[640px] w-fit", outgoing && "items-end")}> 
         <Card className={cn(
-          "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-xs",
-          outgoing ? "bg-primary text-primary-foreground" : "bg-card"
+          "rounded-2xl ps-4 pe-2 py-3 text-sm leading-relaxed shadow-xs",
+          outgoing ? "bg-primary text-primary-foreground text-center" : "bg-card"
         )}>
           {children}
         </Card>
