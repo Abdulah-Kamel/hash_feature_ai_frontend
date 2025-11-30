@@ -59,14 +59,23 @@ export default function WorkspaceList() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) {
-      setLoading(false);
-      setFolders([]);
-      return;
+      const t = setTimeout(() => {
+        setLoading(false);
+        setFolders([]);
+      }, 0);
+      return () => clearTimeout(t);
     }
-    load();
+  }, [authLoading, isAuthenticated]);
+
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+    const t = setTimeout(() => load(), 0);
     const fn = () => load();
     window.addEventListener("folders:refresh", fn);
-    return () => window.removeEventListener("folders:refresh", fn);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("folders:refresh", fn);
+    };
   }, [authLoading, isAuthenticated]);
 
   return (
@@ -118,7 +127,13 @@ export default function WorkspaceList() {
                 className="bg-card flex rounded-xl p-4 xl:p-5"
                 key={f._id || f.id || f.name}
               >
-                <Link href={`/dashboard/folders/${f._id || f.id || f.name}`} className="flex-1">
+                <Link
+                  href={`/dashboard/folders/${encodeURIComponent(
+                    f._id || f.id
+                  )}`}
+                  prefetch={false}
+                  className="flex-1"
+                >
                   <div className="flex flex-1 items-center gap-3">
                     <div className="grid grid-cols-3 gap-4 w-full">
                       <div className="flex flex-col items-start">
@@ -140,37 +155,36 @@ export default function WorkspaceList() {
                         <span className="text-sm">{dateStr}</span>
                       </div>
                     </div>
-                    
                   </div>
                 </Link>
                 <DropdownMenu dir="rtl">
-                      <DropdownMenuTrigger asChild>
-                        <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10">
-                          <MoreHorizontal className="size-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          onClick={() => {
-                            setSelected(f);
-                            setEditName(f.name || "");
-                            setEditOpen(true);
-                          }}
-                        >
-                          تعديل
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelected(f);
-                            setDeleteOpen(true);
-                          }}
-                          className="text-destructive cursor-pointer"
-                        >
-                          حذف
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10">
+                      <MoreHorizontal className="size-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSelected(f);
+                        setEditName(f.name || "");
+                        setEditOpen(true);
+                      }}
+                    >
+                      تعديل
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelected(f);
+                        setDeleteOpen(true);
+                      }}
+                      className="text-destructive cursor-pointer"
+                    >
+                      حذف
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             );
           })}
