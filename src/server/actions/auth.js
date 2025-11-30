@@ -66,3 +66,21 @@ export async function handleResetPassword(data) {
   if (!res.ok) return { success: false, error: final?.message || "Reset password failed" };
   return { success: true, data: final };
 }
+
+export async function handleVerifyResetCode(data) {
+  const res = await fetch(
+    `${process.env.baseApi}/api/v1/auth/verify-reset-code`,
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  const final = await res.json();
+  if (!res.ok)
+    return {
+      success: false,
+      error: final?.message || "Verify reset code failed",
+    };
+  return { success: true, data: final };
+}

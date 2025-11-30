@@ -10,31 +10,31 @@ import { Button } from "@/components/ui/button";
 import FormField from "@/components/form/FormField";
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
-import { handleForgotPassword } from "@/server/actions/auth";
 import { useRouter } from "next/navigation";
+import { handleVerifyResetCode } from "@/server/actions/auth";
 
-export default function ForgetPasswordPage() {
-  const router = useRouter()
+export default function VerifyResetCodePage() {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const schema = z.object({
-    email: z.string().email("البريد الإلكتروني غير صحيح"),
+    resetCode: z.string().min(4, "رمز التحقق غير صحيح"),
   });
   const { handleSubmit, control, reset } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { email: "" },
+    defaultValues: { resetCode: "" },
   });
   async function onSubmit(data) {
     setLoading(true);
-    const result = await handleForgotPassword(data);
+    const result = await handleVerifyResetCode({ resetCode: data.resetCode });
     setLoading(false);
     if (result.success) {
-      toast.success("تم إرسال رمز التحقق إلى بريدك", {
+      toast.success("تم التحقق بنجاح", {
         position: "top-right",
         duration: 3000,
         classNames: "toast-success mt-14",
       });
-      reset({ email: "" });
-      router.push("/verify-code");
+      reset({ resetCode: "" });
+      router.push("/reset-password");
     } else {
       toast.error(result.error || "حدث خطأ", {
         position: "top-right",
@@ -46,17 +46,15 @@ export default function ForgetPasswordPage() {
   return (
     <>
       <NavBar />
-      <Container className="my-6 flex flex-col items-center justify-center max-w-2xl py-12 gap-10">
-        <h1 className="text-3xl font-bold text-white">استعادة كلمة السر</h1>
+      <Container className="my-6 max-w-2xl flex flex-col justify-center items-center py-12 gap-10">
+        <h1 className="text-3xl font-bold text-white">تحقق من رمز الإستعادة</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           <div className="flex flex-col gap-6">
             <FormField
               control={control}
-              name="email"
-              label="البريد الإلكتروني"
-              placeholder="البريد الإلكتروني"
-              type="email"
-              autoComplete="email"
+              name="resetCode"
+              label="رمز الإستعادة"
+              placeholder="ادخل رمز الإستعادة"
               className="bg-card text-white placeholder:text-white"
             />
             <Button
@@ -64,7 +62,7 @@ export default function ForgetPasswordPage() {
               className="w-full cursor-pointer px-5 py-2 sm:py-6 rounded-lg"
               disabled={loading}
             >
-              {loading ? <Spinner className="size-8" /> : "استعادة كلمة السر"}
+              {loading ? <Spinner className="size-8" /> : "تحقق"}
             </Button>
           </div>
         </form>

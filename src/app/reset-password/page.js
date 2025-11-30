@@ -20,8 +20,9 @@ export default function ResetPasswordPage() {
   const schema = z
     .object({
       email: z.string().email("البريد الإلكتروني غير صحيح"),
-      code: z.string().min(4, "رمز التحقق غير صحيح"),
-      password: z.string().min(8, "كلمة السر يجب أن تكون 8 أحرف على الأقل"),
+      password: z
+        .string()
+        .min(8, "كلمة السر يجب أن تكون 8 أحرف على الأقل"),
       confirmPassword: z.string(),
     })
     .refine((d) => d.password === d.confirmPassword, {
@@ -30,14 +31,13 @@ export default function ResetPasswordPage() {
     });
   const { handleSubmit, control } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { email: "", code: "", password: "", confirmPassword: "" },
+    defaultValues: { email: "", password: "", confirmPassword: "" },
   });
   async function onSubmit(data) {
     setLoading(true);
     const result = await handleResetPassword({
       email: data.email,
-      code: data.code,
-      password: data.password,
+      newPassword: data.password,
     });
     setLoading(false);
     if (result.success) {
@@ -71,13 +71,7 @@ export default function ResetPasswordPage() {
               autoComplete="email"
               className="bg-card text-white placeholder:text-white"
             />
-            <FormField
-              control={control}
-              name="code"
-              label="رمز التحقق"
-              placeholder="ادخل رمز التحقق"
-              className="bg-card text-white placeholder:text-white"
-            />
+            
             <PasswordField
               control={control}
               name="password"
