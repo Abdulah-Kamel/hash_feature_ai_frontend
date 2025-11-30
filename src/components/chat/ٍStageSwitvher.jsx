@@ -1,18 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import StageDetail from "./StageDetail";
 import StageCard from "./StageCard";
 import StageLearn from "./StageLearn";
 import { Spinner } from "@/components/ui/spinner";
 import { useFileStore } from "@/store/fileStore";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function StageSwitcher() {
+  const router = useRouter();
   const [mode, setMode] = useState("list");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [selectedStage, setSelectedStage] = useState(null);
   const folderId = useFileStore((s) => s.folderId);
-
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!folderId) return;
     setLoading(true);
     try {
@@ -26,6 +29,13 @@ export default function StageSwitcher() {
           duration: 3000,
         });
         setItems([]);
+        if (res?.status) {
+          if (res.status === 401) {
+            router.push("/login");
+            return;
+          }
+          console.error(res.status);
+        }
       } else {
         const arr = Array.isArray(json?.data)
           ? json.data
@@ -39,6 +49,7 @@ export default function StageSwitcher() {
             ? s.stages.length
             : s.stats?.totalStages ?? 0,
           progress: s.averageScore ?? 0,
+          data: s,
         }));
         setItems(normalized);
       }
@@ -46,21 +57,32 @@ export default function StageSwitcher() {
       setItems([]);
     }
     setLoading(false);
-  };
+  }, [folderId]);
 
   useEffect(() => {
-    load();
+    const t = setTimeout(() => load(), 0);
     const fn = () => load();
     window.addEventListener("stages:refresh", fn);
-    return () => window.removeEventListener("stages:refresh", fn);
-  }, [folderId]);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("stages:refresh", fn);
+    };
+  }, [load]);
 
   if (mode === "detail") {
     return (
       <StageDetail
         onBack={() => setMode("list")}
-        onLearn={() => setMode("learn")}
-        title="القسم الأول"
+        onLearn={(st) => {
+          if (st) setSelectedStage(st);
+          setMode("learn");
+        }}
+        onOpenStage={(st) => {
+          setSelectedStage(st);
+          setMode("learn");
+        }}
+        title={selected?.title || "القسم الأول"}
+        stages={selected?.data?.stages || []}
       />
     );
   }
@@ -68,7 +90,10 @@ export default function StageSwitcher() {
     return (
       <StageLearn
         onBack={() => setMode("detail")}
-        title="القسم الأول - المرحلة الأولى: الذكاء الاصطناعي"
+        title={`${selected?.title || "القسم"} - المرحلة ${
+          selectedStage?.stageNumber || 1
+        }`}
+        content={selectedStage?.stageContent || ""}
       />
     );
   }
@@ -90,7 +115,10 @@ export default function StageSwitcher() {
             title={it.title}
             stagesCount={it.stagesCount}
             progress={it.progress}
-            onOpen={() => setMode("detail")}
+            onOpen={() => {
+              setSelected(it);
+              setMode("detail");
+            }}
           />
         ))}
     </div>

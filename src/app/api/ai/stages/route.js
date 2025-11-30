@@ -52,8 +52,10 @@ export async function GET(req) {
     return NextResponse.json({ message: "No token provided" }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const folderId = searchParams.get("folderId");
-  const qs = folderId ? `?folderId=${encodeURIComponent(folderId)}` : "";
-  const res = await fetch(`${base}/api/v1/ai/stages${qs}`, {
+  const url = folderId
+    ? `${base}/api/v1/ai/stages/${encodeURIComponent(folderId)}`
+    : `${base}/api/v1/ai/stages`;
+  const res = await fetch(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });

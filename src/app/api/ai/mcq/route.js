@@ -20,7 +20,7 @@ export async function POST(req) {
   try {
     body = await req.json();
   } catch {}
-  const res = await fetch(`${base}/api/v1/ai/flashcards`, {
+  const res = await fetch(`${base}/api/v1/ai/mcq`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -41,21 +41,31 @@ export async function POST(req) {
 
 export async function GET(req) {
   const base = apiBase();
-  if (!base) return NextResponse.json({ message: "API base URL not configured" }, { status: 500 });
+  if (!base)
+    return NextResponse.json(
+      { message: "API base URL not configured" },
+      { status: 500 }
+    );
   const c = await cookies();
   const token = c.get("authToken")?.value;
-  if (!token) return NextResponse.json({ message: "No token provided" }, { status: 401 });
+  if (!token)
+    return NextResponse.json({ message: "No token provided" }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const folderId = searchParams.get("folderId");
   const url = folderId
-    ? `${base}/api/v1/ai/flashcards/${encodeURIComponent(folderId)}`
-    : `${base}/api/v1/ai/flashcards`;
+    ? `${base}/api/v1/ai/mcq/${encodeURIComponent(folderId)}`
+    : `${base}/api/v1/ai/mcq`;
   const res = await fetch(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });
   let final = null;
-  try { final = await res.json(); } catch {}
-  if (!res.ok) return NextResponse.json(final || { message: res.statusText }, { status: res.status });
+  try {
+    final = await res.json();
+  } catch {}
+  if (!res.ok)
+    return NextResponse.json(final || { message: res.statusText }, {
+      status: res.status,
+    });
   return NextResponse.json(final);
 }

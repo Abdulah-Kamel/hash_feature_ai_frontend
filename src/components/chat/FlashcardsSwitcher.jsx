@@ -2,14 +2,18 @@ import { useEffect, useState, useCallback } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useFileStore } from "@/store/fileStore";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const { default: StageCard } = require("./StageCard");
 const { default: StageFlashcards } = require("./StageFlashcards");
 
 export default function FlashcardsSwitcher() {
+    const router = useRouter();
+
   const [mode, setMode] = useState("list");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [view, setView] = useState(null);
   const folderId = useFileStore((s) => s.folderId);
 
   const load = useCallback(async () => {
@@ -25,6 +29,13 @@ export default function FlashcardsSwitcher() {
           position: "top-right",
           duration: 3000,
         });
+         if (res?.status) {
+          if (res.status === 401) {
+            router.push("/login");
+            return;
+          }
+          console.error(res.status);
+        }
         setItems([]);
       } else {
         const arr = Array.isArray(json?.data)
@@ -38,11 +49,19 @@ export default function FlashcardsSwitcher() {
             : f.stats?.totalCards ?? 0;
           const answered = f.stats?.totalAnswered ?? 0;
           const progress = total > 0 ? Math.round((answered / total) * 100) : 0;
+          const cards = Array.isArray(f.flashcards)
+            ? f.flashcards.map((c) => ({
+                q: c.question,
+                a: c.answer,
+                hint: c.hint, 
+              }))
+            : [];
           return {
             id: f.id || f._id,
             title: f.title || "مجموعة كروت",
             stagesCount: total,
             progress,
+            cards,
           };
         });
         setItems(normalized);
@@ -63,13 +82,14 @@ export default function FlashcardsSwitcher() {
     };
   }, [load]);
 
-  if (mode === "view") {
+  if (mode === "view" && view) {
     return (
       <StageFlashcards
         onBack={() => setMode("list")}
-        title="الدرس الأول"
-        total={10}
+        title={view.title}
+        total={view.items.length}
         index={1}
+        items={view.items}
       />
     );
   }
@@ -91,7 +111,10 @@ export default function FlashcardsSwitcher() {
             title={it.title}
             stagesCount={it.stagesCount}
             progress={it.progress}
-            onOpen={() => setMode("view")}
+            onOpen={() => {
+              setView({ title: it.title, items: it.cards || [] });
+              setMode("view");
+            }}
           />
         ))}
     </div>

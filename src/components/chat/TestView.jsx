@@ -35,7 +35,12 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
   const [status, setStatus] = React.useState("idle"); // idle | selected | correct | wrong
   const [correctCount, setCorrectCount] = React.useState(0);
   const [wrongCount, setWrongCount] = React.useState(0);
-  const [startAt, setStartAt] = React.useState(Date.now());
+  const startAtRef = React.useRef(0);
+  const [finishedAt, setFinishedAt] = React.useState(null);
+  const [durationMs, setDurationMs] = React.useState(0);
+  React.useEffect(() => {
+    startAtRef.current = Date.now();
+  }, []);
   const items = React.useMemo(() => {
     const sample = [
       {
@@ -50,7 +55,12 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
       },
       {
         q: "اذكر تطبيقين للذكاء الاصطناعي؟",
-        options: ["مساعدات ذكية", "معالجة الصور", "أنظمة توصية", "إنترنت الأشياء"],
+        options: [
+          "مساعدات ذكية",
+          "معالجة الصور",
+          "أنظمة توصية",
+          "إنترنت الأشياء",
+        ],
         correct: 1,
       },
     ];
@@ -65,7 +75,8 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
   const getVariant = (i) => {
     if (status === "selected") return selected === i ? "selected" : "idle";
     if (status === "correct") return i === correctIndex ? "correct" : "idle";
-    if (status === "wrong") return i === selected ? "wrong" : i === correctIndex ? "correct" : "idle";
+    if (status === "wrong")
+      return i === selected ? "wrong" : i === correctIndex ? "correct" : "idle";
     return "idle";
   };
 
@@ -88,13 +99,20 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
 
   const onNext = () => {
     if (status === "idle" || status === "selected") return; // انتظار تأكيد
-    setCurrent((c) => c + 1);
+    setCurrent((c) => {
+      const next = c + 1;
+      if (next > total) {
+        const now = Date.now();
+        setFinishedAt(now);
+        setDurationMs(Math.max(0, now - (startAtRef.current || 0)));
+      }
+      return next;
+    });
     setSelected(null);
     setStatus("idle");
   };
 
   if (current > total) {
-    const durationMs = Date.now() - startAt;
     const TestResult = require("@/components/chat/TestResult").default;
     return (
       <TestResult
@@ -111,7 +129,9 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
           setStatus("idle");
           setCorrectCount(0);
           setWrongCount(0);
-          setStartAt(Date.now());
+          startAtRef.current = Date.now();
+          setFinishedAt(null);
+          setDurationMs(0);
         }}
       />
     );
@@ -120,7 +140,10 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <button onClick={onBack} className="inline-flex items-center gap-2 rounded-xl bg-card px-4 py-3 cursor-pointer">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 rounded-xl bg-card px-4 py-3 cursor-pointer"
+        >
           <span className="text-sm text-muted-foreground">العودة</span>
           <ArrowRight className="size-5" />
         </button>
@@ -129,7 +152,9 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
 
       <div className="space-y-2">
         <div className="flex justify-end">
-          <span className="border rounded-full bg-primary px-3 py-1 text-white text-sm">{current} / {total}</span>
+          <span className="border rounded-full bg-primary px-3 py-1 text-white text-sm">
+            {current} / {total}
+          </span>
         </div>
         <Progress value={progressPercent} className="h-2" />
       </div>
@@ -141,7 +166,13 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
 
       <div className="space-y-3 w-full">
         {options.map((opt, i) => (
-          <OptionItem key={i} label={opt} variant={getVariant(i)} onSelect={() => onSelectOption(i)} disabled={status === "correct" || status === "wrong"} />
+          <OptionItem
+            key={i}
+            label={opt}
+            variant={getVariant(i)}
+            onSelect={() => onSelectOption(i)}
+            disabled={status === "correct" || status === "wrong"}
+          />
         ))}
       </div>
 
@@ -158,7 +189,12 @@ export default function TestView({ title = "الدرس الأول", total = 10, 
             التالي
           </button>
         ) : (
-          <Button onClick={onConfirm} className="w-full h-14 rounded-xl bg-secondary hover:bg-secondary/80 text-white cursor-pointer">تأكيد</Button>
+          <Button
+            onClick={onConfirm}
+            className="w-full h-14 rounded-xl bg-secondary hover:bg-secondary/80 text-white cursor-pointer"
+          >
+            تأكيد
+          </Button>
         )}
       </div>
     </div>

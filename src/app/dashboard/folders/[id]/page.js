@@ -5,7 +5,7 @@ import ChatHeader from "@/components/chat/ChatHeader";
 import ChatThread from "@/components/chat/ChatThread";
 import ChatInput from "@/components/chat/ChatInput";
 import LeftPanel from "@/components/chat/LeftPanel";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchFolderFiles } from "@/server/actions/files";
 import { useFileStore } from "@/store/fileStore";
 import ChatSidebar from "@/components/chat/ChatSidebar";
@@ -15,6 +15,7 @@ export default function ChatPage() {
   const [input, setInput] = React.useState("");
   const [chatOpen, setChatOpen] = React.useState(true);
   const { id } = useParams();
+  const router = useRouter();
   const setFolderId = useFileStore((s) => s.setFolderId);
   const setFiles = useFileStore((s) => s.setFiles);
   const folderId = useFileStore((s) => s.folderId);
@@ -134,8 +135,15 @@ export default function ChatPage() {
         }));
         setFiles(normalized);
       }
+      if (res?.status) {
+        if (res.status === 401) {
+          router.push("/login");
+          return;
+        }
+        console.error(res.status);
+      }
     })();
-  }, [id, setFolderId, setFiles]);
+  }, [id, setFolderId, setFiles, router]);
 
   return (
     <SidebarInset className="min-h-screen">
