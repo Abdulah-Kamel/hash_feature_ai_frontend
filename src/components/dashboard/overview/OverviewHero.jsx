@@ -8,9 +8,27 @@ import WorkspaceDialogTrigger from "@/components/workspace/WorkspaceDialog";
 import { createFolder } from "@/server/actions/folders";
 import { toast } from "sonner";
 import useAuth from "@/hooks/use-auth";
+import React from "react";
 
 export default function OverviewHero() {
   const { user } = useAuth();
+  const [profileImage, setProfileImage] = React.useState(null);
+  
+  React.useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profiles", { credentials: "include" });
+        const json = await res.json();
+        if (json?.data?.profileImage?.url) {
+          setProfileImage(json.data.profileImage.url);
+        }
+      } catch (e) {
+        console.error("Failed to load profile image", e);
+      }
+    }
+    loadProfile();
+  }, []);
+
   const userName = user?.name || "";
   const initials = userName?.trim()?.charAt(0) || "م";
   const userEmail = user?.email || "";
@@ -22,10 +40,10 @@ export default function OverviewHero() {
           أهلا بك يا {userName || ""}!
         </h2>
         <div className="flex items-center gap-3 mt-4">
-          <Avatar className="size-12 bg-white">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback className="bg-white text-primary text-lg">
-              {initials}
+          <Avatar className="size-12 bg-white justify-center items-center">
+            <AvatarImage src={profileImage} className="object-cover" />
+            <AvatarFallback className="bg-white text-primary text-2xl font-bold">
+             {initials}
             </AvatarFallback>
           </Avatar>
           <div className="text-start">
