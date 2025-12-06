@@ -23,3 +23,38 @@ export async function POST(req) {
   if (!res.ok) return NextResponse.json(final || { message: res.statusText }, { status: res.status });
   return NextResponse.json(final);
 }
+
+export async function GET(req) {
+  const base = apiBase();
+  if (!base)
+    return NextResponse.json(
+      { message: "API base URL not configured" },
+      { status: 500 }
+    );
+
+  const c = await cookies();
+  const token = c.get("authToken")?.value;
+  if (!token)
+    return NextResponse.json({ message: "No token provided" }, { status: 401 });
+
+  const { searchParams } = new URL(req.url);
+  const folderId = searchParams.get("folderId");
+
+  const res = await fetch(`${base}/api/v1/ai/chat?folderId=${folderId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  let final = null;
+  try {
+    final = await res.json();
+  } catch {}
+  if (!res.ok)
+    return NextResponse.json(final || { message: res.statusText }, {
+      status: res.status,
+    });
+  return NextResponse.json(final);
+}

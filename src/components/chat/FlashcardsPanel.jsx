@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, X } from "lucide-react";
 import FlashcardsSwitcher from "./FlashcardsSwitcher";
@@ -21,10 +22,12 @@ export default function FlashcardsPanel() {
   const [flashOpen, setFlashOpen] = React.useState(false);
   const [flashTitle, setFlashTitle] = React.useState("");
   const [currentMode, setCurrentMode] = React.useState("list");
-  
+
   const folderId = useFileStore((s) => s.folderId);
   const getSelectedIds = useFileStore((s) => s.getSelectedIds);
-  const setFlashcardsGenerating = useAiContentStore((s) => s.setFlashcardsGenerating);
+  const setFlashcardsGenerating = useAiContentStore(
+    (s) => s.setFlashcardsGenerating
+  );
 
   const handleGenerateFlashcards = async () => {
     if (flashBusy) return;
@@ -36,17 +39,17 @@ export default function FlashcardsPanel() {
       });
       return;
     }
-    
+
     const title = flashTitle?.trim() || "كروت جديدة";
     setFlashOpen(false);
     setFlashTitle("");
-    
+
     setFlashBusy(true);
     setFlashcardsGenerating(true);
     const payload = { title, folderId, fileIds: ids };
-    
+
     try {
-      const res = await fetch(`/api/ai/flashcards`, {
+      const res = await apiClient(`/api/ai/flashcards`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

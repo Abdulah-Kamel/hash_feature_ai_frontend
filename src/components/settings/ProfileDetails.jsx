@@ -73,7 +73,7 @@ export default function ProfileDetails() {
               <div className="space-y-2">
                 <Label className="text-white">المنصب</Label>
                 <Input 
-                  value={profile.position} 
+                  value={profile.role} 
                   disabled
                   className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
                 />
@@ -92,7 +92,7 @@ export default function ProfileDetails() {
               <div className="space-y-2">
                 <Label className="text-white">التخصص</Label>
                 <Input 
-                  value={profile.specialization} 
+                  value={profile.major} 
                   disabled
                   className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
                 />
@@ -100,7 +100,7 @@ export default function ProfileDetails() {
               <div className="space-y-2">
                 <Label className="text-white">الجامعة</Label>
                 <Input 
-                  value={profile.university} 
+                  value={profile.faculty} 
                   disabled
                   className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
                 />

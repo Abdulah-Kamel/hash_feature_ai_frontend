@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, X } from "lucide-react";
 import TestView from "./TestView";
@@ -25,10 +26,10 @@ export default function TestsPanel() {
   const [mcqTitle, setMcqTitle] = React.useState("");
   const [mcqView, setMcqView] = React.useState(null);
   const [mcqLoaded, setMcqLoaded] = React.useState(false);
-  
+
   const folderId = useFileStore((s) => s.folderId);
   const getSelectedIds = useFileStore((s) => s.getSelectedIds);
-  
+
   const mcqs = useAiContentStore((s) => s.mcqs);
   const mcqsLoading = useAiContentStore((s) => s.mcqsLoading);
   const setMcqs = useAiContentStore((s) => s.setMcqs);
@@ -45,17 +46,17 @@ export default function TestsPanel() {
       });
       return;
     }
-    
+
     const title = mcqTitle?.trim() || "اختبار جديد";
     setMcqOpen(false);
     setMcqTitle("");
-    
+
     setGenBusy(true);
     setMcqsGenerating(true);
     const payload = { title, folderId, fileIds: ids };
-    
+
     try {
-      const res = await fetch(`/api/ai/mcq`, {
+      const res = await apiClient(`/api/ai/mcq`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -89,7 +90,7 @@ export default function TestsPanel() {
     if (!folderId) return;
     setMcqsLoading(true);
     try {
-      const res = await fetch(
+      const res = await apiClient(
         `/api/ai/mcq?folderId=${encodeURIComponent(folderId)}`
       );
       const json = await res.json();
@@ -148,7 +149,7 @@ export default function TestsPanel() {
               const id = mcqView.id;
               if (!id) return;
               try {
-                const res = await fetch(
+                const res = await apiClient(
                   `/api/ai/mcq?id=${encodeURIComponent(id)}`,
                   {
                     method: "PATCH",

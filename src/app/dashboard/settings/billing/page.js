@@ -3,6 +3,7 @@ import * as React from "react";
 import { Card } from "@/components/ui/card";
 import BillingPlans from "@/components/settings/BillingPlans";
 import FaqAccordion from "@/components/settings/FaqAccordion";
+import { apiClient } from "@/lib/api-client";
 
 export default function BillingTabPage() {
   const [currentPlan, setCurrentPlan] = React.useState("free");
@@ -11,7 +12,7 @@ export default function BillingTabPage() {
     let active = true;
     (async () => {
       try {
-        const res = await fetch("/api/profiles", { credentials: "include" });
+        const res = await apiClient("/api/profiles");
         const json = await res.json();
         if (!active) return;
         const plan = json?.data?.plan || "free";
@@ -34,8 +35,14 @@ export default function BillingTabPage() {
       <Card className="p-4 space-y-6 bg-background border-0 border-b-2 border-gray-50/50 rounded-none">
         <div className="text-center space-y-3">
           <p className="text-3xl font-bold text-white">قم بترقية خطتك</p>
-          <p className="text-lg text-white">هل أنت جاد بشأن التعلم المُعزز بالذكاء الاصطناعي؟ جرّب باقة مدفوعة وادرس بكفاءة أكبر بعشر مرات.</p>
-          <p className="text-sm text-white/90">وفّر ساعات من إعداد البطاقات التعليمية والملاحظات وأسئلة الامتحانات يوميًا مع هاش بلس.</p>
+          <p className="text-lg text-white">
+            هل أنت جاد بشأن التعلم المُعزز بالذكاء الاصطناعي؟ جرّب باقة مدفوعة
+            وادرس بكفاءة أكبر بعشر مرات.
+          </p>
+          <p className="text-sm text-white/90">
+            وفّر ساعات من إعداد البطاقات التعليمية والملاحظات وأسئلة الامتحانات
+            يوميًا مع هاش بلس.
+          </p>
         </div>
         <BillingPlans currentPlan={currentPlan} />
       </Card>

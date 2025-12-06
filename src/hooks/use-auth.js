@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiClient } from "@/lib/api-client";
 
 const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -8,16 +9,18 @@ const useAuth = () => {
 
   useEffect(() => {
     let active = true
-    fetch('/api/auth/state', { credentials: 'include' })
-      .then(r => r.json())
-      .then(d => {
-        if (!active) return
-        setIsAuthenticated(!!d?.isAuthenticated)
-        setHasRefreshToken(!!d?.hasRefreshToken)
-        setUser(d?.user || null)
+    apiClient("/api/auth/state")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!active) return;
+        setIsAuthenticated(!!d?.isAuthenticated);
+        setHasRefreshToken(!!d?.hasRefreshToken);
+        setUser(d?.user || null);
       })
       .catch(() => {})
-      .finally(() => { if (active) setLoading(false) })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => { active = false }
   }, [])
 

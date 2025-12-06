@@ -9,15 +9,16 @@ import { createFolder } from "@/server/actions/folders";
 import { toast } from "sonner";
 import useAuth from "@/hooks/use-auth";
 import React from "react";
+import { apiClient } from "@/lib/api-client";
 
 export default function OverviewHero() {
   const { user } = useAuth();
   const [profileImage, setProfileImage] = React.useState(null);
-  
+
   React.useEffect(() => {
     async function loadProfile() {
       try {
-        const res = await fetch("/api/profiles", { credentials: "include" });
+        const res = await apiClient("/api/profiles");
         const json = await res.json();
         if (json?.data?.profileImage?.url) {
           setProfileImage(json.data.profileImage.url);
@@ -43,7 +44,7 @@ export default function OverviewHero() {
           <Avatar className="size-12 bg-white justify-center items-center">
             <AvatarImage src={profileImage} className="object-cover" />
             <AvatarFallback className="bg-white text-primary text-2xl font-bold">
-             {initials}
+              {initials}
             </AvatarFallback>
           </Avatar>
           <div className="text-start">
@@ -64,7 +65,7 @@ export default function OverviewHero() {
             <FileText className="size-6" />
             <div className="text-start">
               <span className="text-base font-semibold">ملف جديد</span>
-                <p className="text-sm">إنشاء ملف جديد</p>
+              <p className="text-sm">إنشاء ملف جديد</p>
             </div>
           </Button>
         </UploadDialogTrigger>

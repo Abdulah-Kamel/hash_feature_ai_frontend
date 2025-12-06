@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, X } from "lucide-react";
 import StageSwitcher from "./ٍStageSwitvher"; // Note: Keeping original filename typo for now to avoid breaking import
@@ -21,7 +22,7 @@ export default function StagesPanel() {
   const [stageOpen, setStageOpen] = React.useState(false);
   const [stageTitle, setStageTitle] = React.useState("");
   const [currentMode, setCurrentMode] = React.useState("list");
-  
+
   const folderId = useFileStore((s) => s.folderId);
   const getSelectedIds = useFileStore((s) => s.getSelectedIds);
   const setStagesGenerating = useAiContentStore((s) => s.setStagesGenerating);
@@ -36,17 +37,17 @@ export default function StagesPanel() {
       });
       return;
     }
-    
+
     const title = stageTitle?.trim() || "مرحلة جديدة";
     setStageOpen(false);
     setStageTitle("");
-    
+
     setGenBusy(true);
     setStagesGenerating(true);
     const payload = { title, folderId, fileIds: ids };
-    
+
     try {
-      const res = await fetch(`/api/ai/stages`, {
+      const res = await apiClient(`/api/ai/stages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

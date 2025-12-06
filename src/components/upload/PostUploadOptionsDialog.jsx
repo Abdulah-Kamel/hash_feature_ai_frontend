@@ -9,11 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Loader2, BookOpen, CreditCard, HelpCircle, Sparkles, X, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { apiClient } from "@/lib/api-client";
 
 /**
  * Post-upload options dialog component
  * Multi-step process: Select content type → Enter title → Generate
- * 
+ *
  * @param {boolean} open - Controls dialog visibility
  * @param {function} onOpenChange - Callback when dialog open state changes
  * @param {string} folderId - ID of the folder containing uploaded files
@@ -67,9 +68,12 @@ export default function PostUploadOptionsDialog({
       return false;
     }
 
-    const endpoint = type === 'stages' ? '/api/ai/stages' 
-                   : type === 'flashcards' ? '/api/ai/flashcards'
-                   : '/api/ai/mcq';
+    const endpoint =
+      type === "stages"
+        ? "/api/ai/stages"
+        : type === "flashcards"
+        ? "/api/ai/flashcards"
+        : "/api/ai/mcq";
 
     try {
       // Prepare request body
@@ -78,10 +82,10 @@ export default function PostUploadOptionsDialog({
         folderId: folderId,
         fileIds: fileIds,
       };
-      
+
       console.log("Generating content with:", requestBody);
 
-      const response = await fetch(endpoint, {
+      const response = await apiClient(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
@@ -99,9 +103,12 @@ export default function PostUploadOptionsDialog({
       });
 
       // Dispatch refresh event
-      const eventName = type === 'stages' ? 'stages:refresh'
-                      : type === 'flashcards' ? 'flashcards:refresh'
-                      : 'mcq:refresh';
+      const eventName =
+        type === "stages"
+          ? "stages:refresh"
+          : type === "flashcards"
+          ? "flashcards:refresh"
+          : "mcq:refresh";
       window.dispatchEvent(new Event(eventName));
 
       return true;
@@ -117,10 +124,14 @@ export default function PostUploadOptionsDialog({
    */
   const getTypeName = (type) => {
     switch (type) {
-      case 'stages': return 'المراحل';
-      case 'flashcards': return 'البطاقات التعليمية';
-      case 'mcqs': return 'الأسئلة';
-      default: return 'المحتوى';
+      case "stages":
+        return "المراحل";
+      case "flashcards":
+        return "البطاقات التعليمية";
+      case "mcqs":
+        return "الأسئلة";
+      default:
+        return "المحتوى";
     }
   };
 
@@ -129,7 +140,7 @@ export default function PostUploadOptionsDialog({
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
       toast.error("يرجى إدخال عنوان");
       return;
@@ -137,20 +148,20 @@ export default function PostUploadOptionsDialog({
 
     setGenerating(true);
 
-    if (selectedType === 'all') {
+    if (selectedType === "all") {
       // Generate all three types with the same title
       const results = await Promise.all([
-        handleGenerate('stages', title),
-        handleGenerate('flashcards', title),
-        handleGenerate('mcqs', title),
+        handleGenerate("stages", title),
+        handleGenerate("flashcards", title),
+        handleGenerate("mcqs", title),
       ]);
 
-      if (results.every(r => r)) {
+      if (results.every((r) => r)) {
         toast.success("تم إنشاء جميع المحتويات بنجاح", {
           position: "top-right",
           duration: 3000,
         });
-        
+
         // Navigate to stages page (first generated content) after short delay
         setTimeout(() => {
           handleClose();
@@ -162,10 +173,13 @@ export default function PostUploadOptionsDialog({
       const success = await handleGenerate(selectedType, title);
       if (success) {
         // Navigate to the specific content type page
-        const contentPath = selectedType === 'stages' ? 'stages'
-                          : selectedType === 'flashcards' ? 'flashcards'
-                          : 'mcq';
-        
+        const contentPath =
+          selectedType === "stages"
+            ? "stages"
+            : selectedType === "flashcards"
+            ? "flashcards"
+            : "mcq";
+
         setTimeout(() => {
           handleClose();
           router.push(`/dashboard/folders/${folderId}/${contentPath}`);
@@ -192,10 +206,9 @@ export default function PostUploadOptionsDialog({
             {step === 1 ? "ماذا تريد أن تنشئ؟" : "أدخل عنوان المحتوى"}
           </DialogTitle>
           <DialogDescription>
-            {step === 1 
+            {step === 1
               ? "اختر نوع المحتوى الذي تريد إنشاءه من الملف المرفوع"
-              : `سيتم إنشاء ${getTypeName(selectedType)} بهذا العنوان`
-            }
+              : `سيتم إنشاء ${getTypeName(selectedType)} بهذا العنوان`}
           </DialogDescription>
         </DialogHeader>
 
@@ -204,7 +217,7 @@ export default function PostUploadOptionsDialog({
           <div className="space-y-3 py-4">
             <Card
               className="p-4 cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => handleSelectType('stages')}
+              onClick={() => handleSelectType("stages")}
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-primary/10 p-3">
@@ -222,7 +235,7 @@ export default function PostUploadOptionsDialog({
 
             <Card
               className="p-4 cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => handleSelectType('flashcards')}
+              onClick={() => handleSelectType("flashcards")}
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-blue-500/10 p-3">
@@ -240,7 +253,7 @@ export default function PostUploadOptionsDialog({
 
             <Card
               className="p-4 cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => handleSelectType('mcqs')}
+              onClick={() => handleSelectType("mcqs")}
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-green-500/10 p-3">
@@ -258,7 +271,7 @@ export default function PostUploadOptionsDialog({
 
             <Card
               className="p-4 cursor-pointer hover:bg-accent transition-colors border-primary/50"
-              onClick={() => handleSelectType('all')}
+              onClick={() => handleSelectType("all")}
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-linear-to-br from-primary to-blue-500 p-3">

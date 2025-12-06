@@ -7,16 +7,20 @@ import SkeletonCard from "./SkeletonCard";
 import { useAiContentStore } from "@/store/aiContentStore";
 
 const { default: StageCard } = require("./StageCard");
+import { apiClient } from "@/lib/api-client";
 const { default: StageFlashcards } = require("./StageFlashcards");
 
-export default function FlashcardsSwitcher({ shouldLoad = false, onModeChange }) {
-    const router = useRouter();
+export default function FlashcardsSwitcher({
+  shouldLoad = false,
+  onModeChange,
+}) {
+  const router = useRouter();
 
   const [mode, setMode] = useState("list");
   const [view, setView] = useState(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const folderId = useFileStore((s) => s.folderId);
-  
+
   // Use store for flashcards data and loading states
   const flashcards = useAiContentStore((s) => s.flashcards);
   const loading = useAiContentStore((s) => s.flashcardsLoading);
@@ -33,7 +37,7 @@ export default function FlashcardsSwitcher({ shouldLoad = false, onModeChange })
     if (!folderId) return;
     setLoading(true);
     try {
-      const res = await fetch(
+      const res = await apiClient(
         `/api/ai/flashcards?folderId=${encodeURIComponent(folderId)}`
       );
       const json = await res.json();
@@ -63,8 +67,8 @@ export default function FlashcardsSwitcher({ shouldLoad = false, onModeChange })
             ? f.flashcards.length
             : f.stats?.totalFlashcards ?? 0,
           progress: f.averageScore ?? 0,
-          cards: Array.isArray(f.flashcards) 
-            ? f.flashcards.map(card => ({
+          cards: Array.isArray(f.flashcards)
+            ? f.flashcards.map((card) => ({
                 q: card.question || card.q || "",
                 a: card.answer || card.a || "",
               }))
@@ -123,7 +127,8 @@ export default function FlashcardsSwitcher({ shouldLoad = false, onModeChange })
       {!loading && !isGenerating && flashcards.length === 0 && (
         <div className="text-sm text-muted-foreground">لا توجد كروت</div>
       )}
-      {!loading && !isGenerating &&
+      {!loading &&
+        !isGenerating &&
         flashcards.map((it) => (
           <StageCard
             key={it.id}

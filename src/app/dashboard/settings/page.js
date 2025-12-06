@@ -16,58 +16,45 @@ import BillingPlans from "@/components/settings/BillingPlans";
 import FaqAccordion from "@/components/settings/FaqAccordion";
 import UsageCard from "@/components/settings/UsageCard";
 
+import { apiClient } from "@/lib/api-client";
+
 export default function SettingsPage() {
   const [tab, setTab] = React.useState("settings");
   const [lang, setLang] = React.useState("ar");
   const [privacyOpen, setPrivacyOpen] = React.useState(false);
-  const [profile, setProfile] = React.useState({
-    name: "محمود عمر",
-    position: "طالب",
-    country: "مصر",
-    specialization: "إدارة أعمال",
-    university: "جامعة الملك فهد",
-    email: "",
-    phone: "",
-    plan: "free",
-    uploadsToday: 0,
-    aiTokensToday: 0,
-    weeklyTriesUsed: 0,
-    totalTries: 0,
-    oldPassword: "",
-    newPassword: "",
-    newPassword2: "",
-  });
+  const [profile, setProfile] = React.useState();
   React.useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const res = await fetch("/api/profiles", { credentials: "include" });
+        const res = await apiClient("/api/profiles");
         const json = await res.json();
         if (!active) return;
         const d = json?.data || {};
         setProfile((p) => ({
           ...p,
-          name: d.name || p.name,
-          email: d.email || p.email,
-          phone: d.phone || p.phone,
-          plan: d.plan || p.plan,
+          name: d?.name || p?.name,
+          email: d?.email || p?.email,
+          phone: d?.phone || p?.phone,
+          plan: d?.plan || p?.plan,
           uploadsToday:
-            typeof d.uploadsToday === "number"
+            typeof d?.uploadsToday === "number"
               ? d.uploadsToday
-              : p.uploadsToday,
+              : p?.uploadsToday,
           aiTokensToday:
-            typeof d.aiTokensToday === "number"
+            typeof d?.aiTokensToday === "number"
               ? d.aiTokensToday
-              : p.aiTokensToday,
+              : p?.aiTokensToday,
           weeklyTriesUsed:
-            typeof d.weeklyTriesUsed === "number"
+            typeof d?.weeklyTriesUsed === "number"
               ? d.weeklyTriesUsed
-              : p.weeklyTriesUsed,
+              : p?.weeklyTriesUsed,
           totalTries:
-            typeof d.totalTries === "number" ? d.totalTries : p.totalTries,
-          country: p.country,
-          specialization: p.specialization,
-          university: p.university,
+            typeof d?.totalTries === "number" ? d.totalTries : p?.totalTries,
+          country: d?.country || p?.country,
+          role: d?.role || p?.role,
+          major: d?.major || p?.major,
+          faculty: d?.faculty || p?.faculty,
         }));
       } catch {}
     })();

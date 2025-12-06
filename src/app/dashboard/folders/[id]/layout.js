@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { apiClient } from "@/lib/api-client";
 import { SidebarInset } from "@/components/ui/sidebar";
 import ChatHeader from "@/components/chat/ChatHeader";
 import ChatThread from "@/components/chat/ChatThread";
@@ -71,7 +72,7 @@ export default function FolderLayout({ children }) {
       },
     ]);
     try {
-      const res = await fetch(`/api/ai/chat`, {
+      const res = await apiClient(`/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -134,7 +135,7 @@ export default function FolderLayout({ children }) {
         name: it.fileName,
       }));
       setFiles(normalized);
-      
+
       // Auto-select all files
       if (normalized.length > 0) {
         useFileStore.getState().selectAll();
@@ -149,12 +150,68 @@ export default function FolderLayout({ children }) {
     }
   }, [id, setFolderId, setFiles, router]);
 
+  const fetchChatHistory = React.useCallback(async () => {
+    if (!id) return;
+    try {
+      const res = await apiClient(`/api/ai/chat?folderId=${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const json = await res.json();
+
+      if (json?.data && Array.isArray(json.data) && json.data.length > 0) {
+        const historyMessages = [];
+        const resource = json.data[0];
+
+        if (resource.messages && Array.isArray(resource.messages)) {
+          resource.messages.forEach((msg) => {
+            // Add user question
+            if (msg.question) {
+              historyMessages.push({
+                id: `msg-${msg._id}-q`,
+                author: "user",
+                initials: "م", // Me/User
+                time: new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+                outgoing: true,
+                content: <p>{msg.question}</p>,
+              });
+            }
+            // Add AI answer
+            if (msg.answer) {
+              historyMessages.push({
+                id: `msg-${msg._id}-a`,
+                author: "assistant",
+                initials: "SL", // SL/AI
+                time: new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+                outgoing: false,
+                content: <p className="whitespace-pre-wrap">{msg.answer}</p>,
+              });
+            }
+          });
+        }
+
+        if (historyMessages.length > 0) {
+          setMessages(historyMessages);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch chat history:", error);
+    }
+  }, [id]);
+
   // Set folderId immediately when id changes
   React.useEffect(() => {
     if (id) {
       setFolderId(id);
+      fetchChatHistory();
     }
-  }, [id, setFolderId]);
+  }, [id, setFolderId, fetchChatHistory]);
 
   React.useEffect(() => {
     loadFiles();
@@ -187,9 +244,7 @@ export default function FolderLayout({ children }) {
         )}
         <div className={chatOpen ? "xl:col-span-2" : "xl:col-span-4"}>
           <Card className="bg-background rounded-lg p-4 h-full border-none flex flex-col overflow-y-auto">
-            <div className="flex-1 overflow-hidden">
-              {children}
-            </div>
+            <div className="flex-1 overflow-hidden">{children}</div>
           </Card>
         </div>
       </div>

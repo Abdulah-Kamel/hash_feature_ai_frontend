@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, ArrowLeft, Lightbulb, X, Check } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { apiClient } from "@/lib/api-client";
 
 import StageFlashcardsResult from "@/components/chat/StageFlashcardsResult";
 
@@ -62,7 +63,7 @@ export default function StageFlashcards({
     setCorrectCount((v) => v + 1);
     try {
       if (setId && cards[current - 1]?.q) {
-        fetch(`/api/ai/flashcards?id=${encodeURIComponent(setId)}`, {
+        apiClient(`/api/ai/flashcards?id=${encodeURIComponent(setId)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: cards[current - 1].q }),
@@ -75,7 +76,7 @@ export default function StageFlashcards({
     setWrongCount((v) => v + 1);
     try {
       if (setId && cards[current - 1]?.q) {
-        fetch(`/api/ai/flashcards?id=${encodeURIComponent(setId)}`, {
+        apiClient(`/api/ai/flashcards?id=${encodeURIComponent(setId)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: cards[current - 1].q }),
@@ -153,24 +154,24 @@ export default function StageFlashcards({
             }}
           />
         ))}
-        <div 
+        <div
           onClick={() => setFlipped((f) => !f)}
           className="absolute inset-0 cursor-pointer"
-          style={{ perspective: '1000px' }}
+          style={{ perspective: "1000px" }}
         >
           <div
             className="relative w-[85%] mx-auto h-full transition-transform duration-700"
             style={{
-              transformStyle: 'preserve-3d',
-              transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              transformStyle: "preserve-3d",
+              transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
             }}
           >
             {/* Front of card (Question) */}
-            <Card 
+            <Card
               className="absolute inset-0 border-0 shadow-none rounded-2xl bg-linear-to-b from-primary/80 to-primary text-white flex flex-col items-center justify-center px-4 py-0"
               style={{
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
               }}
             >
               <div className="text-center space-y-12">
@@ -192,7 +193,9 @@ export default function StageFlashcards({
                     >
                       <X className="size-4" />
                     </button>
-                    <p className="text-sm text-right">{cards[current - 1].hint}</p>
+                    <p className="text-sm text-right">
+                      {cards[current - 1].hint}
+                    </p>
                   </div>
                 </div>
               )}
@@ -209,14 +212,14 @@ export default function StageFlashcards({
                 </button>
               )}
             </Card>
-            
+
             {/* Back of card (Answer) */}
-            <Card 
+            <Card
               className="absolute inset-0 border-0 shadow-none rounded-2xl bg-linear-to-b from-secondary/80 to-secondary text-white flex flex-col items-center justify-center px-4 py-0"
               style={{
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
-                transform: 'rotateY(180deg)',
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
               }}
             >
               <div className="text-center space-y-12">
@@ -230,10 +233,10 @@ export default function StageFlashcards({
           </div>
         </div>
       </div>
-      <div 
+      <div
         className={`flex items-center justify-center mt-10 gap-4 transition-all duration-500 ${
-          flipped 
-            ? "opacity-100 translate-y-0" 
+          flipped
+            ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >

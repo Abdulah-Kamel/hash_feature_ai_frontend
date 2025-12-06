@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { apiClient } from "@/lib/api-client";
 import StageDetail from "./StageDetail";
 import StageCard from "./StageCard";
 import StageLearn from "./StageLearn";
@@ -18,24 +19,24 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
   const [mcqData, setMcqData] = useState([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const folderId = useFileStore((s) => s.folderId);
-  
+
   // Use store for stages data and loading states
   const stages = useAiContentStore((s) => s.stages);
   const loading = useAiContentStore((s) => s.stagesLoading);
   const isGenerating = useAiContentStore((s) => s.stagesGenerating);
   const setStages = useAiContentStore((s) => s.setStages);
   const setLoading = useAiContentStore((s) => s.setStagesLoading);
-  
+
   // Notify parent when mode changes
   useEffect(() => {
     onModeChange?.(mode);
   }, [mode, onModeChange]);
-  
+
   const load = useCallback(async () => {
     if (!folderId) return;
     setLoading(true);
     try {
-      const res = await fetch(
+      const res = await apiClient(
         `/api/ai/stages?folderId=${encodeURIComponent(folderId)}`
       );
       const json = await res.json();
@@ -99,8 +100,11 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
   // Update selected object when stages data changes
   useEffect(() => {
     if (selected && stages.length > 0) {
-      const updatedSelected = stages.find(s => s.id === selected.id);
-      if (updatedSelected && JSON.stringify(updatedSelected) !== JSON.stringify(selected)) {
+      const updatedSelected = stages.find((s) => s.id === selected.id);
+      if (
+        updatedSelected &&
+        JSON.stringify(updatedSelected) !== JSON.stringify(selected)
+      ) {
         setSelected(updatedSelected);
       }
     }
@@ -123,7 +127,7 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
       />
     );
   }
-  
+
   if (mode === "learn") {
     return (
       <StageLearn
@@ -157,19 +161,21 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
       />
     );
   }
-  
+
   if (mode === "mcq") {
     const handleNextStage = async () => {
       // Reload stages data to get updated status
       await load();
-      
+
       // Get all stages from the selected item
       const allStages = selected?.data?.stages || [];
       const currentStageNumber = selectedStage?.stageNumber || 1;
-      
+
       // Find the next stage
-      const nextStage = allStages.find(st => st.stageNumber === currentStageNumber + 1);
-      
+      const nextStage = allStages.find(
+        (st) => st.stageNumber === currentStageNumber + 1
+      );
+
       if (nextStage) {
         // Move to the next stage
         setSelectedStage(nextStage);
@@ -200,7 +206,7 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
           const id = selected?.data?._id || selected?.data?.id || selected?.id;
           if (!id) return;
           try {
-            const res = await fetch(
+            const res = await apiClient(
               `/api/ai/stages?id=${encodeURIComponent(id)}`,
               {
                 method: "PATCH",
@@ -219,7 +225,7 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
       />
     );
   }
-  
+
   return (
     <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       {(loading || isGenerating) && (
@@ -232,7 +238,8 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
       {!loading && !isGenerating && stages.length === 0 && (
         <div className="text-sm text-muted-foreground">لا توجد مراحل</div>
       )}
-      {!loading && !isGenerating &&
+      {!loading &&
+        !isGenerating &&
         stages.map((it) => (
           <StageCard
             key={it.id}
