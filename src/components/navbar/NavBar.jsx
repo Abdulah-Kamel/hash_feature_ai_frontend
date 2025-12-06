@@ -12,7 +12,7 @@ export function NavBar() {
  
   return (
     <>
-      <nav className="sticky w-full z-20 top-0 bg-background start-0">
+      <nav className="sticky w-full z-20 top-0 bg-transparent start-0">
         <div className="flex flex-wrap w-full items-center justify-between p-4 lg:px-12">
           <NavLogo />
           <NavActions />
