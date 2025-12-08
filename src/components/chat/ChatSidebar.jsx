@@ -186,7 +186,7 @@ export default function ChatSidebar() {
   return (
     <Sidebar aria-label="الشريط الجانبي العام">
       <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/dashboard/overview" className="flex items-center gap-3">
           <Image src={logo} alt="Hash Plus Logo" className="h-8 w-auto" />
           <span className="text-xl font-bold text-sidebar-foreground">
             هاش بلس
