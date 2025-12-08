@@ -62,3 +62,15 @@ export async function deleteFolder(id) {
     return { success: false, error: final?.message || res.statusText };
   return { success: true, data: final };
 }
+
+export async function getFolder(id) {
+  const res = await serverApiClient(`/api/v1/folders/${id}`, { method: "GET" });
+
+  let final = null;
+  try {
+    final = await res.json();
+  } catch {}
+
+  if (!res.ok) return { success: false, error: final?.message };
+  return { success: true, data: final?.data || final };
+}

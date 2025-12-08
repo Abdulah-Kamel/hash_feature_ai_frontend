@@ -81,7 +81,7 @@ export default function FlashcardsPanel() {
 
   return (
     <div className="h-full flex flex-col max-w-7xl mx-auto">
-      <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+      <div className="space-y-4 flex-1 overflow-y-auto">
         {currentMode === "list" && (
           <Button
             onClick={() => setFlashOpen(true)}

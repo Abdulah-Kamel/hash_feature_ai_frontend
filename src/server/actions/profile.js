@@ -173,3 +173,27 @@ export async function changeMyPassword(passwordData) {
 
   return { success: true, data: data.data || data };
 }
+
+/**
+ * Delete the current user's account
+ */
+export async function deleteMyAccount() {
+  const res = await serverApiClient("/api/v1/profiles", {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return {
+      success: false,
+      error: data.message || "Failed to delete account",
+    };
+  }
+  
+  // Clear cookies upon successful deletion
+  const cookieStore = await cookies();
+  cookieStore.delete("authToken");
+  cookieStore.delete("refreshToken");
+
+  return { success: true, message: "Account deleted successfully" };
+}

@@ -6,24 +6,52 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 function OptionItem({ label, variant = "idle", onSelect, disabled = false }) {
   const styleMap = {
-    idle: { containerBg: "#303030", containerBorder: "transparent", dotBg: "#212121", dotBorder: "#515355" },
-    selected: { containerBg: "#bd6bee1a", containerBorder: "#bd6bee", dotBg: "#bd6bee", dotBorder: "transparent" },
-    correct: { containerBg: "#278f5c1a", containerBorder: "#278f5c", dotBg: "#278f5c", dotBorder: "transparent" },
-    wrong: { containerBg: "#ff00001a", containerBorder: "#ff0000", dotBg: "#ff0000", dotBorder: "transparent" },
+    idle: {
+      containerBg: "#303030",
+      containerBorder: "transparent",
+      dotBg: "#212121",
+      dotBorder: "#515355",
+    },
+    selected: {
+      containerBg: "#bd6bee1a",
+      containerBorder: "#bd6bee",
+      dotBg: "#bd6bee",
+      dotBorder: "transparent",
+    },
+    correct: {
+      containerBg: "#278f5c1a",
+      containerBorder: "#278f5c",
+      dotBg: "#278f5c",
+      dotBorder: "transparent",
+    },
+    wrong: {
+      containerBg: "#ff00001a",
+      containerBorder: "#ff0000",
+      dotBg: "#ff0000",
+      dotBorder: "transparent",
+    },
   }[variant];
   return (
     <button
       onClick={disabled ? undefined : onSelect}
-      className="w-full h-[75px] rounded-[15px] flex items-center justify-between px-6 cursor-pointer"
-      style={{ background: styleMap.containerBg, border: `1px solid ${styleMap.containerBorder}` }}
+      className="w-full min-h-[100px] rounded-[15px] flex gap-2 items-center justify-between px-6 cursor-pointer"
+      style={{
+        background: styleMap.containerBg,
+        border: `1px solid ${styleMap.containerBorder}`,
+      }}
       disabled={disabled}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center">
         <span
-          className="size-5 rounded-full"
-          style={{ background: styleMap.dotBg, border: `1px solid ${styleMap.dotBorder}` }}
+          className="rounded-full h-4 w-4 sm:h-6 sm:w-6 shrink-0"
+          style={{
+            background: styleMap.dotBg,
+            border: `1px solid ${styleMap.dotBorder}`,
+          }}
         />
-        <span className="text-white text-sm">{label}</span>
+      </div>
+      <div className="flex-1">
+        <span className="text-white text-center text-sm">{label}</span>
       </div>
     </button>
   );
@@ -51,30 +79,8 @@ export default function TestView({
     startAtRef.current = Date.now();
   }, []);
   const items = React.useMemo(() => {
-    const sample = [
-      {
-        q: "ما هو الذكاء الأصطناعي؟",
-        options: [
-          "هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة",
-          "هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة",
-          "هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة",
-          "هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة",
-        ],
-        correct: 2,
-      },
-      {
-        q: "اذكر تطبيقين للذكاء الاصطناعي؟",
-        options: [
-          "مساعدات ذكية",
-          "معالجة الصور",
-          "أنظمة توصية",
-          "إنترنت الأشياء",
-        ],
-        correct: 1,
-      },
-    ];
     if (Array.isArray(data) && data.length) return data;
-    return Array.from({ length: total }, (_, i) => sample[i % sample.length]);
+    return Array.from({ length: total }, (_, i) => data[i % data.length]);
   }, [data, total]);
   const maxScore = React.useMemo(() => {
     return items.reduce(

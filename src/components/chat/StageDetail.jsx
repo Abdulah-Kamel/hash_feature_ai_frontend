@@ -11,6 +11,10 @@ export default function StageDetail({
   onLearn,
   onOpenStage,
 }) {
+  const activeStage = stages.find((st) => st.status === "opened") || stages[0];
+  const qCount = Array.isArray(activeStage?.stageMcq)
+    ? activeStage.stageMcq.length
+    : 0;
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -30,21 +34,18 @@ export default function StageDetail({
       <Card className="rounded-2xl p-5 bg-gradient-to-b from-[#262626] to-[#262626cc] text-white">
         <div className="flex items-center gap-3">
           <div className="ml-auto text-right">
-            <p className="text-base font-medium">المرحلة الأولى</p>
-            <p className="text-sm font-light">
-              عدد الأسئلة:
-              {Array.isArray(stages?.[0]?.stageMcq)
-                ? stages[0].stageMcq.length
-                : 0}
+            <p className="text-base font-medium">
+              المرحلة {activeStage?.stageNumber || 1}
             </p>
+            <p className="text-sm font-light">عدد الأسئلة: {qCount}</p>
           </div>
           <Button
             onClick={() => {
               // Find the first opened stage (not completed)
-              const openedStage = stages.find(st => st.status === "opened");
+              const openedStage = stages.find((st) => st.status === "opened");
               if (openedStage) onLearn?.(openedStage);
             }}
-            disabled={!stages.some(st => st.status === "opened")}
+            disabled={!stages.some((st) => st.status === "opened")}
             className="rounded-lg h-10 px-4 cursor-pointer"
           >
             أكمل التعلم

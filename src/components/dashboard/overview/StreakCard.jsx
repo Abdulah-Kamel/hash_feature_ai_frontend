@@ -9,6 +9,7 @@ export default function StreakCard() {
   const [currentStreak, setCurrentStreak] = React.useState(0);
   const [longestStreak, setLongestStreak] = React.useState(0);
   const [lastActive, setLastActive] = React.useState(null);
+  const [userName, setUserName] = React.useState("");
   const [days, setDays] = React.useState([
     false,
     false,
@@ -29,6 +30,7 @@ export default function StreakCard() {
         const d = json?.data || {};
         const cs = Math.max(0, d.currentStreak ?? 0);
         const ls = Math.max(0, d.longestStreak ?? 0);
+        setUserName(d.name || "مستخدم");
         setCurrentStreak(cs);
         setLongestStreak(ls);
         setLastActive(d.lastActiveDate ? new Date(d.lastActiveDate) : null);
@@ -57,33 +59,31 @@ export default function StreakCard() {
     "السبت",
   ];
   return (
-    <div className="bg-primary rounded-xl p-4">
-      <div className="flex items-center gap-3">
+    <div className="bg-primary rounded-xl py-4 px-6 sm:px-10 ">
+      <div className="flex max-sm:flex-col items-center gap-3">
         <Flame className="size-10" />
-        <div className="flex-1">
-          <p className="text-white text-lg font-semibold">
-            {currentStreak} يوم
-          </p>
-          <p className="text-white/90 text-sm">
-            ستريك التعلم، حافظ على الاستريك الخاص بك
-          </p>
-          <p className="text-white/80 text-xs">
+        <div className="flex-1 space-y-1">
+          <h2 className="font-semibold text-xl text-white">
+            أهلا بك يا {userName || ""}!
+          </h2>
+          <p className="text-white/90 text-md">
             أطول مدة ستريك: {longestStreak} يوم
           </p>
           {lastActive && (
-            <p className="text-white/70 text-xs">
+            <p className="text-white/90 text-md">
               آخر نشاط: {lastActive.toLocaleString("ar")}
             </p>
           )}
         </div>
         <Image src={cute_octopus} className="size-25" alt="octopus" />
       </div>
-      <div className="mt-5 flex items-center justify-between">
+      <div className="mt-5 flex items-center justify-between gap-4">
         {dayNames.map((d, i) => (
           <div key={d} className="flex flex-col items-center gap-2">
             <span
               className={
-                "size-6 rounded-full " + (days[i] ? "bg-white" : "bg-white/30")
+                "size-4 md:size-6 rounded-full " +
+                (days[i] ? "bg-white" : "bg-white/30")
               }
             />
             <span className="text-white/90 text-xs">{d}</span>

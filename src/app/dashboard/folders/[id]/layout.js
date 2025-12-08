@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 export default function FolderLayout({ children }) {
   const [input, setInput] = React.useState("");
   const [chatOpen, setChatOpen] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState("chat"); // 'chat' or 'content'
   const { id } = useParams();
   const router = useRouter();
   const setFolderId = useFileStore((s) => s.setFolderId);
@@ -229,9 +230,41 @@ export default function FolderLayout({ children }) {
     <SidebarInset className="min-h-screen">
       <ChatSidebar />
       <ChatHeader chatOpen={chatOpen} onToggle={() => setChatOpen((v) => !v)} />
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 min-h-[calc(100vh-64px)]">
+
+      {/* Mobile Tab Bar - Only visible on mobile */}
+      <div className="xl:hidden border-b bg-background sticky top-0 z-10">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab("chat")}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "chat"
+                ? "text-primary border-b-2 border-primary bg-primary/5"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            }`}
+          >
+            المحادثة
+          </button>
+          <button
+            onClick={() => setActiveTab("content")}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "content"
+                ? "text-primary border-b-2 border-primary bg-primary/5"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            }`}
+          >
+            المحتوى
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-4 min-h-[calc(100vh-64px)]">
+        {/* Chat Section - Hidden on mobile when content tab is active */}
         {chatOpen && (
-          <div className="xl:col-span-2 max-h-[calc(100vh-64px)]">
+          <div
+            className={`xl:col-span-2 max-h-[calc(100vh-64px)] ${
+              activeTab === "content" ? "hidden xl:block" : ""
+            }`}
+          >
             <div className="h-full shadow-sm overflow-hidden flex flex-col border-l">
               <ChatThread messages={messages} />
               <ChatInput
@@ -242,7 +275,13 @@ export default function FolderLayout({ children }) {
             </div>
           </div>
         )}
-        <div className={chatOpen ? "xl:col-span-2" : "xl:col-span-4"}>
+
+        {/* Content Section - Hidden on mobile when chat tab is active */}
+        <div
+          className={`${chatOpen ? "xl:col-span-2" : "xl:col-span-4"} ${
+            activeTab === "chat" ? "hidden xl:block" : ""
+          }`}
+        >
           <Card className="bg-background rounded-lg p-4 h-full border-none flex flex-col overflow-y-auto">
             <div className="flex-1 overflow-hidden">{children}</div>
           </Card>

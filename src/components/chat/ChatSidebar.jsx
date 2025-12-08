@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { apiClient } from "@/lib/api-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -59,9 +60,11 @@ function SidebarSection({ title, children }) {
 
 function SourceItem({ label, checked, onToggle, onDelete, isDeleting }) {
   return (
-    <div className={`w-full flex items-center justify-between gap-2 rounded-xl bg-card px-3 py-2 hover:bg-card/80 group transition-all duration-300 ${
-      isDeleting ? 'opacity-50 pointer-events-none' : ''
-    }`}>
+    <div
+      className={`w-full flex items-center justify-between gap-2 rounded-xl bg-card px-3 py-2 hover:bg-card/80 group transition-all duration-300 ${
+        isDeleting ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
       <button
         onClick={onToggle}
         className="flex items-center justify-start gap-2 text-sm flex-1 min-w-0 cursor-pointer"
@@ -121,7 +124,7 @@ export default function ChatSidebar() {
     if (!folderId || !fileId) return;
 
     // Add to deleting set
-    setDeletingIds(prev => new Set(prev).add(fileId));
+    setDeletingIds((prev) => new Set(prev).add(fileId));
 
     const toastId = toast.loading("جارٍ حذف الملف...");
     try {
@@ -134,7 +137,7 @@ export default function ChatSidebar() {
       } else {
         toast.error(res?.error || "فشل حذف الملف", { id: toastId });
         // Remove from deleting set on error
-        setDeletingIds(prev => {
+        setDeletingIds((prev) => {
           const next = new Set(prev);
           next.delete(fileId);
           return next;
@@ -143,7 +146,7 @@ export default function ChatSidebar() {
     } catch {
       toast.error("حدث خطأ أثناء الحذف", { id: toastId });
       // Remove from deleting set on error
-      setDeletingIds(prev => {
+      setDeletingIds((prev) => {
         const next = new Set(prev);
         next.delete(fileId);
         return next;
@@ -151,7 +154,22 @@ export default function ChatSidebar() {
     }
   };
 
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Removed as requested
+  const [profile, setProfile] = React.useState(null);
+
+  React.useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await apiClient("/api/profiles");
+        const data = await res.json();
+        if (data?.data) {
+          setProfile(data.data);
+        }
+      } catch {}
+    };
+    loadProfile();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -159,9 +177,12 @@ export default function ChatSidebar() {
       toast.error("حدث خطأ أثناء تسجيل الخروج");
     }
   };
-  const userName = user?.name || "";
-  const userEmail = user?.email || "";
+
+  const userName = profile?.name || "";
+  const userEmail = profile?.email || "";
   const initials = userName?.trim()?.charAt(0) || "م";
+  const plan = profile?.plan || "free";
+
   return (
     <Sidebar aria-label="الشريط الجانبي العام">
       <SidebarHeader className="p-4">
@@ -186,7 +207,7 @@ export default function ChatSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        
+
         {/* Feature Navigation */}
         {folderId && (
           <>
@@ -194,10 +215,10 @@ export default function ChatSidebar() {
             <SidebarGroup title="الأقسام">
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     className="py-5"
-                    isActive={pathname?.includes('/stages')}
+                    isActive={pathname?.includes("/stages")}
                   >
                     <Link href={`/dashboard/folders/${folderId}/stages`}>
                       <GitMerge className="size-4" />
@@ -206,10 +227,10 @@ export default function ChatSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     className="py-5"
-                    isActive={pathname?.includes('/flashcards')}
+                    isActive={pathname?.includes("/flashcards")}
                   >
                     <Link href={`/dashboard/folders/${folderId}/flashcards`}>
                       <Layers className="size-4" />
@@ -218,10 +239,10 @@ export default function ChatSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     className="py-5"
-                    isActive={pathname?.includes('/tests')}
+                    isActive={pathname?.includes("/tests")}
                   >
                     <Link href={`/dashboard/folders/${folderId}/tests`}>
                       <FileQuestion className="size-4" />
@@ -233,7 +254,7 @@ export default function ChatSidebar() {
             </SidebarGroup>
           </>
         )}
-        
+
         <SidebarSeparator />
         <SidebarGroup title="المصادر">
           <div className="flex items-center justify-between mb-2">
@@ -255,7 +276,8 @@ export default function ChatSidebar() {
               <div className="w-full flex items-center justify-between gap-2 rounded-xl bg-card px-3 py-2 border border-primary/30">
                 <button
                   onClick={() => {
-                    const allSelected = files.length > 0 && selectedIds.size === files.length;
+                    const allSelected =
+                      files.length > 0 && selectedIds.size === files.length;
                     if (allSelected) {
                       useFileStore.getState().deselectAll();
                     } else {
@@ -265,7 +287,9 @@ export default function ChatSidebar() {
                   className="flex items-center justify-start gap-2 text-sm flex-1 min-w-0 cursor-pointer"
                 >
                   <Checkbox
-                    checked={files.length > 0 && selectedIds.size === files.length}
+                    checked={
+                      files.length > 0 && selectedIds.size === files.length
+                    }
                     readOnly
                     className="data-[state=checked]:bg-primary border-white shrink-0"
                   />
@@ -273,7 +297,7 @@ export default function ChatSidebar() {
                 </button>
               </div>
             )}
-            
+
             {sources.map((s, i) => (
               <SourceItem
                 key={s.id}
@@ -300,14 +324,16 @@ export default function ChatSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-4">
-        {/* Free Plan Button */}
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2 border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        >
-          <Zap className="size-4" />
-          <span>خطة مجانية</span>
-        </Button>
+        {/* Plan Button */}
+        <Link href="/dashboard/settings/billing" className="block w-full">
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2 border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+          >
+            <Zap className="size-4" />
+            <span>{plan === "pro" ? "الخطة الاحترافية" : "خطة مجانية"}</span>
+          </Button>
+        </Link>
 
         {/* User Profile */}
         <DropdownMenu dir="rtl">
@@ -331,10 +357,7 @@ export default function ChatSidebar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem asChild>
-              <Link
-                href="/dashboard/settings/settings"
-                className="cursor-pointer"
-              >
+              <Link href="/dashboard/settings" className="cursor-pointer">
                 <Settings className="size-4 ml-2" />
                 الإعدادات
               </Link>

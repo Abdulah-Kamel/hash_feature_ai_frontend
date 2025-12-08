@@ -1,10 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MoreHorizontal, X, Trash2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  X,
+  Trash2,
+  ChevronDown,
+  FileText,
+  FolderClosed,
+} from "lucide-react"; // Added ChevronDown
 import {
   getFolders,
   updateFolder,
   deleteFolder,
+  createFolder,
 } from "@/server/actions/folders";
 import { fetchFolderFiles, deleteFile } from "@/server/actions/files";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +35,8 @@ import useAuth from "@/hooks/use-auth";
 import { DialogClose } from "@radix-ui/react-dialog";
 import Link from "next/link";
 import { fixArabicFilename } from "@/lib/utils";
+import UploadDialogTrigger from "@/components/upload/UploadDialog";
+import WorkspaceDialogTrigger from "@/components/workspace/WorkspaceDialog";
 
 export default function WorkspaceList() {
   const [folders, setFolders] = useState([]);
@@ -40,7 +50,20 @@ export default function WorkspaceList() {
   const [filesLoading, setFilesLoading] = useState(false);
   const [editName, setEditName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [expandedFolders, setExpandedFolders] = useState(new Set()); // Track expanded folders
   const { isAuthenticated, loading: authLoading } = useAuth();
+
+  const toggleExpand = (id) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   const load = async () => {
     setLoading(true);
@@ -84,13 +107,15 @@ export default function WorkspaceList() {
   const handleDeleteFile = async (fileId) => {
     if (!selected || !fileId) return;
     const folderId = selected._id || selected.id;
-    
+
     const toastId = toast.loading("جارٍ حذف الملف...");
     try {
       const res = await deleteFile(folderId, fileId);
       if (res?.success) {
         toast.success("تم حذف الملف بنجاح", { id: toastId });
-        setFolderFiles((prev) => prev.filter((f) => (f._id || f.id) !== fileId));
+        setFolderFiles((prev) =>
+          prev.filter((f) => (f._id || f.id) !== fileId)
+        );
       } else {
         toast.error(res?.error || "فشل حذف الملف", { id: toastId });
       }
@@ -127,6 +152,48 @@ export default function WorkspaceList() {
     <div className="mt-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg xl:text-xl font-semibold">مساحة العمل</h3>
+        <div className="flex 2xl:flex-row flex-col items-center gap-4">
+          <UploadDialogTrigger>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-primary hover:bg-primary/80 shadow-lg p-6 text-white cursor-pointer border-white/30"
+            >
+              <FileText className="size-6" />
+              <span className="text-base font-semibold">ملف جديد</span>
+            </Button>
+          </UploadDialogTrigger>
+          <WorkspaceDialogTrigger
+            onSave={async (name) => {
+              const result = await createFolder({ name });
+              if (result?.success) {
+                toast.success("تم إنشاء المجلد بنجاح", {
+                  position: "top-right",
+                  duration: 3000,
+                  classNames: "toast-success mt-14",
+                });
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("folders:refresh"));
+                }
+              } else {
+                toast.error(result?.error || "فشل إنشاء المجلد", {
+                  position: "top-right",
+                  duration: 3000,
+                  classNames: "toast-error mt-14",
+                });
+              }
+            }}
+          >
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-primary hover:bg-primary/80 shadow-lg p-6 text-white cursor-pointer border-white/30"
+            >
+              <FolderClosed className="size-6" />
+              <span className="text-base font-semibold">انشاء مجلد</span>
+            </Button>
+          </WorkspaceDialogTrigger>
+        </div>
       </div>
       {loading && (
         <div className="space-y-4">
@@ -159,6 +226,7 @@ export default function WorkspaceList() {
       {!loading && !error && (
         <div className="space-y-4">
           {folders.map((f) => {
+            const id = f._id || f.id;
             const filesCount =
               f.filesCount ??
               (Array.isArray(f.files) ? f.files.length : undefined) ??
@@ -167,13 +235,19 @@ export default function WorkspaceList() {
             const dateStr = createdAt
               ? createdAt.toLocaleDateString("ar-EG")
               : "—";
+            const isExpanded = expandedFolders.has(id);
+
             return (
               <div
-                className="bg-card rounded-xl p-4 xl:p-5"
-                key={f._id || f.id || f.name}
+                className="bg-card rounded-xl p-4 xl:p-5 transition-all"
+                key={id || f.name}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  {/* Link wrapper for the main content */}
+                  <Link
+                    href={`/dashboard/folders/${encodeURIComponent(id)}/stages`}
+                    className="flex-1 block hover:opacity-80 transition-opacity"
+                  >
                     <div className="grid grid-cols-3 gap-4">
                       <div className="flex flex-col items-start">
                         <span className="text-sm text-foreground/70">
@@ -194,104 +268,135 @@ export default function WorkspaceList() {
                         <span className="text-sm">{dateStr}</span>
                       </div>
                     </div>
+                  </Link>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => toggleExpand(id)}
+                      className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10 transition-colors"
+                    >
+                      <ChevronDown
+                        className={`size-5 transition-transform duration-300 ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    <DropdownMenu dir="rtl">
+                      <DropdownMenuTrigger asChild>
+                        <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10 transition-colors">
+                          <MoreHorizontal className="size-5" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleShowDetails(f)}
+                        >
+                          تفاصيل
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelected(f);
+                            setEditName(f.name || "");
+                            setEditOpen(true);
+                          }}
+                        >
+                          تعديل
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelected(f);
+                            setDeleteOpen(true);
+                          }}
+                          className="text-destructive cursor-pointer"
+                        >
+                          حذف
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu dir="rtl">
-                    <DropdownMenuTrigger asChild>
-                      <button className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10">
-                        <MoreHorizontal className="size-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => handleShowDetails(f)}
-                      >
-                        تفاصيل
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelected(f);
-                          setEditName(f.name || "");
-                          setEditOpen(true);
-                        }}
-                      >
-                        تعديل
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelected(f);
-                          setDeleteOpen(true);
-                        }}
-                        className="text-destructive cursor-pointer"
-                      >
-                        حذف
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-                
-                {/* Feature Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                  <Link
-                    href={`/dashboard/folders/${encodeURIComponent(
-                      f._id || f.id
-                    )}/stages`}
-                    prefetch={false}
-                    className="group"
-                  >
-                    <div className="bg-primary/10 hover:bg-primary/20 transition-colors rounded-lg p-4 border border-primary/20 hover:border-primary/40">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center">
-                          <span className="text-primary text-sm font-bold">M</span>
-                        </div>
-                        <h3 className="font-medium text-sm">المراحل</h3>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        إنشاء وإدارة المراحل التعليمية
-                      </p>
-                    </div>
-                  </Link>
 
-                  <Link
-                    href={`/dashboard/folders/${encodeURIComponent(
-                      f._id || f.id
-                    )}/flashcards`}
-                    prefetch={false}
-                    className="group"
-                  >
-                    <div className="bg-secondary/10 hover:bg-secondary/20 transition-colors rounded-lg p-4 border border-secondary/20 hover:border-secondary/40">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="size-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                          <span className="text-secondary text-sm font-bold">F</span>
+                {/* Collapsible Feature Cards Grid */}
+                <div
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    isExpanded
+                      ? "grid-rows-[1fr] opacity-100 mt-4"
+                      : "grid-rows-[0fr] opacity-0 mt-0"
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <Link
+                        href={`/dashboard/folders/${encodeURIComponent(
+                          id
+                        )}/stages`}
+                        prefetch={false}
+                        className="group"
+                      >
+                        <div className="bg-primary/10 hover:bg-primary/20 transition-colors rounded-lg p-4 border border-primary/20 hover:border-primary/40">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center">
+                              <span className="text-primary text-sm font-bold">
+                                M
+                              </span>
+                            </div>
+                            <h3 className="font-medium text-sm">المراحل</h3>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            إنشاء وإدارة المراحل التعليمية
+                          </p>
                         </div>
-                        <h3 className="font-medium text-sm">كروت الفلاش</h3>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        إنشاء بطاقات تعليمية تفاعلية
-                      </p>
-                    </div>
-                  </Link>
+                      </Link>
 
-                  <Link
-                    href={`/dashboard/folders/${encodeURIComponent(
-                      f._id || f.id
-                    )}/tests`}
-                    prefetch={false}
-                    className="group"
-                  >
-                    <div className="bg-[#278F5C]/10 hover:bg-[#278F5C]/20 transition-colors rounded-lg p-4 border border-[#278F5C]/20 hover:border-[#278F5C]/40">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="size-8 rounded-full bg-[#278F5C]/20 flex items-center justify-center">
-                          <span className="text-[#278F5C] text-sm font-bold">T</span>
+                      <Link
+                        href={`/dashboard/folders/${encodeURIComponent(
+                          id
+                        )}/flashcards`}
+                        prefetch={false}
+                        className="group"
+                      >
+                        <div className="bg-secondary/10 hover:bg-secondary/20 transition-colors rounded-lg p-4 border border-secondary/20 hover:border-secondary/40">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="size-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                              <span className="text-secondary text-sm font-bold">
+                                F
+                              </span>
+                            </div>
+                            <h3 className="font-medium text-sm">
+                              البطاقات التعليمية
+                            </h3>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            إنشاء بطاقات تعليمية تفاعلية
+                          </p>
                         </div>
-                        <h3 className="font-medium text-sm">الاختبارات</h3>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        إنشاء اختبارات تفاعلية
-                      </p>
+                      </Link>
+
+                      <Link
+                        href={`/dashboard/folders/${encodeURIComponent(
+                          id
+                        )}/tests`}
+                        prefetch={false}
+                        className="group"
+                      >
+                        <div className="bg-[#278F5C]/10 hover:bg-[#278F5C]/20 transition-colors rounded-lg p-4 border border-[#278F5C]/20 hover:border-[#278F5C]/40">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="size-8 rounded-full bg-[#278F5C]/20 flex items-center justify-center">
+                              <span className="text-[#278F5C] text-sm font-bold">
+                                T
+                              </span>
+                            </div>
+                            <h3 className="font-medium text-sm">الاختبارات</h3>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            إنشاء اختبارات تفاعلية
+                          </p>
+                        </div>
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 </div>
               </div>
             );
@@ -306,12 +411,12 @@ export default function WorkspaceList() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-[92vw]">
           <DialogHeader className="flex flex-row items-center justify-between py-2">
-            <DialogClose className="cursor-pointer mb-0">
-              <X />
-            </DialogClose>
             <DialogTitle className="text-xl font-semibold">
               تعديل اسم المجلد
             </DialogTitle>
+            <DialogClose className="cursor-pointer mb-0">
+              <X />
+            </DialogClose>
           </DialogHeader>
           <div className="space-y-4">
             <Input
@@ -320,6 +425,13 @@ export default function WorkspaceList() {
               className="h-12 rounded-xl bg-card border-[#515355]"
             />
             <div className="flex items-center gap-4 justify-end">
+              <Button
+                variant="outline"
+                className="py-5 rounded-lg bg-card border-[#515355] cursor-pointer"
+                onClick={() => setEditOpen(false)}
+              >
+                إلغاء
+              </Button>
               <Button
                 className="py-5 rounded-lg px-8 cursor-pointer"
                 disabled={busy}
@@ -352,29 +464,32 @@ export default function WorkspaceList() {
               >
                 حفظ
               </Button>
-              <Button
-                variant="outline"
-                className="py-5 rounded-lg bg-card border-[#515355] cursor-pointer"
-                onClick={() => setEditOpen(false)}
-              >
-                إلغاء
-              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-[92vw]">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between py-2">
             <DialogTitle className="text-xl font-semibold">
               حذف المجلد
             </DialogTitle>
+            <DialogClose className="cursor-pointer mb-0">
+              <X />
+            </DialogClose>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm">
               هل أنت متأكد من حذف المجلد {selected?.name}؟
             </p>
             <div className="flex items-center gap-4 justify-end">
+              <Button
+                variant="outline"
+                className="py-5 rounded-lg bg-card border-[#515355] cursor-pointer"
+                onClick={() => setDeleteOpen(false)}
+              >
+                إلغاء
+              </Button>
               <Button
                 className="py-5 rounded-lg px-8 cursor-pointer"
                 disabled={busy}
@@ -405,13 +520,6 @@ export default function WorkspaceList() {
               >
                 حذف
               </Button>
-              <Button
-                variant="outline"
-                className="py-5 rounded-lg bg-card border-[#515355] cursor-pointer"
-                onClick={() => setDeleteOpen(false)}
-              >
-                إلغاء
-              </Button>
             </div>
           </div>
         </DialogContent>
@@ -420,12 +528,12 @@ export default function WorkspaceList() {
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-2xl w-[92vw]">
           <DialogHeader className="flex flex-row items-center justify-between py-2">
-            <DialogClose className="cursor-pointer mb-0">
-              <X />
-            </DialogClose>
             <DialogTitle className="text-xl font-semibold">
               تفاصيل المجلد
             </DialogTitle>
+            <DialogClose className="cursor-pointer mb-0">
+              <X />
+            </DialogClose>
           </DialogHeader>
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
@@ -434,7 +542,9 @@ export default function WorkspaceList() {
                 <p className="font-medium">{selected?.name}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">تاريخ الإنشاء</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  تاريخ الإنشاء
+                </p>
                 <p className="font-medium">
                   {selected?.createdAt
                     ? new Date(selected.createdAt).toLocaleDateString("ar-EG")
@@ -442,9 +552,11 @@ export default function WorkspaceList() {
                 </p>
               </div>
             </div>
-            
+
             <div>
-              <h4 className="font-medium mb-3">الملفات ({folderFiles.length})</h4>
+              <h4 className="font-medium mb-3">
+                الملفات ({folderFiles.length})
+              </h4>
               <div className="bg-card rounded-xl border border-[#515355] overflow-hidden">
                 {filesLoading ? (
                   <div className="p-4 space-y-3">
@@ -461,10 +573,11 @@ export default function WorkspaceList() {
                       >
                         <div className="flex items-center gap-3">
                           <div className="size-8 rounded bg-primary/10 grid place-items-center text-primary text-xs font-bold">
-                            {file.fileName?.split(".").pop()?.toUpperCase() || "FILE"}
+                            {file.fileName?.split(".").pop()?.toUpperCase() ||
+                              "FILE"}
                           </div>
                           <div>
-                            <p className="text-sm font-medium truncate max-w-[200px]">
+                            <p className="text-sm font-medium truncate max-w-[200px] sm:max-w-[300px]">
                               {fixArabicFilename(file.fileName)}
                             </p>
                             <p className="text-xs text-muted-foreground">

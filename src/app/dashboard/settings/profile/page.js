@@ -9,9 +9,16 @@ import { getMyProfile } from "@/server/actions/profile";
 import { toast } from "sonner";
 import { useProfileStore } from "@/store/profileStore";
 import ProfileSkeleton from "@/components/settings/ProfileSkeleton";
+import { logout } from "@/server/actions/files";
 
 export default function ProfileTabPage() {
   const { profile, setProfile, setLoading, loading } = useProfileStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {}
+  };
 
   React.useEffect(() => {
     let active = true;
@@ -20,7 +27,7 @@ export default function ProfileTabPage() {
       try {
         const result = await getMyProfile();
         if (!active) return;
-        
+
         if (result.success) {
           const d = result.data || {};
           setProfile({
@@ -54,12 +61,6 @@ export default function ProfileTabPage() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <Card className="rounded-xl p-4 space-y-2 bg-background">
-        <p className="text-2xl font-semibold text-white">تفاصيل الملف</p>
-        <p className="text-sm text-muted-foreground">
-          إدارة تفاصيل الملف الخاصة بك
-        </p>
-      </Card>
       {loading ? (
         <>
           <ProfileSkeleton />
@@ -88,7 +89,7 @@ export default function ProfileTabPage() {
           <PasswordCard />
         </>
       )}
-      <LogoutCard />
+      <LogoutCard onLogout={handleLogout} />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import EmptyState from "./EmptyState";
 
 export default function TestsPanel() {
   const [testsMode, setTestsMode] = React.useState("list");
@@ -137,7 +138,7 @@ export default function TestsPanel() {
 
   return (
     <div className="h-full flex flex-col max-w-7xl mx-auto">
-      <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+      <div className="space-y-4 flex-1 overflow-y-auto">
         {testsMode === "view" && mcqView ? (
           <TestView
             onBack={() => setTestsMode("list")}
@@ -181,8 +182,11 @@ export default function TestsPanel() {
                 </>
               )}
               {!mcqsLoading && mcqs.length === 0 && (
-                <div className="text-sm text-muted-foreground">
-                  لا توجد اختبارات
+                <div className="col-span-1 md:col-span-2">
+                  <EmptyState
+                    title="لا توجد اختبارات"
+                    message="انشئ اختبار جديد"
+                  />
                 </div>
               )}
               {!mcqsLoading &&
@@ -210,6 +214,7 @@ export default function TestsPanel() {
                       stagesCount={total}
                       progress={progress}
                       variant="green"
+                      countLabel="الأسئلة"
                       onOpen={() => {
                         setMcqView({
                           id: it.id || it._id,

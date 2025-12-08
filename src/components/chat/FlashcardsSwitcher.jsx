@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import SkeletonCard from "./SkeletonCard";
 import { useAiContentStore } from "@/store/aiContentStore";
+import EmptyState from "./EmptyState";
 
 const { default: StageCard } = require("./StageCard");
 import { apiClient } from "@/lib/api-client";
@@ -125,7 +126,12 @@ export default function FlashcardsSwitcher({
         </>
       )}
       {!loading && !isGenerating && flashcards.length === 0 && (
-        <div className="text-sm text-muted-foreground">لا توجد كروت</div>
+        <div className="col-span-1 md:col-span-2">
+          <EmptyState
+            title="لا توجد بطاقات تعليمية"
+            message="انشئ بطاقة تعليمية جديدة"
+          />
+        </div>
       )}
       {!loading &&
         !isGenerating &&
@@ -136,6 +142,7 @@ export default function FlashcardsSwitcher({
             stagesCount={it.stagesCount}
             progress={it.progress}
             variant="secondary"
+            countLabel="البطاقات"
             onOpen={() => {
               setView({ id: it.id, title: it.title, items: it.cards || [] });
               setMode("view");

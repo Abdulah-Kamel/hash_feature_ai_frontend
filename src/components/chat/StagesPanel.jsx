@@ -3,7 +3,7 @@ import * as React from "react";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, X } from "lucide-react";
-import StageSwitcher from "./ٍStageSwitvher"; // Note: Keeping original filename typo for now to avoid breaking import
+import StageSwitcher from "./StageSwitcher";
 import { useFileStore } from "@/store/fileStore";
 import { useAiContentStore } from "@/store/aiContentStore";
 import { Spinner } from "@/components/ui/spinner";
@@ -79,7 +79,7 @@ export default function StagesPanel() {
 
   return (
     <div className="h-full flex flex-col max-w-7xl mx-auto">
-      <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+      <div className="space-y-4 flex-1 overflow-y-auto">
         {currentMode === "list" && (
           <Button
             onClick={() => setStageOpen(true)}
