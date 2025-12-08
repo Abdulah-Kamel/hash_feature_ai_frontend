@@ -28,6 +28,9 @@ export async function getMyProfile() {
     profileData.profileImageUrl = profileData.profileImage.url;
   }
 
+  console.log(profileData);
+  
+
   return { success: true, data: profileData };
 }
 

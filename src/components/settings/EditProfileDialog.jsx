@@ -18,8 +18,8 @@ export default function EditProfileDialog({ open, onOpenChange }) {
     name: "",
     country: "",
     position: "",
-    specialization: "",
-    university: "",
+    major: "",
+    faculty: "",
   });
   const [updating, setUpdating] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -34,8 +34,8 @@ export default function EditProfileDialog({ open, onOpenChange }) {
         name: profile.name || "",
         country: profile.country || "",
         position: profile.position || "",
-        specialization: profile.specialization || "",
-        university: profile.university || "",
+        major: profile.major || "",
+        faculty: profile.faculty || "",
       });
       setTempProfileImage(profile.profileImageUrl || null);
     }
@@ -65,10 +65,10 @@ export default function EditProfileDialog({ open, onOpenChange }) {
     const result = await updateMyProfileImage(formData);
     if (result.success) {
       toast.success("تم تحديث صورة الملف الشخصي بنجاح");
-      
+
       // Extract image URL from various possible response structures
       let imageUrl = null;
-      
+
       if (result.data?.profileImage?.url) {
         imageUrl = result.data.profileImage.url;
       } else if (result.data?.profileImageUrl) {
@@ -76,10 +76,10 @@ export default function EditProfileDialog({ open, onOpenChange }) {
       } else if (result.data?.url) {
         imageUrl = result.data.url;
       }
-      
+
       console.log("Image upload result:", result.data);
       console.log("Extracted image URL:", imageUrl);
-      
+
       if (imageUrl) {
         // Update temp image for preview in dialog
         setTempProfileImage(imageUrl);
@@ -92,7 +92,7 @@ export default function EditProfileDialog({ open, onOpenChange }) {
       toast.error(result.error || "فشل تحميل الصورة");
     }
     setUploadingImage(false);
-    
+
     // Clear file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -127,19 +127,21 @@ export default function EditProfileDialog({ open, onOpenChange }) {
     const result = await updateMyProfile({
       name: formData.name,
       country: formData.country,
+      major: formData.major,
+      faculty: formData.faculty,
     });
 
     if (result.success) {
       // Show success state
       setSuccess(true);
       toast.success("تم تحديث الملف الشخصي بنجاح");
-      
+
       // Update store with all form data
       updateProfile({
         ...formData,
         ...result.data,
       });
-      
+
       // Delay closing to show success animation
       setTimeout(() => {
         setSuccess(false);
@@ -159,24 +161,23 @@ export default function EditProfileDialog({ open, onOpenChange }) {
         name: profile.name || "",
         country: profile.country || "",
         position: profile.position || "",
-        specialization: profile.specialization || "",
-        university: profile.university || "",
+        major: profile.major || "",
+        faculty: profile.faculty || "",
       });
       setTempProfileImage(profile.profileImageUrl || null);
     }
     onOpenChange(false);
   };
 
-  const initials = formData.name?.trim()?.charAt(0) || profile?.name?.trim()?.charAt(0) || "م";
+  const initials =
+    formData.name?.trim()?.charAt(0) || profile?.name?.trim()?.charAt(0) || "م";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]" dir="rtl">
         <DialogHeader>
           <DialogTitle>تعديل الملف الشخصي</DialogTitle>
-          <DialogDescription>
-            قم بتحديث معلومات ملفك الشخصي
-          </DialogDescription>
+          <DialogDescription>قم بتحديث معلومات ملفك الشخصي</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -220,7 +221,7 @@ export default function EditProfileDialog({ open, onOpenChange }) {
                     </div>
                   </div>
                 ) : (
-                  <Card 
+                  <Card
                     className="rounded-2xl border bg-card w-32 h-32 grid place-items-center cursor-pointer hover:bg-card/80 transition-colors"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -251,7 +252,9 @@ export default function EditProfileDialog({ open, onOpenChange }) {
               <Input
                 id="edit-name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="bg-card rounded-xl"
                 placeholder="أدخل اسمك"
                 required
@@ -263,7 +266,9 @@ export default function EditProfileDialog({ open, onOpenChange }) {
               <Input
                 id="edit-country"
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, country: e.target.value })
+                }
                 className="bg-card rounded-xl"
                 placeholder="أدخل دولتك"
               />
@@ -274,31 +279,37 @@ export default function EditProfileDialog({ open, onOpenChange }) {
               <Input
                 id="edit-position"
                 value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, position: e.target.value })
+                }
                 className="bg-card rounded-xl"
                 placeholder="أدخل منصبك"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-specialization">التخصص</Label>
+              <Label htmlFor="edit-major">التخصص</Label>
               <Input
-                id="edit-specialization"
-                value={formData.specialization}
-                onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                id="edit-major"
+                value={formData.major}
+                onChange={(e) =>
+                  setFormData({ ...formData, major: e.target.value })
+                }
                 className="bg-card rounded-xl"
                 placeholder="أدخل تخصصك"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-university">الجامعة</Label>
+              <Label htmlFor="edit-faculty">الكلية</Label>
               <Input
-                id="edit-university"
-                value={formData.university}
-                onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                id="edit-faculty"
+                value={formData.faculty}
+                onChange={(e) =>
+                  setFormData({ ...formData, faculty: e.target.value })
+                }
                 className="bg-card rounded-xl"
-                placeholder="أدخل جامعتك"
+                placeholder="أدخل كليتك"
               />
             </div>
           </div>
@@ -316,14 +327,16 @@ export default function EditProfileDialog({ open, onOpenChange }) {
             <Button
               type="submit"
               disabled={updating}
-              className={`rounded-xl transition-all ${success ? 'bg-green-600 hover:bg-green-600' : ''}`}
+              className={`rounded-xl transition-all ${
+                success ? "bg-green-600 hover:bg-green-600" : ""
+              }`}
             >
               {success ? (
                 <Check className="size-4 me-2 animate-in zoom-in duration-300" />
               ) : updating ? (
                 <Loader2 className="size-4 me-2 animate-spin" />
               ) : null}
-              {success ? 'تم الحفظ' : 'حفظ التغييرات'}
+              {success ? "تم الحفظ" : "حفظ التغييرات"}
             </Button>
           </DialogFooter>
         </form>

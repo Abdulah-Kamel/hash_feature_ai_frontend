@@ -21,7 +21,9 @@ export default function ProfileDetails() {
     <>
       <Card className="rounded-xl p-4 space-y-6 bg-background">
         <div className="flex items-center justify-between">
-          <p className="text-lg font-semibold text-white">تفاصيل الملف الشخصي</p>
+          <p className="text-lg font-semibold text-white">
+            تفاصيل الملف الشخصي
+          </p>
           <Button
             onClick={() => setDialogOpen(true)}
             className="rounded-xl"
@@ -44,27 +46,27 @@ export default function ProfileDetails() {
 
           <div className="space-y-4">
             <Label className="text-white">الإسم</Label>
-            <Input 
-              value={profile.name} 
+            <Input
+              value={profile.name}
               disabled
-              className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+              className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
             />
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">البريد الإلكتروني</Label>
-                <Input 
-                  value={profile.email || ""} 
+                <Input
+                  value={profile.email || ""}
                   disabled
-                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-white">رقم الهاتف</Label>
-                <Input 
-                  value={profile.phone || ""} 
+                <Input
+                  value={profile.phone || ""}
                   disabled
-                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -72,18 +74,18 @@ export default function ProfileDetails() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">المنصب</Label>
-                <Input 
-                  value={profile.role} 
+                <Input
+                  value={profile.position || ""}
                   disabled
-                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-white">الدولة</Label>
-                <Input 
-                  value={profile.country} 
+                <Input
+                  value={profile.country}
                   disabled
-                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -91,18 +93,18 @@ export default function ProfileDetails() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">التخصص</Label>
-                <Input 
-                  value={profile.major} 
+                <Input
+                  value={profile.major || ""}
                   disabled
-                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-white">الجامعة</Label>
-                <Input 
-                  value={profile.faculty} 
+                <Input
+                  value={profile.faculty || ""}
                   disabled
-                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed" 
+                  className="bg-card rounded-xl text-white opacity-60 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -110,10 +112,7 @@ export default function ProfileDetails() {
         </div>
       </Card>
 
-      <EditProfileDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
+      <EditProfileDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
   );
 }

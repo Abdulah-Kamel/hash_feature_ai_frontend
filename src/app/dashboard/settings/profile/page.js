@@ -30,7 +30,8 @@ export default function ProfileTabPage() {
 
         if (result.success) {
           const d = result.data || {};
-          setProfile({
+          console.log("Profile API Response:", d);
+          const profileData = {
             name: d.name || "",
             email: d.email || "",
             phone: d.phone || "",
@@ -38,12 +39,16 @@ export default function ProfileTabPage() {
             profileImage: d.profileImage || null,
             profileImageUrl: d.profileImageUrl || null,
             position: d.role || "",
+            role: d.role || "",
             major: d.major || "",
             faculty: d.faculty || "",
+            type: d.type || "",
             oldPassword: "",
             newPassword: "",
             newPassword2: "",
-          });
+          };
+          console.log("Setting profile data:", profileData);
+          setProfile(profileData);
         } else {
           toast.error(result.error || "فشل تحميل البيانات");
         }
