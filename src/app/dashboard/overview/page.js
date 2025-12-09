@@ -28,7 +28,7 @@ export default function OverviewPage() {
     );
   }
   return (
-    <section className="p-2 xl:p-10 max-sm:conatiner">
+    <section className="p-2 py-6 xl:p-10 max-sm:conatiner">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <StreakCard />

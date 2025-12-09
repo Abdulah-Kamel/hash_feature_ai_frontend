@@ -54,9 +54,14 @@ export async function handleForgotPassword(data) {
 }
 
 export async function handleVerifyOtp(data) {
+  const payload = {
+    email:
+      typeof data?.email === "string" ? data.email : String(data?.email || ""),
+    code: typeof data?.code === "string" ? data.code : String(data?.code || ""),
+  };
   const res = await fetch(`${process.env.baseApi}/api/v1/auth/verify-otp`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
     headers: { "Content-Type": "application/json" },
   });
   const final = await res.json();

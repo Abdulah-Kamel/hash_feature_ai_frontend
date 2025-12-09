@@ -149,15 +149,15 @@ export default function WorkspaceList() {
   }, [authLoading, isAuthenticated]);
 
   return (
-    <div className="mt-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="mt-6 py-5">
+      <div className="flex 2xl:flex-row flex-col gap-3 items-center justify-between mb-4">
         <h3 className="text-lg xl:text-xl font-semibold">مساحة العمل</h3>
-        <div className="flex 2xl:flex-row flex-col items-center gap-4">
+        <div className="flex  items-center gap-2">
           <UploadDialogTrigger>
             <Button
               size="lg"
               variant="outline"
-              className="bg-primary hover:bg-primary/80 shadow-lg p-6 text-white cursor-pointer border-white/30"
+              className="bg-primary hover:bg-primary/80 shadow-lg p-4 text-white cursor-pointer border-white/30"
             >
               <FileText className="size-6" />
               <span className="text-base font-semibold">ملف جديد</span>
@@ -187,7 +187,7 @@ export default function WorkspaceList() {
             <Button
               size="lg"
               variant="outline"
-              className="bg-primary hover:bg-primary/80 shadow-lg p-6 text-white cursor-pointer border-white/30"
+              className="bg-primary hover:bg-primary/80 shadow-lg p-4 text-white cursor-pointer border-white/30"
             >
               <FolderClosed className="size-6" />
               <span className="text-base font-semibold">انشاء مجلد</span>
@@ -270,7 +270,7 @@ export default function WorkspaceList() {
                     </div>
                   </Link>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex  items-center gap-1">
                     <button
                       onClick={() => toggleExpand(id)}
                       className="rounded-xl p-2 text-foreground/80 cursor-pointer hover:bg-foreground/10 transition-colors"
