@@ -10,6 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 .figma/*
+client_secret_337620576952-ubj4b0cbht4b4775ochut0n9jfg1n86f.apps.googleusercontent.com.json
 # testing
 /coverage
 
