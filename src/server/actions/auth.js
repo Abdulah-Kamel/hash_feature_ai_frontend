@@ -58,6 +58,11 @@ export async function handleVerifyOtp(data) {
     email:
       typeof data?.email === "string" ? data.email : String(data?.email || ""),
     code: typeof data?.code === "string" ? data.code : String(data?.code || ""),
+    otp: typeof data?.code === "string" ? data.code : String(data?.code || ""),
+    otpCode:
+      typeof data?.code === "string" ? data.code : String(data?.code || ""),
+    verificationCode:
+      typeof data?.code === "string" ? data.code : String(data?.code || ""),
   };
   const res = await fetch(`${process.env.baseApi}/api/v1/auth/verify-otp`, {
     method: "POST",
