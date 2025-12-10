@@ -95,67 +95,6 @@ const LoginForm = () => {
               typeof window !== "undefined"
                 ? `${window.location.origin}/api/auth/google/callback`
                 : undefined,
-            callback: async (response) => {
-              const credential = response?.credential;
-              if (!credential) return;
-              setGoogleBusy(true);
-              try {
-                const res = await fetch("/api/auth/google", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ idToken: credential }),
-                });
-                const json = await res.json();
-                if (!res.ok) {
-                  const msg = json?.message || "فشل تسجيل الدخول بواسطة جوجل";
-                  if (/verify your otp code first/i.test(String(msg))) {
-                    toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
-                      position: "top-right",
-                      duration: 3000,
-                      classNames: "toast-info mt-14",
-                    });
-                    const email = json?.data?.email || "";
-                    router.push(
-                      `/otp${
-                        email ? `?email=${encodeURIComponent(email)}` : ""
-                      }`
-                    );
-                    return;
-                  }
-                  toast.error(msg, {
-                    position: "top-right",
-                    duration: 3000,
-                    classNames: "toast-error mt-14",
-                  });
-                } else {
-                  const active = !!(
-                    json?.data?.isActive || json?.user?.isActive
-                  );
-                  if (!active) {
-                    toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
-                      position: "top-right",
-                      duration: 3000,
-                      classNames: "toast-info mt-14",
-                    });
-                    const email = json?.data?.email || "";
-                    router.push(
-                      `/otp${
-                        email ? `?email=${encodeURIComponent(email)}` : ""
-                      }`
-                    );
-                    return;
-                  }
-                  toast.success("تم تسجيل الدخول بنجاح", {
-                    position: "top-right",
-                    duration: 3000,
-                    classNames: "toast-success mt-14",
-                  });
-                  router.push("/dashboard/overview");
-                }
-              } finally {
-                setGoogleBusy(false);
-              }
-            },
           });
           try {
             const btn = document.getElementById("gsi-login-btn");
@@ -200,20 +139,6 @@ const LoginForm = () => {
     const result = await handleLogin(data);
     if (result.success) {
       setLoading(false);
-      const isActive = !!(
-        result?.data?.data?.isActive ||
-        result?.data?.user?.isActive ||
-        result?.data?.isActive
-      );
-      if (!isActive) {
-        toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
-          position: "top-right",
-          duration: 3000,
-          classNames: "toast-info mt-14",
-        });
-        router.push(`/otp?email=${encodeURIComponent(data.email)}`);
-        return;
-      }
       toast.success("تم تسجيل الدخول بنجاح", {
         position: "top-right",
         duration: 3000,

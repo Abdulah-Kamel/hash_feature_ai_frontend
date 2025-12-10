@@ -15,12 +15,13 @@ function Feature({ children }) {
 }
 
 import { PLANS } from "@/data/plans";
-import { createProPlanCheckoutSession } from "@/server/actions/payments";
+import PaymentForm from "@/components/payment/PaymentForm";
 import { toast } from "sonner";
 
 export default function BillingPlans({ currentPlan = "free" }) {
   const [period, setPeriod] = React.useState("month");
   const [loading, setLoading] = React.useState(false);
+  const [showPayment, setShowPayment] = React.useState(false);
   const price = period === "month" ? 59 : period === "quarter" ? 149 : 499; // Keep price logic for display or update if needed
   const options = [
     { v: "month", label: "شهر" },
@@ -31,25 +32,8 @@ export default function BillingPlans({ currentPlan = "free" }) {
   const isFreePlan = currentPlan === "free";
   const isProPlan = currentPlan === "pro" || currentPlan === "premium";
 
-  const handleSubscribe = async () => {
-    setLoading(true);
-    const toastId = toast.loading("جاري تحويلك لصفحة الدفع...");
-
-    try {
-      const res = await createProPlanCheckoutSession();
-      if (res.success && res.data?.session_url) {
-        window.location.href = res.data.session_url;
-      } else {
-        toast.error(res.error || "حدث خطأ أثناء إنشاء جلسة الدفع", {
-          id: toastId,
-        });
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("حدث خطأ غير متوقع", { id: toastId });
-      setLoading(false);
-    }
+  const handleSubscribe = () => {
+    setShowPayment(true);
   };
 
   return (
@@ -157,6 +141,13 @@ export default function BillingPlans({ currentPlan = "free" }) {
               ? "الخطة الحالية"
               : "اشترك الآن"}
           </Button>
+          {!isProPlan && showPayment && (
+            <div className="mt-6">
+              <PaymentForm
+                planMonths={period === "month" ? "1" : period === "quarter" ? "3" : "12"}
+              />
+            </div>
+          )}
         </Card>
       </div>
     </div>

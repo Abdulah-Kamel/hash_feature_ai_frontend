@@ -28,8 +28,8 @@ export async function POST(req) {
   let idToken = "";
   try {
     const form = await req.formData();
+    console.log("Google callback request form data:", form);
     idToken = form.get("credential") || form.get("id_token") || "";
-    console.log("Google callback request received", idToken);
   } catch {}
   if (!idToken)
     return NextResponse.redirect(
@@ -84,16 +84,6 @@ export async function POST(req) {
       path: "/",
       expires: new Date(Date.now() + 15 * 60 * 1000),
     });
-
-  const active = !!(final?.data?.isActive || final?.user?.isActive);
-  if (!active) {
-    const email = final?.data?.email || decodeEmailFromToken(idToken);
-    const u = new URL(
-      `/otp${email ? `?email=${encodeURIComponent(email)}` : ""}`,
-      req.url
-    );
-    return NextResponse.redirect(u);
-  }
 
   return NextResponse.redirect(new URL("/dashboard/overview", req.url));
 }
