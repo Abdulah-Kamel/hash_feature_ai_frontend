@@ -14,10 +14,18 @@ export async function POST(req) {
     );
 
   let body = {};
-  try { body = await req.json(); } catch {}
+  try {
+    body = await req.json();
+  } catch {}
+
   const cardToken = body?.cardToken;
-  const planMonths = body?.planMonths;
-  if (!cardToken || !planMonths)
+  const paymentId = body?.paymentId || body?.id;
+  const email = body?.email;
+  const planMonths =
+    typeof body?.planMonths === "string"
+      ? Number(body?.planMonths)
+      : body?.planMonths;
+  if (!planMonths || !(cardToken || paymentId))
     return NextResponse.json(
       { message: "Missing required fields" },
       { status: 400 }
@@ -34,13 +42,17 @@ export async function POST(req) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ cardToken, planMonths }),
+    body: JSON.stringify({ id: paymentId, email, planMonths }),
   });
 
   let final = null;
-  try { final = await res.json(); } catch {}
+  try {
+    final = await res.json();
+    console.log(final);
+  } catch {}
   if (!res.ok)
-    return NextResponse.json(final || { message: res.statusText }, { status: res.status });
+    return NextResponse.json(final || { message: res.statusText }, {
+      status: res.status,
+    });
   return NextResponse.json(final);
 }
-

@@ -28,8 +28,46 @@ export default function PaymentForm({ planMonths = "1" }) {
       if (exists) return;
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "https://cdn.jsdelivr.net/npm/moyasar-payment-form@2.2.3/dist/moyasar.css";
+      link.href =
+        "https://cdn.jsdelivr.net/npm/moyasar-payment-form@2.2.3/dist/moyasar.css";
       document.head.appendChild(link);
+    };
+
+    const ensureOverrides = () => {
+      if (document.getElementById("mysr-custom-style")) return;
+      const style = document.createElement("style");
+      style.id = "mysr-custom-style";
+      style.textContent = `
+        .mysr-form, .mysr-form * { color: #fff !important; }
+        .mysr-form .text-black, .mysr-form [class*='text-black'] { color: #fff !important; }
+        .mysr-form input,
+        .mysr-form .mysr-input,
+        .mysr-form .mysr-input input,
+        .mysr-form input[type="text"],
+        .mysr-form input[type="tel"],
+        .mysr-form input[type="password"],
+        .mysr-form [style*='color'] {
+          color: #fff !important;
+          -webkit-text-fill-color: #fff !important;
+          background-color: #1f1f1f !important;
+          border-color: #515355 !important;
+        }
+        /* Center card brand icons beside the card number */
+        .mysr-form .mysr-input { display: flex !important; align-items: center !important; }
+        .mysr-form .mysr-input input { flex: 1 !important; }
+        .mysr-form .mysr-input img, .mysr-form .mysr-input svg { align-self: center !important; vertical-align: middle !important; }
+        .mysr-form ::placeholder,
+        .mysr-form input::-webkit-input-placeholder,
+        .mysr-form input:-ms-input-placeholder,
+        .mysr-form input::-ms-input-placeholder {
+          color: #bbb !important;
+        }
+        .mysr-form .mysr-button,
+        .mysr-form button[type="submit"] {
+          color: #fff !important;
+        }
+      `;
+      document.head.appendChild(style);
     };
 
     const initForm = () => {
@@ -42,32 +80,17 @@ export default function PaymentForm({ planMonths = "1" }) {
         window.Moyasar.init({
           element: ".mysr-form",
           publishable_api_key: key,
+          callback_url: `${
+            window.location.origin
+          }/api/payments/callback?planMonths=${encodeURIComponent(
+            String(planMonths)
+          )}`,
           amount: amountFor(planMonths),
           currency: "SAR",
           description: `HashPlus Pro – ${planMonths} months`,
           methods: ["creditcard"],
           supported_networks: ["visa", "mastercard", "mada", "amex"],
-          on_completed: async (payment) => {
-            const cardToken = payment?.source?.token || "";
-            if (!cardToken) {
-              toast.error("فشل استخراج رمز البطاقة");
-              return;
-            }
-            setLoading(true);
-            const res = await apiClient("/api/payments/pro-plan", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ cardToken, planMonths: String(planMonths) }),
-            });
-            const json = await res.json().catch(() => ({}));
-            setLoading(false);
-            if (res.ok) {
-              toast.success("تم الدفع بنجاح");
-              window.location.href = "/dashboard/overview";
-            } else {
-              toast.error(json?.message || "فشل الدفع");
-            }
-          },
+          on_completed: async () => {},
         });
       } catch (e) {
         toast.error("تعذر تهيئة نموذج الدفع");
@@ -75,10 +98,12 @@ export default function PaymentForm({ planMonths = "1" }) {
     };
 
     ensureCss();
+    ensureOverrides();
 
     if (!window.Moyasar) {
       const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/moyasar-payment-form@2.2.3/dist/moyasar.umd.min.js";
+      script.src =
+        "https://cdn.jsdelivr.net/npm/moyasar-payment-form@2.2.3/dist/moyasar.umd.min.js";
       script.async = true;
       script.onload = initForm;
       script.onerror = () => toast.error("تعذر تحميل مكتبة Moyasar");
@@ -101,4 +126,3 @@ export default function PaymentForm({ planMonths = "1" }) {
     </div>
   );
 }
-

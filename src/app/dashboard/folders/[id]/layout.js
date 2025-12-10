@@ -73,6 +73,7 @@ export default function FolderLayout({ children }) {
       },
     ]);
     try {
+      setInput("");
       const res = await apiClient(`/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

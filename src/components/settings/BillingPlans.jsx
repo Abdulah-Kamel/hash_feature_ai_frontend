@@ -16,6 +16,12 @@ function Feature({ children }) {
 
 import { PLANS } from "@/data/plans";
 import PaymentForm from "@/components/payment/PaymentForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export default function BillingPlans({ currentPlan = "free" }) {
@@ -141,12 +147,21 @@ export default function BillingPlans({ currentPlan = "free" }) {
               ? "الخطة الحالية"
               : "اشترك الآن"}
           </Button>
-          {!isProPlan && showPayment && (
-            <div className="mt-6">
-              <PaymentForm
-                planMonths={period === "month" ? "1" : period === "quarter" ? "3" : "12"}
-              />
-            </div>
+          {!isProPlan && (
+            <Dialog open={showPayment} onOpenChange={setShowPayment}>
+              <DialogContent className="bg-[#1f1f1f] text-white border-[#383839]">
+                <DialogHeader>
+                  <DialogTitle className="text-white">
+                    الدفع عبر Moyasar
+                  </DialogTitle>
+                </DialogHeader>
+                <PaymentForm
+                  planMonths={
+                    period === "month" ? "1" : period === "quarter" ? "3" : "12"
+                  }
+                />
+              </DialogContent>
+            </Dialog>
           )}
         </Card>
       </div>
