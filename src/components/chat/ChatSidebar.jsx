@@ -16,6 +16,7 @@ import {
   GitMerge,
   Layers,
   FileQuestion,
+  GitBranch,
 } from "lucide-react";
 import UploadDialogTrigger from "@/components/upload/UploadDialog";
 import { useFileStore } from "@/store/fileStore";
@@ -247,6 +248,18 @@ export default function ChatSidebar() {
                     <Link href={`/dashboard/folders/${folderId}/tests`}>
                       <FileQuestion className="size-4" />
                       <span>الاختبارات</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="py-5"
+                    isActive={pathname?.includes("/mindmap")}
+                  >
+                    <Link href={`/dashboard/folders/${folderId}/mindmap`}>
+                      <GitBranch className="size-4" />
+                      <span>الخريطة الذهنية</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

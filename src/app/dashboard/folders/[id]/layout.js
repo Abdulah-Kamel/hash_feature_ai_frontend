@@ -12,11 +12,14 @@ import ChatSidebar from "@/components/chat/ChatSidebar";
 import { Spinner } from "@/components/ui/spinner";
 import FolderNav from "@/components/chat/FolderNav";
 import { Card } from "@/components/ui/card";
+import { usePathname } from "next/navigation";
 
 export default function FolderLayout({ children }) {
   const [input, setInput] = React.useState("");
   const [chatOpen, setChatOpen] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState("chat"); // 'chat' or 'content'
+  const pathname = usePathname();
+  const isMindMap = pathname?.includes("/mindmap");
   const { id } = useParams();
   const router = useRouter();
   const setFolderId = useFileStore((s) => s.setFolderId);
@@ -230,37 +233,44 @@ export default function FolderLayout({ children }) {
   return (
     <SidebarInset className="min-h-screen">
       <ChatSidebar />
-      <ChatHeader chatOpen={chatOpen} onToggle={() => setChatOpen((v) => !v)} />
+      {!isMindMap && (
+        <ChatHeader
+          chatOpen={chatOpen}
+          onToggle={() => setChatOpen((v) => !v)}
+        />
+      )}
 
       {/* Mobile Tab Bar - Only visible on mobile */}
-      <div className="xl:hidden border-b bg-background sticky top-0 z-10">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab("chat")}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
-              activeTab === "chat"
-                ? "text-primary border-b-2 border-primary bg-primary/5"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            }`}
-          >
-            المحادثة
-          </button>
-          <button
-            onClick={() => setActiveTab("content")}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
-              activeTab === "content"
-                ? "text-primary border-b-2 border-primary bg-primary/5"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            }`}
-          >
-            المحتوى
-          </button>
+      {!isMindMap && (
+        <div className="xl:hidden border-b bg-background sticky top-0 z-10">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === "chat"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              }`}
+            >
+              المحادثة
+            </button>
+            <button
+              onClick={() => setActiveTab("content")}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === "content"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              }`}
+            >
+              المحتوى
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-4 min-h-[calc(100vh-64px)]">
         {/* Chat Section - Hidden on mobile when content tab is active */}
-        {chatOpen && (
+        {!isMindMap && chatOpen && (
           <div
             className={`xl:col-span-2 max-h-[calc(100vh-64px)] ${
               activeTab === "content" ? "hidden xl:block" : ""
@@ -279,9 +289,13 @@ export default function FolderLayout({ children }) {
 
         {/* Content Section - Hidden on mobile when chat tab is active */}
         <div
-          className={`${chatOpen ? "xl:col-span-2" : "xl:col-span-4"} ${
-            activeTab === "chat" ? "hidden xl:block" : ""
-          }`}
+          className={`${
+            isMindMap
+              ? "xl:col-span-4"
+              : chatOpen
+              ? "xl:col-span-2"
+              : "xl:col-span-4"
+          } ${isMindMap ? "" : activeTab === "chat" ? "hidden xl:block" : ""}`}
         >
           <Card className="bg-background rounded-lg p-4 h-full border-none flex flex-col overflow-y-auto">
             <div className="flex-1 overflow-hidden">{children}</div>
