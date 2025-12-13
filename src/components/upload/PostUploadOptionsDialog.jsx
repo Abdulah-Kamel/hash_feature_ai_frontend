@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Loader2, BookOpen, CreditCard, HelpCircle, Sparkles, X, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, BookOpen, CreditCard, HelpCircle, Sparkles, X, ArrowRight, ArrowLeft, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 
@@ -28,7 +28,7 @@ export default function PostUploadOptionsDialog({
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1); // 1: Select type, 2: Enter title
-  const [selectedType, setSelectedType] = useState(null); // 'stages', 'flashcards', 'mcqs', 'all'
+  const [selectedType, setSelectedType] = useState(null); // 'stages', 'flashcards', 'mcqs', 'mindmap', 'all'
   const [title, setTitle] = useState("");
   const [generating, setGenerating] = useState(false);
 
@@ -55,6 +55,26 @@ export default function PostUploadOptionsDialog({
   };
 
   /**
+   * Get display name for content type
+   */
+  const getTypeName = (type) => {
+    switch (type) {
+      case "stages":
+        return "المراحل التعليمية";
+      case "flashcards":
+        return "البطاقات التعليمية";
+      case "mcqs":
+        return "الأسئلة";
+      case "mindmap":
+        return "الخريطة الذهنية";
+      case "all":
+        return "الكل";
+      default:
+        return "المحتوى";
+    }
+  };
+
+  /**
    * Generate content with title and file IDs
    */
   const handleGenerate = async (type, contentTitle) => {
@@ -73,6 +93,8 @@ export default function PostUploadOptionsDialog({
         ? "/api/ai/stages"
         : type === "flashcards"
         ? "/api/ai/flashcards"
+        : type === "mindmap"
+        ? "/api/ai/mindmap"
         : "/api/ai/mcq";
 
     try {
@@ -81,6 +103,7 @@ export default function PostUploadOptionsDialog({
         title: contentTitle.trim(),
         folderId: folderId,
         fileIds: fileIds,
+        fileId: fileIds?.[0], 
       };
 
       console.log("Generating content with:", requestBody);
@@ -108,6 +131,8 @@ export default function PostUploadOptionsDialog({
           ? "stages:refresh"
           : type === "flashcards"
           ? "flashcards:refresh"
+          : type === "mindmap"
+          ? "mindmap:refresh"
           : "mcq:refresh";
       window.dispatchEvent(new Event(eventName));
 
@@ -116,22 +141,6 @@ export default function PostUploadOptionsDialog({
       console.error(`Generate ${type} error:`, error);
       toast.error(error.message || `حدث خطأ أثناء إنشاء ${getTypeName(type)}`);
       return false;
-    }
-  };
-
-  /**
-   * Get Arabic name for content type
-   */
-  const getTypeName = (type) => {
-    switch (type) {
-      case "stages":
-        return "المراحل";
-      case "flashcards":
-        return "البطاقات التعليمية";
-      case "mcqs":
-        return "الأسئلة";
-      default:
-        return "المحتوى";
     }
   };
 
@@ -149,11 +158,12 @@ export default function PostUploadOptionsDialog({
     setGenerating(true);
 
     if (selectedType === "all") {
-      // Generate all three types with the same title
+      // Generate all types with the same title
       const results = await Promise.all([
         handleGenerate("stages", title),
         handleGenerate("flashcards", title),
         handleGenerate("mcqs", title),
+        handleGenerate("mindmap", title),
       ]);
 
       if (results.every((r) => r)) {
@@ -178,6 +188,8 @@ export default function PostUploadOptionsDialog({
             ? "stages"
             : selectedType === "flashcards"
             ? "flashcards"
+            : selectedType === "mindmap"
+            ? "mind-maps"
             : "mcq";
 
         setTimeout(() => {
@@ -200,7 +212,7 @@ export default function PostUploadOptionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg" dir="rtl">
+      <DialogContent className="sm:max-w-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? "ماذا تريد أن تنشئ؟" : "أدخل عنوان المحتوى"}
@@ -214,60 +226,88 @@ export default function PostUploadOptionsDialog({
 
         {step === 1 ? (
           // Step 1: Select content type
-          <div className="space-y-3 py-4">
-            <Card
-              className="p-4 cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => handleSelectType("stages")}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-primary/10 p-3">
-                  <BookOpen className="size-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">مراحل تعليمية</p>
-                  <p className="text-xs text-muted-foreground">
-                    إنشاء مراحل تعليمية تفاعلية
-                  </p>
-                </div>
-                <ArrowLeft className="size-5 text-muted-foreground" />
-              </div>
-            </Card>
+          <div className="space-y-4 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button
+                  variant={selectedType === "stages" ? "default" : "outline"}
+                  className={`h-auto py-6 flex flex-col gap-3 hover:bg-primary/5 hover:text-primary transition-all duration-300 group relative overflow-hidden border-2 ${
+                    selectedType === "stages"
+                      ? "border-primary bg-primary/5 shadow-lg shadow-primary/20 scale-[1.02]"
+                      : "border-border/40 hover:border-primary/50"
+                  }`}
+                  onClick={() => handleSelectType("stages")}
+                >
+                  <div className={`p-3 rounded-xl transition-colors duration-300 ${
+                    selectedType === "stages" ? "bg-primary text-white" : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white"
+                  }`}>
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-base font-bold">مراحل تعليمية</span>
+                    <p className="text-xs text-muted-foreground font-normal">تقسيم المحتوى إلى وحدات</p>
+                  </div>
+                </Button>
 
-            <Card
-              className="p-4 cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => handleSelectType("flashcards")}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-blue-500/10 p-3">
-                  <CreditCard className="size-5 text-blue-500" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">بطاقات تعليمية</p>
-                  <p className="text-xs text-muted-foreground">
-                    إنشاء بطاقات تعليمية للمراجعة
-                  </p>
-                </div>
-                <ArrowLeft className="size-5 text-muted-foreground" />
-              </div>
-            </Card>
+                <Button
+                  variant={selectedType === "flashcards" ? "default" : "outline"}
+                  className={`h-auto py-6 flex flex-col gap-3 hover:bg-orange-500/5 hover:text-orange-500 transition-all duration-300 group relative overflow-hidden border-2 ${
+                    selectedType === "flashcards"
+                      ? "border-orange-500 bg-orange-500/5 shadow-lg shadow-orange-500/20 scale-[1.02]"
+                      : "border-border/40 hover:border-orange-500/50"
+                  }`}
+                  onClick={() => handleSelectType("flashcards")}
+                >
+                  <div className={`p-3 rounded-xl transition-colors duration-300 ${
+                    selectedType === "flashcards" ? "bg-orange-500 text-white" : "bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-white"
+                  }`}>
+                    <CreditCard className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-base font-bold">بطاقات</span>
+                    <p className="text-xs text-muted-foreground font-normal">للمراجعة السريعة والحفظ</p>
+                  </div>
+                </Button>
 
-            <Card
-              className="p-4 cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => handleSelectType("mcqs")}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-green-500/10 p-3">
-                  <HelpCircle className="size-5 text-green-500" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">أسئلة اختيار متعدد</p>
-                  <p className="text-xs text-muted-foreground">
-                    إنشاء أسئلة اختبار متعددة الخيارات
-                  </p>
-                </div>
-                <ArrowLeft className="size-5 text-muted-foreground" />
+                <Button
+                  variant={selectedType === "mcqs" ? "default" : "outline"}
+                  className={`h-auto py-6 flex flex-col gap-3 hover:bg-green-500/5 hover:text-green-500 transition-all duration-300 group relative overflow-hidden border-2 ${
+                    selectedType === "mcqs"
+                      ? "border-green-500 bg-green-500/5 shadow-lg shadow-green-500/20 scale-[1.02]"
+                      : "border-border/40 hover:border-green-500/50"
+                  }`}
+                  onClick={() => handleSelectType("mcqs")}
+                >
+                  <div className={`p-3 rounded-xl transition-colors duration-300 ${
+                    selectedType === "mcqs" ? "bg-green-500 text-white" : "bg-green-500/10 text-green-500 group-hover:bg-green-500 group-hover:text-white"
+                  }`}>
+                    <HelpCircle className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-base font-bold">أسئلة</span>
+                    <p className="text-xs text-muted-foreground font-normal">اختبارات للمعلومات</p>
+                  </div>
+                </Button>
+
+                <Button
+                  variant={selectedType === "mindmap" ? "default" : "outline"}
+                  className={`h-auto py-6 flex flex-col gap-3 hover:bg-purple-500/5 hover:text-purple-500 transition-all duration-300 group relative overflow-hidden border-2 ${
+                    selectedType === "mindmap"
+                      ? "border-purple-500 bg-purple-500/5 shadow-lg shadow-purple-500/20 scale-[1.02]"
+                      : "border-border/40 hover:border-purple-500/50"
+                  }`}
+                  onClick={() => handleSelectType("mindmap")}
+                >
+                  <div className={`p-3 rounded-xl transition-colors duration-300 ${
+                    selectedType === "mindmap" ? "bg-purple-500 text-white" : "bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-white"
+                  }`}>
+                    <Brain className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-base font-bold">خريطة ذهنية</span>
+                    <p className="text-xs text-muted-foreground font-normal">تصور مرئي للمعلومات</p>
+                  </div>
+                </Button>
               </div>
-            </Card>
 
             <Card
               className="p-4 cursor-pointer hover:bg-accent transition-colors border-primary/50"
