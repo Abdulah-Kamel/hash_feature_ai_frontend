@@ -1,6 +1,7 @@
 "use client";
 import Dagre from "@dagrejs/dagre";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
+import { useParams } from "next/navigation";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -244,6 +245,8 @@ function getDescendants(nodeId, childrenMap, result = new Set()) {
 
 const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
   const { fitView } = useReactFlow();
+  const params = useParams();
+  const folderId = params?.id || '';
   
   // Use static skeleton to avoid recreating on every render
   const skeleton = SKELETON_GRAPH;
@@ -586,6 +589,8 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         onClose={() => setChatOpen(false)}
         activeNode={activeNode}
         onSendMessage={handleSendMessage}
+        fileId={fileId}
+        folderId={folderId}
       />
     </>
   );
