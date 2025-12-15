@@ -22,7 +22,7 @@ const layout = ({ children }) => {
       }}
     >
       <Sidebar variant={variant} />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset className="w-full h-full">{children}</SidebarInset>
     </SidebarProvider>
   );
 };

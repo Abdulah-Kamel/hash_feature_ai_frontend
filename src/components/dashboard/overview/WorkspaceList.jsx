@@ -59,9 +59,11 @@ export default function WorkspaceList() {
   // Mind Map Dialog State
   const [mindMapOpen, setMindMapOpen] = useState(false);
   const [mindMapFolderId, setMindMapFolderId] = useState(null);
+  const [mindMapInitialFileId, setMindMapInitialFileId] = useState(null);
 
-  const handleOpenMindMapDialog = (folderId) => {
+  const handleOpenMindMapDialog = (folderId, fileId = null) => {
     setMindMapFolderId(folderId);
+    setMindMapInitialFileId(fileId);
     setMindMapOpen(true);
   };
 
@@ -617,95 +619,29 @@ export default function WorkspaceList() {
                             </p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDeleteFile(file._id || file.id)}
-                          className="text-muted-foreground hover:text-destructive transition-colors p-2 cursor-pointer"
-                          title="حذف الملف"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground text-sm">
-                    لا توجد ملفات في هذا المجلد
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-2xl w-[92vw]">
-          <DialogHeader className="flex flex-row items-center justify-between py-2">
-            <DialogTitle className="text-xl font-semibold">
-              تفاصيل المجلد
-            </DialogTitle>
-            <DialogClose className="cursor-pointer mb-0">
-              <X />
-            </DialogClose>
-          </DialogHeader>
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">اسم المجلد</p>
-                <p className="font-medium">{selected?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  تاريخ الإنشاء
-                </p>
-                <p className="font-medium">
-                  {selected?.createdAt
-                    ? new Date(selected.createdAt).toLocaleDateString("ar-EG")
-                    : "—"}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-medium mb-3">
-                الملفات ({folderFiles.length})
-              </h4>
-              <div className="bg-card rounded-xl border border-[#515355] overflow-hidden">
-                {filesLoading ? (
-                  <div className="p-4 space-y-3">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                ) : folderFiles.length > 0 ? (
-                  <div className="max-h-[300px] overflow-y-auto">
-                    {folderFiles.map((file, i) => (
-                      <div
-                        key={file._id || i}
-                        className="p-3 border-b border-[#515355] last:border-0 flex items-center justify-between hover:bg-accent/50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="size-8 rounded bg-primary/10 grid place-items-center text-primary text-xs font-bold">
-                            {file.fileName?.split(".").pop()?.toUpperCase() ||
-                              "FILE"}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium truncate max-w-[200px] sm:max-w-[300px]">
-                              {fixArabicFilename(file.fileName)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {file.size
-                                ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
-                                : "—"}
-                            </p>
-                          </div>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() =>
+                              handleOpenMindMapDialog(
+                                selected._id || selected.id,
+                                file._id || file.id
+                              )
+                            }
+                            className="text-muted-foreground hover:text-purple-500 transition-colors p-2 cursor-pointer"
+                            title="إنشاء خريطة ذهنية"
+                          >
+                            <Brain className="size-4" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteFile(file._id || file.id)
+                            }
+                            className="text-muted-foreground hover:text-destructive transition-colors p-2 cursor-pointer"
+                            title="حذف الملف"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleDeleteFile(file._id || file.id)}
-                          className="text-muted-foreground hover:text-destructive transition-colors p-2 cursor-pointer"
-                          title="حذف الملف"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -719,6 +655,14 @@ export default function WorkspaceList() {
           </div>
         </DialogContent>
       </Dialog>
+      <CreateMindMapDialog
+        open={mindMapOpen}
+        onOpenChange={setMindMapOpen}
+        folderId={mindMapFolderId}
+        initialFileId={mindMapInitialFileId}
+        initialFiles={folderFiles}
+      />
+     
     </div>
   );
 }

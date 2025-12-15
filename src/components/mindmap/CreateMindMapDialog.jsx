@@ -12,10 +12,14 @@ import { useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { fixArabicFilename } from "@/lib/utils";
+
 export default function CreateMindMapDialog({
   open,
   onOpenChange,
   folderId,
+  initialFileId = null,
+  initialFiles = [],
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false); // Loading files
@@ -25,7 +29,15 @@ export default function CreateMindMapDialog({
 
   useEffect(() => {
     if (open && folderId) {
-      loadFiles();
+      if (initialFiles && initialFiles.length > 0) {
+        setFiles(initialFiles);
+        setLoading(false);
+      } else {
+        loadFiles();
+      }
+      if (initialFileId) {
+        setSelectedFileId(initialFileId);
+      }
     } else {
       // Reset state when closed
       setFiles([]);
@@ -33,7 +45,7 @@ export default function CreateMindMapDialog({
       setLoading(false);
       setGenerating(false);
     }
-  }, [open, folderId]);
+  }, [open, folderId, initialFileId, initialFiles]);
 
   const loadFiles = async () => {
     setLoading(true);
@@ -69,14 +81,8 @@ export default function CreateMindMapDialog({
 
     setGenerating(true);
     try {
-      // Use filename as title, remove extension
-      const title = selectedFile.originalName || selectedFile.name || "خريطة ذهنية";
-      const cleanTitle = title.replace(/\.[^/.]+$/, "");
 
       const requestBody = {
-        title: cleanTitle,
-        folderId: folderId,
-        fileIds: [selectedFileId],
         fileId: selectedFileId,
       };
 
@@ -115,7 +121,7 @@ export default function CreateMindMapDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" dir="rtl">
-        <DialogHeader>
+        <DialogHeader className="flex flex-col items-start py-2">
           <DialogTitle>إنشاء خريطة ذهنية</DialogTitle>
           <DialogDescription>
             اختر الملف الذي تريد تحويله إلى خريطة ذهنية
@@ -138,10 +144,9 @@ export default function CreateMindMapDialog({
                 {files.map((file) => (
                   <div key={file._id || file.id} className={`flex items-center space-x-3 space-x-reverse rounded-lg border p-4 cursor-pointer transition-all ${selectedFileId === (file._id || file.id) ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}>
                     <RadioGroupItem value={file._id || file.id} id={file._id || file.id} className="mt-1" />
-                    <Label htmlFor={file._id || file.id} className="flex-1 cursor-pointer flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium dir-rtl">{file.originalName || file.name}</span>
+                    <Label htmlFor={file._id || file.id} className="flex-1  cursor-pointer flex items-center justify-between">
+                      <div className="flex items-center gap-2 ms-2">
+                        <span className="font-medium dir-rtl">{fixArabicFilename(file.originalName || file.name || file.fileName)}</span>
                       </div>
                       {selectedFileId === (file._id || file.id) && (
                         <Check className="h-4 w-4 text-primary" />
@@ -154,25 +159,26 @@ export default function CreateMindMapDialog({
           )}
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="space-x-1">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={generating}
+            className="cursor-pointer"
           >
             إلغاء
           </Button>
           <Button
             onClick={handleCreate}
             disabled={generating || !selectedFileId}
-            className="gap-2"
+            className="cursor-pointer gap-2"
           >
+            {generating ? "جاري الإنشاء..." : "إنشاء الخريطة"}
             {generating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Brain className="h-4 w-4" />
             )}
-            {generating ? "جاري الإنشاء..." : "إنشاء الخريطة"}
           </Button>
         </DialogFooter>
       </DialogContent>

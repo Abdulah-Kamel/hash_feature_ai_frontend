@@ -72,7 +72,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Mind Map Generation Error:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: error.message || "Internal Server Error" },
       { status: 500 }
     );
   }

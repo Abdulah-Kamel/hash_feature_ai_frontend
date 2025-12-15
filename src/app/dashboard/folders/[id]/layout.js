@@ -231,7 +231,7 @@ export default function FolderLayout({ children }) {
   }, [loadFiles]);
 
   return (
-    <SidebarInset className="min-h-screen">
+    <SidebarInset className="">
       <ChatSidebar />
       {!isMindMap && (
         <ChatHeader
@@ -268,11 +268,11 @@ export default function FolderLayout({ children }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 min-h-[calc(100vh-64px)]">
+      <div className="grid grid-cols-1 xl:grid-cols-4 min-h-[calc(100vh)]">
         {/* Chat Section - Hidden on mobile when content tab is active */}
         {!isMindMap && chatOpen && (
           <div
-            className={`xl:col-span-2 max-h-[calc(100vh-64px)] ${
+            className={`xl:col-span-2 max-h-[calc(100vh)] ${
               activeTab === "content" ? "hidden xl:block" : ""
             }`}
           >
