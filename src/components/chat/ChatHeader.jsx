@@ -6,7 +6,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
 import { getFolder } from "@/server/actions/folders";
 
-function ChatHeader({ chatOpen, onToggle }) {
+function ChatHeader({ chatOpen, onToggle, isMindMap }) {
   const { toggleSidebar, open: sidebarOpen } = useSidebar();
   const params = useParams();
   const [folderName, setFolderName] = React.useState("");
@@ -25,7 +25,7 @@ function ChatHeader({ chatOpen, onToggle }) {
     }
     loadFolderName();
   }, [params?.id]);
-  
+
   return (
     <div className="flex items-center justify-between bg-sidebar px-4 py-3 relative">
       <div className="flex items-center gap-2">
@@ -42,32 +42,27 @@ function ChatHeader({ chatOpen, onToggle }) {
             <PanelLeftOpen className="size-5" />
           )}
         </Button>
-        <Button
-          variant="ghost"
-          className="rounded-lg cursor-pointer"
-          onClick={onToggle}
-        >
-          <span className="ml-1 text-sm">
-            {chatOpen ? (
-              <PanelRight className="size-5" />
-            ) : (
-              <PanelLeft className="size-5" />
-            )}
-          </span>
-          الشات
-        </Button>
+        {!isMindMap && (
+          <Button
+            variant="ghost"
+            className="rounded-lg cursor-pointer"
+            onClick={onToggle}
+          >
+            <span className="ml-1 text-sm">
+              {chatOpen ? (
+                <PanelRight className="size-5" />
+              ) : (
+                <PanelLeft className="size-5" />
+              )}
+            </span>
+            الشات
+          </Button>
+        )}
       </div>
 
       {/* Centered Folder Name */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+      <div className="flex-1 text-center">
         <span className="font-semibold text-lg">{folderName}</span>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="rounded-lg">
-          <MoreHorizontal className="size-5" />
-        </Button>
-        <Lock className="size-4 text-muted-foreground" />
       </div>
     </div>
   );

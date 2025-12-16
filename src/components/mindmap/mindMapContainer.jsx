@@ -246,24 +246,28 @@ function getDescendants(nodeId, childrenMap, result = new Set()) {
 const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
   const { fitView } = useReactFlow();
   const params = useParams();
-  const folderId = params?.id || '';
-  
+  const folderId = params?.id || "";
+
   // Use static skeleton to avoid recreating on every render
   const skeleton = SKELETON_GRAPH;
-  
+
   // Chat and active node state
   const [chatOpen, setChatOpen] = useState(false);
   const [activeNode, setActiveNode] = useState(null);
-  
+
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   // All nodes and edges (complete graph)
   const [allNodes, setAllNodes] = useState([]);
   const [allEdges, setAllEdges] = useState([]);
   const [childrenMap, setChildrenMap] = useState({});
   const [rootIds, setRootIds] = useState([]);
-  
+
   // Expanded nodes set
   const [expandedNodes, setExpandedNodes] = useState(new Set());
-  
+
   // Toggle expand/collapse for a node
   const handleToggleExpand = useCallback((nodeId) => {
     setExpandedNodes((prev) => {
@@ -276,7 +280,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
       return next;
     });
   }, []);
-  
+
   // Handle node action (from context menu)
   const handleNodeAction = useCallback((actionId, nodeId, nodeData) => {
     console.log("Action:", actionId, "Node:", nodeId, "Data:", nodeData);
@@ -285,7 +289,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
       setChatOpen(true);
     }
   }, []);
-  
+
   // Handle chat message send
   const handleSendMessage = useCallback((message, node) => {
     console.log("Chat message:", message, "About node:", node);
@@ -294,9 +298,9 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
   // Compute visible nodes based on expanded state
   const visibleNodes = useMemo(() => {
     if (!allNodes.length) return skeleton.nodes;
-    
+
     const visible = new Set(rootIds);
-    
+
     // Add children of expanded nodes
     const addVisibleChildren = (nodeId) => {
       if (expandedNodes.has(nodeId)) {
@@ -307,9 +311,9 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         });
       }
     };
-    
+
     rootIds.forEach((rootId) => addVisibleChildren(rootId));
-    
+
     return allNodes
       .filter((n) => visible.has(n.id))
       .map((n) => ({
@@ -321,12 +325,19 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
           onAction: handleNodeAction,
         },
       }));
-  }, [allNodes, expandedNodes, childrenMap, rootIds, handleToggleExpand, handleNodeAction]);
+  }, [
+    allNodes,
+    expandedNodes,
+    childrenMap,
+    rootIds,
+    handleToggleExpand,
+    handleNodeAction,
+  ]);
 
   // Compute visible edges
   const visibleEdges = useMemo(() => {
     if (!allEdges.length) return skeleton.edges;
-    
+
     const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
     return allEdges.filter(
       (e) => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target)
@@ -336,66 +347,78 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
   // Layout visible nodes
   const [nodes, setNodes] = useState(skeleton.nodes);
   const [edges, setEdges] = useState(skeleton.edges);
-  
+
   // Track previous visible node IDs for entrance animation
   const prevVisibleIdsRef = React.useRef(new Set());
   const nodePositionsRef = React.useRef({});
   const allNodesMapRef = React.useRef({});
   const isAnimatingRef = React.useRef(false);
-  
+
   // Store all nodes map for parent lookup
   useEffect(() => {
     const map = {};
-    allNodes.forEach(n => { map[n.id] = n; });
+    allNodes.forEach((n) => {
+      map[n.id] = n;
+    });
     allNodesMapRef.current = map;
   }, [allNodes]);
-  
-  // Layout visible nodes when they change  
+
+  // Layout visible nodes when they change
   useEffect(() => {
     if (!allNodes.length) return;
     if (isAnimatingRef.current) return;
-    
-    const currentIds = new Set(visibleNodes.map(n => n.id));
+
+    const currentIds = new Set(visibleNodes.map((n) => n.id));
     const prevIds = prevVisibleIdsRef.current;
-    
+
     // Find nodes being removed
-    const removedNodeIds = [...prevIds].filter(id => !currentIds.has(id));
-    
+    const removedNodeIds = [...prevIds].filter((id) => !currentIds.has(id));
+
     // If nodes are being removed, animate them out first
     if (removedNodeIds.length > 0) {
       isAnimatingRef.current = true;
-      
+
       // Animate removed nodes to their parent position
-      setNodes(prev => prev.map(node => {
-        if (removedNodeIds.includes(node.id)) {
-          const parentId = node.data?.parentId;
-          const parentPos = nodePositionsRef.current[parentId] || { x: 0, y: 0 };
-          
-          return {
-            ...node,
-            position: parentPos,
-            style: {
-              ...node.style,
-              opacity: 0,
-              transition: 'transform 0.3s ease-in, opacity 0.2s ease-in',
-            },
-          };
-        }
-        return node;
-      }));
-      
+      setNodes((prev) =>
+        prev.map((node) => {
+          if (removedNodeIds.includes(node.id)) {
+            const parentId = node.data?.parentId;
+            const parentPos = nodePositionsRef.current[parentId] || {
+              x: 0,
+              y: 0,
+            };
+
+            return {
+              ...node,
+              position: parentPos,
+              style: {
+                ...node.style,
+                opacity: 0,
+                transition: "transform 0.3s ease-in, opacity 0.2s ease-in",
+              },
+            };
+          }
+          return node;
+        })
+      );
+
       // After animation, update to new layout
       setTimeout(() => {
         if (visibleNodes.length) {
-          const layouted = getLayoutedElements(visibleNodes, visibleEdges, {
-            direction: "LR",
-          }, nodePositionsRef.current);
+          const layouted = getLayoutedElements(
+            visibleNodes,
+            visibleEdges,
+            {
+              direction: "LR",
+            },
+            nodePositionsRef.current
+          );
           setNodes(layouted.nodes);
           setEdges(layouted.edges);
-          
+
           // Store positions
           const currentPositions = {};
-          layouted.nodes.forEach(n => {
+          layouted.nodes.forEach((n) => {
             currentPositions[n.id] = n.position;
           });
           nodePositionsRef.current = currentPositions;
@@ -403,73 +426,82 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         prevVisibleIdsRef.current = currentIds;
         isAnimatingRef.current = false;
       }, 300);
-      
+
       return;
     }
-    
+
     // Normal flow: entrance animation for new nodes
     if (visibleNodes.length) {
-      const layouted = getLayoutedElements(visibleNodes, visibleEdges, {
-        direction: "LR",
-      }, nodePositionsRef.current);
-      
+      const layouted = getLayoutedElements(
+        visibleNodes,
+        visibleEdges,
+        {
+          direction: "LR",
+        },
+        nodePositionsRef.current
+      );
+
       // Find newly added nodes
-      const newNodeIds = new Set([...currentIds].filter(id => !prevIds.has(id)));
-      
+      const newNodeIds = new Set(
+        [...currentIds].filter((id) => !prevIds.has(id))
+      );
+
       // Get current positions
       const currentPositions = {};
-      layouted.nodes.forEach(n => {
+      layouted.nodes.forEach((n) => {
         currentPositions[n.id] = n.position;
       });
-      
+
       // For new nodes, place at parent position first
-      const nodesWithEntrance = layouted.nodes.map(node => {
+      const nodesWithEntrance = layouted.nodes.map((node) => {
         if (newNodeIds.has(node.id) && node.data?.parentId) {
-          const parentPos = currentPositions[node.data.parentId] || 
-                           nodePositionsRef.current[node.data.parentId] ||
-                           { x: 0, y: 0 };
-          
+          const parentPos = currentPositions[node.data.parentId] ||
+            nodePositionsRef.current[node.data.parentId] || { x: 0, y: 0 };
+
           return {
             ...node,
             position: { ...parentPos },
             style: {
               ...node.style,
               opacity: 0,
-              transition: 'none',
+              transition: "none",
             },
           };
         }
         return node;
       });
-      
+
       setNodes(nodesWithEntrance);
       setEdges(layouted.edges);
-      
+
       // Animate new nodes to final position
       if (newNodeIds.size > 0) {
         setTimeout(() => {
-          setNodes(prev => prev.map(node => {
-            if (newNodeIds.has(node.id)) {
-              const finalPos = currentPositions[node.id];
-              return {
-                ...node,
-                position: finalPos,
-                style: {
-                  ...node.style,
-                  opacity: 1,
-                  transition: 'transform 0.4s ease-out, opacity 0.3s ease-out',
-                },
-              };
-            }
-            return node;
-          }));
-          
+          setNodes((prev) =>
+            prev.map((node) => {
+              if (newNodeIds.has(node.id)) {
+                const finalPos = currentPositions[node.id];
+                return {
+                  ...node,
+                  position: finalPos,
+                  style: {
+                    ...node.style,
+                    opacity: 1,
+                    transition:
+                      "transform 0.4s ease-out, opacity 0.3s ease-out",
+                  },
+                };
+              }
+              return node;
+            })
+          );
+
           // Center viewport on the newly expanded nodes after animation
           setTimeout(() => {
             const newNodeIdsArray = [...newNodeIds];
             if (newNodeIdsArray.length > 0) {
-              fitView({ 
-                nodes: newNodeIdsArray.map(id => ({ id })),
+              fitView({
+                nodes: newNodeIdsArray.map((id) => ({ id })),
                 duration: 400,
                 padding: 0.8,
               });
@@ -477,61 +509,107 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
           }, 400);
         }, 50);
       }
-      
+
       nodePositionsRef.current = currentPositions;
       prevVisibleIdsRef.current = currentIds;
     }
   }, [visibleNodes, visibleEdges, allNodes.length]);
-  
+
   // Load data
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+
         // Show skeleton while loading
         const skLayout = getLayoutedElements(skeleton.nodes, skeleton.edges, {
           direction: "LR",
         });
         setNodes([...skLayout.nodes]);
         setEdges([...skLayout.edges]);
-        
+
         const url = fileId
           ? `/api/ai/mind-maps?fileId=${encodeURIComponent(fileId)}`
           : `/api/ai/mind-maps`;
         const res = await apiClient(url);
         const json = await res.json().catch(() => null);
+
+        // Check for API error response
+        if (!res.ok) {
+          const errorMessage =
+            json?.message ||
+            json?.error ||
+            `Failed to load mind map (${res.status})`;
+          throw new Error(errorMessage);
+        }
+        if(res.count === 0){
+          setError("لا يوجد  mind map انشئ واحد");
+          setIsLoading(false);
+          return;
+        }
+
         const { roots, filename } = extractMindMapData(json);
-        if (!Array.isArray(roots) || !roots.length || cancelled) return;
-        
-        const mapped = treeToFlow(roots, handleNodeAction, handleToggleExpand, filename);
-        
+        if (!Array.isArray(roots) || !roots.length || cancelled) {
+          if (!cancelled) {
+            setError(
+              "لا يوجد  mind map انشئ واحد"
+            );
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        const mapped = treeToFlow(
+          roots,
+          handleNodeAction,
+          handleToggleExpand,
+          filename
+        );
+
         setAllNodes(mapped.nodes);
         setAllEdges(mapped.edges);
         setChildrenMap(mapped.childrenMap);
         setRootIds(mapped.rootIds);
-        
+
         // Start with roots expanded
         setExpandedNodes(new Set(mapped.rootIds));
-        
+        setIsLoading(false);
       } catch (e) {
         console.error("Error loading mind map:", e);
+        if (!cancelled) {
+          setError(
+            e.message ||
+              "An unexpected error occurred while loading the mind map."
+          );
+          setIsLoading(false);
+        }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fileId, handleNodeAction, handleToggleExpand, skeleton.nodes, skeleton.edges]);
-  
+  }, [
+    fileId,
+    handleNodeAction,
+    handleToggleExpand,
+    skeleton.nodes,
+    skeleton.edges,
+  ]);
+
   const onLayout = useCallback(
     (direction) => {
-      const layouted = getLayoutedElements(visibleNodes, visibleEdges, { direction });
+      const layouted = getLayoutedElements(visibleNodes, visibleEdges, {
+        direction,
+      });
       setNodes([...layouted.nodes]);
       setEdges([...layouted.edges]);
       setTimeout(() => fitView({ duration: 300 }), 50);
     },
     [visibleNodes, visibleEdges, fitView]
   );
-  
+
   const onNodesChange = useCallback(
     (changes) =>
       setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
@@ -546,7 +624,35 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
     (params) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     []
   );
-  
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full bg-background p-8">
+        <div className="bg-card dark:bg-gray-800 rounded-xl shadow-lg py-12 px-20 max-w-md text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-white/90  rounded-full flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-red-500 dark:text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-2">
+           {error}
+          </h3>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <ReactFlow
@@ -565,24 +671,10 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         fitView
         nodesDraggable={true}
       >
-        <Panel position="top-right" className="space-x-2">
-          <button
-            onClick={() => onLayout("TB")}
-            className="text-black bg-white px-2 py-1 rounded-md cursor-pointer"
-          >
-            vertical layout
-          </button>
-          <button
-            onClick={() => onLayout("LR")}
-            className="text-black bg-white px-2 py-1 rounded-md cursor-pointer"
-          >
-            horizontal layout
-          </button>
-        </Panel>
         <Controls />
         <Background />
       </ReactFlow>
-      
+
       {/* Mind Map Chat Interface */}
       <MindMapChat
         isOpen={chatOpen}

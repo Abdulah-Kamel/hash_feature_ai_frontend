@@ -233,12 +233,11 @@ export default function FolderLayout({ children }) {
   return (
     <SidebarInset className="">
       <ChatSidebar />
-      {!isMindMap && (
         <ChatHeader
           chatOpen={chatOpen}
           onToggle={() => setChatOpen((v) => !v)}
+          isMindMap={isMindMap}
         />
-      )}
 
       {/* Mobile Tab Bar - Only visible on mobile */}
       {!isMindMap && (
