@@ -139,6 +139,10 @@ const LoginForm = () => {
     const result = await handleLogin(data);
     if (result.success) {
       setLoading(false);
+      // Clear any refresh failed flags from previous sessions
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("auth_refresh_failed");
+      }
       toast.success("تم تسجيل الدخول بنجاح", {
         position: "top-right",
         duration: 3000,
