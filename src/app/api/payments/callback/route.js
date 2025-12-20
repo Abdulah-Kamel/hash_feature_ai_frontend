@@ -32,7 +32,7 @@ export async function GET(req) {
   } catch {}
 
   const dest = new URL(
-    `/subscription-success?id=${encodeURIComponent(
+    `/subscription-validation?id=${encodeURIComponent(
       id
     )}&status=${encodeURIComponent(status)}&message=${encodeURIComponent(
       message

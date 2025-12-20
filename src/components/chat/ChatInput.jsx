@@ -38,17 +38,12 @@ function ChatInput({ value, onChange, onSend }) {
           className="w-full h-full resize-none bg-transparent pr-2 pl-1 pt-1 pb-16 outline-none text-foreground"
         />
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
-          <Button aria-label="ميكروفون" variant="outline" size="icon" className="rounded-full cursor-pointer">
-            <Paperclip className="size-5" />
-
+          <Button
+            onClick={onSend}
+            className="rounded-full px-5 py-2 cursor-pointer"
+          >
+            ارسال <Send className="size-5 ml-2" />
           </Button>
-          <Button aria-label="ميكروفون" variant="outline" size="icon" className="rounded-full cursor-pointer">
-            <Mic className="size-5" />
-          </Button>
-          <Button aria-label="ابتسامة" variant="outline" size="icon" className="rounded-full cursor-pointer">
-            <Smile className="size-5" />
-          </Button>
-          <Button onClick={onSend} className="rounded-full px-5 py-2 cursor-pointer">ارسال <Send className="size-5 ml-2" /></Button>
         </div>
       </div>
     </div>

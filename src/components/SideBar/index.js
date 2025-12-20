@@ -34,7 +34,7 @@ import {
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Skeleton } from "../ui/skeleton";
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/HashFlowlogo.png";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import useAuth from "@/hooks/use-auth";
 import { logout } from "@/server/actions/files";
@@ -191,10 +191,7 @@ const Index = ({ variant = "global" }) => {
         </div>
         <SidebarHeader className="p-4">
           <Link href="/dashboard/overview" className="flex items-center gap-3">
-            <Image src={logo} alt="Hash Plus Logo" className="h-8 w-auto" />
-            <span className="text-xl font-bold text-sidebar-foreground">
-              هاش بلس
-            </span>
+            <Image src={logo} alt="Hash Plus Logo" className="h-11 w-auto" />
           </Link>
         </SidebarHeader>
 

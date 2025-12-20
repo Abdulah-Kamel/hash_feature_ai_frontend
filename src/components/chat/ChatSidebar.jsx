@@ -38,7 +38,7 @@ import {
 } from "../ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/HashFlowlogo.png";
 import useAuth from "@/hooks/use-auth";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -188,10 +188,7 @@ export default function ChatSidebar() {
     <Sidebar aria-label="الشريط الجانبي العام">
       <SidebarHeader className="p-4">
         <Link href="/dashboard/overview" className="flex items-center gap-3">
-          <Image src={logo} alt="Hash Plus Logo" className="h-8 w-auto" />
-          <span className="text-xl font-bold text-sidebar-foreground">
-            هاش بلس
-          </span>
+          <Image src={logo} alt="Hash Plus Logo" className="h-11 w-auto" />
         </Link>
       </SidebarHeader>
 

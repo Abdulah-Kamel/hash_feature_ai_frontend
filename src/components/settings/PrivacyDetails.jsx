@@ -3,18 +3,31 @@ import * as React from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Shield, Lock, UserX, Trash2 } from "lucide-react";
 
 export default function PrivacyDetails({ open, onOpenChange }) {
-  const Article = ({ title, body }) => (
-    <div className="space-y-2">
-      <p className="text-white text-xl font-semibold">{title}</p>
-      <p className="text-white/90 text-sm leading-7">{body}</p>
-    </div>
-  );
-
-  const bodyText =
-    "هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها التطبيق. إذا كنت تحتاج إلى عدد أكبر من الفقرات يتيح لك مولد النص العربي زيادة عدد الفقرات كما تريد، النص لن يبدو مقسماً ولا يحوي أخطاءً لغوية، مولد النص العربي مفيد لمصممي المواقع على وجه الخصوص، حيث يحتاج العميل في كثير من الأحيان أن يطلع على صورة حقيقية لتصميم الموقع.";
+  const privacyPoints = [
+    {
+      icon: Shield,
+      title: "تخزين آمن",
+      text: "جميع معلومات حسابك ومحتواك الدراسي تُخزن بشكل آمن.",
+    },
+    {
+      icon: Lock,
+      title: "حماية البيانات",
+      text: "لا نشارك أي بيانات أو ملفات مع جهات خارجية دون إذنك الصريح.",
+    },
+    {
+      icon: UserX,
+      title: "أمان متقدم",
+      text: "بياناتك الشخصية مثل الاسم، البريد الإلكتروني، وملفاتك تظل محمية باستخدام بروتوكولات أمان متقدمة.",
+    },
+    {
+      icon: Trash2,
+      title: "التحكم الكامل",
+      text: "يمكنك تعديل أو حذف حسابك في أي وقت، مع ضمان إزالة جميع البيانات الخاصة بك من منصتنا.",
+    },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,17 +50,33 @@ export default function PrivacyDetails({ open, onOpenChange }) {
             </div>
           </div>
 
-          <Card className="rounded-2xl bg-card/60 border p-6 space-y-6">
-            {Array.from({ length: 2 }).map((_, i) => (
-              <Article
-                key={i}
-                title="هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة"
-                body={bodyText}
-              />
-            ))}
+          <Card className="rounded-2xl bg-card/60 border p-6 space-y-4">
+            <p className="text-white/90 text-base leading-7">
+              نحن في هاش فلو نولي أهمية كبيرة لحماية خصوصيتك وبياناتك الشخصية.
+            </p>
+
+            <div className="space-y-4">
+              {privacyPoints.map((point, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-4 p-4 rounded-xl bg-background/50"
+                >
+                  <div className="size-10 grid place-items-center rounded-lg bg-primary/20 shrink-0">
+                    <point.icon className="size-5 text-primary" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-white font-semibold">{point.title}</p>
+                    <p className="text-white/70 text-sm leading-6">
+                      {point.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </Card>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+

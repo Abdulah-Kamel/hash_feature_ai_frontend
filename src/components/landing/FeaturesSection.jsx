@@ -21,10 +21,8 @@ const FeaturesSection = () => {
               سهولة الاستخدام
             </CardTitle>
             <CardDescription className="text-white/70 text-sm leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              واجهة بسيطة ومباشرة تخليك تبدأ بدون شرح أو تعقيد. ارفع محتواك،
+              اختر الأداة، وابدأ التعلم فورًا بدون خبرة تقنية أو خطوات طويلة.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -33,10 +31,8 @@ const FeaturesSection = () => {
           <CardHeader>
             <CardTitle className="text-xl text-white">سرعة التنفيذ</CardTitle>
             <CardDescription className="text-white/70 text-sm leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              حوّل ملفاتك وأسئلتك إلى محتوى تعليمي خلال ثوانٍ. الذكاء الاصطناعي
+              في هاش فلو ينجز ما كان يستغرق ساعات في وقت قياسي.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -45,10 +41,9 @@ const FeaturesSection = () => {
           <CardHeader>
             <CardTitle className="text-xl text-white">تعدد المحتوى</CardTitle>
             <CardDescription className="text-white/70 text-sm leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              سواء كانت محاضرات، مذكرات، ملفات PDF أو نصوص هاش فلو يتعامل معها
+              كلها. من مادة واحدة تقدر تنشئ شرح، مراحل تعلم، واختبارات في مكان
+              واحد.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -56,13 +51,11 @@ const FeaturesSection = () => {
         <Card className="hover:border-primary/50 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-xl text-white">
-              سهولة الاستخدام
+              تعلم مخصص وفعال
             </CardTitle>
             <CardDescription className="text-white/70 text-sm leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              كل تجربة تعلم تتكيّف مع مستواك وهدفك. هاش فلو يساعدك تركز على
+              المهم، وتراجع بذكاء، وتحقق نتائج أفضل بثقة أعلى.
             </CardDescription>
           </CardHeader>
         </Card>

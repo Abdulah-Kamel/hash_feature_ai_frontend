@@ -16,6 +16,11 @@ export const useAiContentStore = create((set) => ({
   mcqsLoading: false,
   mcqsGenerating: false,
 
+  // Mind Maps state
+  mindMaps: [],
+  mindMapsLoading: false,
+  mindMapsGenerating: false,
+
   // Stages actions
   setStages: (stages) => set({ stages }),
   setStagesLoading: (loading) => set({ stagesLoading: loading }),
@@ -24,23 +29,35 @@ export const useAiContentStore = create((set) => ({
   // Flashcards actions
   setFlashcards: (flashcards) => set({ flashcards }),
   setFlashcardsLoading: (loading) => set({ flashcardsLoading: loading }),
-  setFlashcardsGenerating: (generating) => set({ flashcardsGenerating: generating }),
+  setFlashcardsGenerating: (generating) =>
+    set({ flashcardsGenerating: generating }),
 
   // MCQs actions
   setMcqs: (mcqs) => set({ mcqs }),
   setMcqsLoading: (loading) => set({ mcqsLoading: loading }),
   setMcqsGenerating: (generating) => set({ mcqsGenerating: generating }),
 
+  // Mind Maps actions
+  setMindMaps: (mindMaps) => set({ mindMaps }),
+  setMindMapsLoading: (loading) => set({ mindMapsLoading: loading }),
+  setMindMapsGenerating: (generating) =>
+    set({ mindMapsGenerating: generating }),
+
   // Reset all
-  resetAll: () => set({
-    stages: [],
-    stagesLoading: false,
-    stagesGenerating: false,
-    flashcards: [],
-    flashcardsLoading: false,
-    flashcardsGenerating: false,
-    mcqs: [],
-    mcqsLoading: false,
-    mcqsGenerating: false,
-  }),
+  resetAll: () =>
+    set({
+      stages: [],
+      stagesLoading: false,
+      stagesGenerating: false,
+      flashcards: [],
+      flashcardsLoading: false,
+      flashcardsGenerating: false,
+      mcqs: [],
+      mcqsLoading: false,
+      mcqsGenerating: false,
+      mindMaps: [],
+      mindMapsLoading: false,
+      mindMapsGenerating: false,
+    }),
 }));
+

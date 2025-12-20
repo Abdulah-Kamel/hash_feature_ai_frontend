@@ -177,16 +177,6 @@ export default function MindMapChat({
               dir="rtl"
             />
           </div>
-          
-          {/* Plus button */}
-          <button className="p-2 rounded-full hover:bg-gray-700 transition-colors cursor-pointer">
-            <Plus className="w-5 h-5 text-gray-400" />
-          </button>
-
-          {/* Mic button */}
-          <button className="p-2 rounded-full hover:bg-gray-700 transition-colors cursor-pointer">
-            <Mic className="w-5 h-5 text-gray-400" />
-          </button>
 
           {/* Send button */}
           <button

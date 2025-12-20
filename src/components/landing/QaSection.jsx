@@ -24,19 +24,12 @@ const QaSection = () => {
             className="bg-card border border-border/50 rounded-xl mb-4 px-6"
           >
             <AccordionTrigger className="text-white hover:no-underline text-right flex-row-reverse">
-              <span className="text-lg font-semibold">
-                هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة
-              </span>
+              <span className="text-lg font-semibold">ما هو هاش فلو؟ </span>
             </AccordionTrigger>
             <AccordionContent className="text-white/80 text-right leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق. إذا كنت تحتاج إلى عدد أكبر من الفقرات يتيح لك مولد النص
-              العربي زيادة عدد الفقرات كما تريد، النص لن يبدو مقسماً ولا يحوي
-              أخطاء لغوية، مولد النص العربي مفيد لمصممي المواقع على وجه الخصوص،
-              حيث يحتاج العميل في كثير من الأحيان أن يطلع على صورة حقيقية لتصميم
-              الموقع.
+              هاش فلو منصة تعليمية مدعومة بالذكاء الاصطناعي، تساعدك تحوّل أي
+              مادة دراسية إلى تجربة تعلم تفاعلية تشمل مراحل تعلم، اختبارات،
+              بطاقات تعليمية، وخريطة ذهنية في مكان واحد.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem
@@ -45,14 +38,12 @@ const QaSection = () => {
           >
             <AccordionTrigger className="text-white hover:no-underline text-right flex-row-reverse">
               <span className="text-lg font-semibold">
-                هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة
+                كيف أبدأ باستخدام هاش فلو؟
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-white/80 text-right leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              التسجيل بسيط وسريع. أنشئ حسابك، ارفع أول ملف، وابدأ التعلّم مباشرة
+              بدون خطوات معقدة.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem
@@ -61,14 +52,13 @@ const QaSection = () => {
           >
             <AccordionTrigger className="text-white hover:no-underline text-right flex-row-reverse">
               <span className="text-lg font-semibold">
-                هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة
+                هل الاختبارات تنشأ تلقائيا؟
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-white/80 text-right leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              نعم، يتم إنشاء الاختبارات تلقائيًا من نفس المحتوى اللي تذاكره،
+              بحيث تكون الأسئلة مناسبة للمادة ولمستواك وتساعدك تقيس فهمك
+              الحقيقي.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem
@@ -77,14 +67,12 @@ const QaSection = () => {
           >
             <AccordionTrigger className="text-white hover:no-underline text-right flex-row-reverse">
               <span className="text-lg font-semibold">
-                هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة
+                هل هاش فلو مناسب للمراجعة قبل الاختبارات؟
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-white/80 text-right leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              نعم، هاش فلو مثالي للمراجعة السريعة قبل الاختبارات من خلال
+              الملخصات، البطاقات التعليمية، والاختبارات القصيرة.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem
@@ -93,14 +81,12 @@ const QaSection = () => {
           >
             <AccordionTrigger className="text-white hover:no-underline text-right flex-row-reverse">
               <span className="text-lg font-semibold">
-                هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة
+                هل يتطور المحتوى مع تقدمي في التعلم؟
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-white/80 text-right leading-relaxed">
-              هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد
-              هذا النص من مولد النص العربي، حيث يمكنك أن تولد مثل هذا النص أو
-              العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التي يولدها
-              التطبيق.
+              نعم، كل ما استخدمت المنصة أكثر، تقدر تطوّر المحتوى، تعيد إنشاء
+              الاختبارات، وتعمّق الشرح حسب مستواك الحالي.
             </AccordionContent>
           </AccordionItem>
         </Accordion>

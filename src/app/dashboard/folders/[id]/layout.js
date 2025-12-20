@@ -233,11 +233,11 @@ export default function FolderLayout({ children }) {
   return (
     <SidebarInset className="">
       <ChatSidebar />
-        <ChatHeader
-          chatOpen={chatOpen}
-          onToggle={() => setChatOpen((v) => !v)}
-          isMindMap={isMindMap}
-        />
+      <ChatHeader
+        chatOpen={chatOpen}
+        onToggle={() => setChatOpen((v) => !v)}
+        isMindMap={isMindMap}
+      />
 
       {/* Mobile Tab Bar - Only visible on mobile */}
       {!isMindMap && (
@@ -267,11 +267,11 @@ export default function FolderLayout({ children }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 min-h-[calc(100vh)]">
+      <div className="grid grid-cols-1 xl:grid-cols-4 h-[calc(100vh-4rem)] overflow-hidden">
         {/* Chat Section - Hidden on mobile when content tab is active */}
         {!isMindMap && chatOpen && (
           <div
-            className={`xl:col-span-2 max-h-[calc(100vh)] ${
+            className={`xl:col-span-2 h-full ${
               activeTab === "content" ? "hidden xl:block" : ""
             }`}
           >
@@ -294,10 +294,12 @@ export default function FolderLayout({ children }) {
               : chatOpen
               ? "xl:col-span-2"
               : "xl:col-span-4"
-          } ${isMindMap ? "" : activeTab === "chat" ? "hidden xl:block" : ""}`}
+          } ${
+            isMindMap ? "" : activeTab === "chat" ? "hidden xl:block" : ""
+          } h-full overflow-hidden`}
         >
-          <Card className="bg-background rounded-lg p-4 h-full border-none flex flex-col overflow-y-auto">
-            <div className="flex-1 overflow-hidden">{children}</div>
+          <Card className="bg-background rounded-lg p-4 border-none flex flex-col h-full overflow-y-auto">
+            <div className="flex-1 overflow-auto">{children}</div>
           </Card>
         </div>
       </div>

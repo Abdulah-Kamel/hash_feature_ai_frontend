@@ -37,7 +37,7 @@ const HeroSection = () => {
               تسجيل الدخول
             </Button>
           </Link>
-          <Link href="/start">
+          <Link href="/register">
             <Button
               size="xl"
               className="bg-primary hover:bg-primary/90 border-primary< text-white rounded-2xl px-20 py-3.5 text-lg font-medium gap-2 cursor-pointer"

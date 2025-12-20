@@ -16,16 +16,6 @@ const actions = [
     label: "اسأل الذكاء الاصطناعي",
     icon: Sparkles,
   },
-  {
-    id: "explain",
-    label: "شرح",
-    icon: MessageSquareText,
-  },
-  {
-    id: "quiz",
-    label: "إنشاء إختبار",
-    icon: ClipboardList,
-  },
 ];
 
 export default function NodeContextMenu({ nodeId, onAction, onClose }) {

@@ -28,7 +28,7 @@ export default function BillingPlans({ currentPlan = "free" }) {
   const [period, setPeriod] = React.useState("month");
   const [loading, setLoading] = React.useState(false);
   const [showPayment, setShowPayment] = React.useState(false);
-  const price = period === "month" ? 59 : period === "quarter" ? 149 : 499; // Keep price logic for display or update if needed
+  const price = period === "month" ? 29 : period === "quarter" ? 79 : 179; // Keep price logic for display or update if needed
   const options = [
     { v: "month", label: "شهر" },
     { v: "quarter", label: "3 شهور" },

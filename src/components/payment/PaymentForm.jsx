@@ -4,10 +4,10 @@ import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 
 function amountFor(planMonths) {
-  if (String(planMonths) === "1") return 59 * 100;
-  if (String(planMonths) === "3") return 149 * 100;
-  if (String(planMonths) === "12") return 499 * 100;
-  return 59 * 100;
+  if (String(planMonths) === "1") return 29 * 100;
+  if (String(planMonths) === "3") return 79 * 100;
+  if (String(planMonths) === "12") return 179 * 100;
+  return 29 * 100;
 }
 
 export default function PaymentForm({ planMonths = "1" }) {
