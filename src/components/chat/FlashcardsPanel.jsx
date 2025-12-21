@@ -6,6 +6,8 @@ import { PlusCircle, X } from "lucide-react";
 import FlashcardsSwitcher from "./FlashcardsSwitcher";
 import { useFileStore } from "@/store/fileStore";
 import { useAiContentStore } from "@/store/aiContentStore";
+import { useJobStore } from "@/store/jobStore";
+import { jobTracker } from "@/lib/job-tracker";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import {
@@ -18,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function FlashcardsPanel() {
-  const [flashBusy, setFlashBusy] = React.useState(false);
   const [flashOpen, setFlashOpen] = React.useState(false);
   const [flashTitle, setFlashTitle] = React.useState("");
   const [currentMode, setCurrentMode] = React.useState("list");
@@ -28,6 +29,11 @@ export default function FlashcardsPanel() {
   const setFlashcardsGenerating = useAiContentStore(
     (s) => s.setFlashcardsGenerating
   );
+
+  const setJob = useJobStore((s) => s.setJob);
+  const clearJob = useJobStore((s) => s.clearJob);
+  const isJobActive = useJobStore((s) => s.isJobActive);
+  const flashBusy = isJobActive("flashcards");
 
   const handleGenerateFlashcards = async () => {
     if (flashBusy) return;
@@ -44,7 +50,6 @@ export default function FlashcardsPanel() {
     setFlashOpen(false);
     setFlashTitle("");
 
-    setFlashBusy(true);
     setFlashcardsGenerating(true);
     const payload = { title, folderId, fileIds: ids };
 
@@ -55,28 +60,77 @@ export default function FlashcardsPanel() {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (!res.ok) {
         toast.error(json?.message || "فشل إنشاء كروت الفلاش", {
           position: "top-right",
           duration: 3000,
         });
-      } else {
-        toast.success("تم إنشاء كروت الفلاش بنجاح", {
+        setFlashcardsGenerating(false);
+        return;
+      }
+
+      // Job accepted - start tracking
+      const jobId = json?.data?._id;
+      if (!jobId) {
+        toast.error("لم يتم استلام معرف الوظيفة", {
           position: "top-right",
           duration: 3000,
         });
-        try {
-          window.dispatchEvent(new Event("flashcards:refresh"));
-        } catch {}
+        setFlashcardsGenerating(false);
+        return;
       }
+
+      toast.info("جاري إنشاء كروت الفلاش...", {
+        position: "top-right",
+        duration: 3000,
+      });
+
+      // Store job info
+      setJob("flashcards", {
+        jobId,
+        status: "queued",
+        progress: 0,
+        title,
+      });
+
+      // Start WebSocket tracking
+      jobTracker.track(jobId, {
+        onProgress: (progress, status) => {
+          setJob("flashcards", {
+            jobId,
+            status,
+            progress,
+            title,
+          });
+        },
+        onComplete: (result) => {
+          clearJob("flashcards");
+          setFlashcardsGenerating(false);
+          toast.success("تم إنشاء كروت الفلاش بنجاح", {
+            position: "top-right",
+            duration: 3000,
+          });
+          try {
+            window.dispatchEvent(new Event("flashcards:refresh"));
+          } catch {}
+        },
+        onError: (error) => {
+          clearJob("flashcards");
+          setFlashcardsGenerating(false);
+          toast.error(error || "فشل إنشاء كروت الفلاش", {
+            position: "top-right",
+            duration: 3000,
+          });
+        },
+      });
     } catch {
       toast.error("حدث خطأ غير متوقع", {
         position: "top-right",
         duration: 3000,
       });
+      setFlashcardsGenerating(false);
     }
-    setFlashBusy(false);
-    setFlashcardsGenerating(false);
   };
 
   return (

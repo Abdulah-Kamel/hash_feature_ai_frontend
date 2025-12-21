@@ -6,6 +6,8 @@ import { PlusCircle, X } from "lucide-react";
 import StageSwitcher from "./StageSwitcher";
 import { useFileStore } from "@/store/fileStore";
 import { useAiContentStore } from "@/store/aiContentStore";
+import { useJobStore } from "@/store/jobStore";
+import { jobTracker } from "@/lib/job-tracker";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import {
@@ -18,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function StagesPanel() {
-  const [genBusy, setGenBusy] = React.useState(false);
   const [stageOpen, setStageOpen] = React.useState(false);
   const [stageTitle, setStageTitle] = React.useState("");
   const [currentMode, setCurrentMode] = React.useState("list");
@@ -26,6 +27,13 @@ export default function StagesPanel() {
   const folderId = useFileStore((s) => s.folderId);
   const getSelectedIds = useFileStore((s) => s.getSelectedIds);
   const setStagesGenerating = useAiContentStore((s) => s.setStagesGenerating);
+
+  const stagesJob = useJobStore((s) => s.jobs.stages);
+  const setJob = useJobStore((s) => s.setJob);
+  const clearJob = useJobStore((s) => s.clearJob);
+  const isJobActive = useJobStore((s) => s.isJobActive);
+
+  const genBusy = isJobActive("stages");
 
   const handleGenerateStages = async () => {
     if (genBusy) return;
@@ -42,7 +50,6 @@ export default function StagesPanel() {
     setStageOpen(false);
     setStageTitle("");
 
-    setGenBusy(true);
     setStagesGenerating(true);
     const payload = { title, folderId, fileIds: ids };
 
@@ -53,28 +60,77 @@ export default function StagesPanel() {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (!res.ok) {
         toast.error(json?.message || "فشل إنشاء المراحل", {
           position: "top-right",
           duration: 3000,
         });
-      } else {
-        toast.success("تم إنشاء المراحل بنجاح", {
+        setStagesGenerating(false);
+        return;
+      }
+
+      // Job accepted - start tracking
+      const jobId = json?.data?._id || json?.data?.jobId;
+      if (!jobId) {
+        toast.error("لم يتم استلام معرف الوظيفة", {
           position: "top-right",
           duration: 3000,
         });
-        try {
-          window.dispatchEvent(new Event("stages:refresh"));
-        } catch {}
+        setStagesGenerating(false);
+        return;
       }
+
+      toast.info("جاري إنشاء المراحل...", {
+        position: "top-right",
+        duration: 3000,
+      });
+
+      // Store job info
+      setJob("stages", {
+        jobId,
+        status: "queued",
+        progress: 0,
+        title,
+      });
+
+      // Start WebSocket tracking
+      jobTracker.track(jobId, {
+        onProgress: (progress, status) => {
+          setJob("stages", {
+            jobId,
+            status,
+            progress,
+            title,
+          });
+        },
+        onComplete: (result) => {
+          clearJob("stages");
+          setStagesGenerating(false);
+          toast.success("تم إنشاء المراحل بنجاح", {
+            position: "top-right",
+            duration: 3000,
+          });
+          try {
+            window.dispatchEvent(new Event("stages:refresh"));
+          } catch {}
+        },
+        onError: (error) => {
+          clearJob("stages");
+          setStagesGenerating(false);
+          toast.error(error || "فشل إنشاء المراحل", {
+            position: "top-right",
+            duration: 3000,
+          });
+        },
+      });
     } catch {
       toast.error("حدث خطأ غير متوقع", {
         position: "top-right",
         duration: 3000,
       });
+      setStagesGenerating(false);
     }
-    setGenBusy(false);
-    setStagesGenerating(false);
   };
 
   return (

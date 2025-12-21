@@ -8,6 +8,8 @@ import StageCard from "./StageCard";
 import SkeletonCard from "./SkeletonCard";
 import { useFileStore } from "@/store/fileStore";
 import { useAiContentStore } from "@/store/aiContentStore";
+import { useJobStore } from "@/store/jobStore";
+import { jobTracker } from "@/lib/job-tracker";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import {
@@ -22,7 +24,6 @@ import EmptyState from "./EmptyState";
 
 export default function TestsPanel() {
   const [testsMode, setTestsMode] = React.useState("list");
-  const [genBusy, setGenBusy] = React.useState(false);
   const [mcqOpen, setMcqOpen] = React.useState(false);
   const [mcqTitle, setMcqTitle] = React.useState("");
   const [mcqView, setMcqView] = React.useState(null);
@@ -36,6 +37,11 @@ export default function TestsPanel() {
   const setMcqs = useAiContentStore((s) => s.setMcqs);
   const setMcqsLoading = useAiContentStore((s) => s.setMcqsLoading);
   const setMcqsGenerating = useAiContentStore((s) => s.setMcqsGenerating);
+
+  const setJob = useJobStore((s) => s.setJob);
+  const clearJob = useJobStore((s) => s.clearJob);
+  const isJobActive = useJobStore((s) => s.isJobActive);
+  const genBusy = isJobActive("mcq");
 
   const handleGenerateMcq = async () => {
     if (genBusy) return;
@@ -52,7 +58,6 @@ export default function TestsPanel() {
     setMcqOpen(false);
     setMcqTitle("");
 
-    setGenBusy(true);
     setMcqsGenerating(true);
     const payload = { title, folderId, fileIds: ids };
 
@@ -63,28 +68,77 @@ export default function TestsPanel() {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (!res.ok) {
         toast.error(json?.message || "فشل إنشاء الاختبار", {
           position: "top-right",
           duration: 3000,
         });
-      } else {
-        toast.success("تم إنشاء الاختبار بنجاح", {
+        setMcqsGenerating(false);
+        return;
+      }
+
+      // Job accepted - start tracking
+      const jobId = json?.data?._id || json?.data?.jobId;
+      if (!jobId) {
+        toast.error("لم يتم استلام معرف الوظيفة", {
           position: "top-right",
           duration: 3000,
         });
-        try {
-          window.dispatchEvent(new Event("mcq:refresh"));
-        } catch {}
+        setMcqsGenerating(false);
+        return;
       }
+
+      toast.info("جاري إنشاء الاختبار...", {
+        position: "top-right",
+        duration: 3000,
+      });
+
+      // Store job info
+      setJob("mcq", {
+        jobId,
+        status: "queued",
+        progress: 0,
+        title,
+      });
+
+      // Start WebSocket tracking
+      jobTracker.track(jobId, {
+        onProgress: (progress, status) => {
+          setJob("mcq", {
+            jobId,
+            status,
+            progress,
+            title,
+          });
+        },
+        onComplete: (result) => {
+          clearJob("mcq");
+          setMcqsGenerating(false);
+          toast.success("تم إنشاء الاختبار بنجاح", {
+            position: "top-right",
+            duration: 3000,
+          });
+          try {
+            window.dispatchEvent(new Event("mcq:refresh"));
+          } catch {}
+        },
+        onError: (error) => {
+          clearJob("mcq");
+          setMcqsGenerating(false);
+          toast.error(error || "فشل إنشاء الاختبار", {
+            position: "top-right",
+            duration: 3000,
+          });
+        },
+      });
     } catch {
       toast.error("حدث خطأ غير متوقع", {
         position: "top-right",
         duration: 3000,
       });
+      setMcqsGenerating(false);
     }
-    setGenBusy(false);
-    setMcqsGenerating(false);
   };
 
   const loadMcq = React.useCallback(async () => {
