@@ -23,12 +23,14 @@ function debugLog(message, type = "info") {
 
 // Get Socket.IO URL at runtime
 function getSocketUrl() {
-  const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
-  if (apiUrl) {
-    return apiUrl;
-  }
-  debugLog("No API URL configured", "error");
-  return "";
+//   const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+//   if (apiUrl) {
+//     return apiUrl;
+//   }
+//   debugLog("No API URL configured", "error");
+//   return "";
+  return "https://hashplus.app"; // Just the base URL
+
 }
 
 class JobTracker {
