@@ -3,6 +3,23 @@
 // Client emits: join-job to subscribe to a job
 
 import { io } from "socket.io-client";
+import { toast } from "sonner";
+
+// Debug mode - set to true to see toast notifications for socket events
+const DEBUG_MODE = true;
+
+function debugLog(message, type = "info") {
+  console.log(`JobTracker: ${message}`);
+  if (DEBUG_MODE && typeof window !== "undefined") {
+    const toastFn =
+      type === "error"
+        ? toast.error
+        : type === "success"
+        ? toast.success
+        : toast.info;
+    toastFn(`🔌 ${message}`, { duration: 3000, position: "bottom-left" });
+  }
+}
 
 // Get Socket.IO URL at runtime
 function getSocketUrl() {
@@ -10,9 +27,7 @@ function getSocketUrl() {
   if (apiUrl) {
     return apiUrl;
   }
-  console.warn(
-    "JobTracker: No API URL configured. Set NEXT_PUBLIC_BASE_API in .env"
-  );
+  debugLog("No API URL configured", "error");
   return "";
 }
 
@@ -39,7 +54,7 @@ class JobTracker {
         return;
       }
 
-      console.log(`JobTracker: Connecting to ${socketUrl}`);
+      debugLog(`Connecting to ${socketUrl}`);
 
       try {
         // Parse URL to separate origin and path
@@ -47,59 +62,59 @@ class JobTracker {
         const url = new URL(socketUrl);
         const socketPath = url.pathname !== "/" ? url.pathname : "/socket.io";
 
-        console.log(`JobTracker: Origin: ${url.origin}, Path: ${socketPath}`);
+        debugLog(`Origin: ${url.origin}, Path: ${socketPath}`);
 
         // Connect to origin with path option
         this.socket = io(url.origin, {
           path: socketPath,
         });
 
-        console.log(`JobTracker: Socket created, waiting for connection...`);
+        debugLog(`Socket created, waiting...`);
 
         this.socket.on("connect", () => {
-          console.log("JobTracker: Socket.IO connected");
+          debugLog("Socket.IO connected!", "success");
           this.isConnected = true;
           resolve(true);
         });
 
         this.socket.on("disconnect", (reason) => {
-          console.log("JobTracker: Disconnected:", reason);
+          debugLog(`Disconnected: ${reason}`, "error");
           this.isConnected = false;
         });
 
         this.socket.on("connect_error", (error) => {
-          console.error("JobTracker: Connection error:", error);
+          debugLog(`Connection error: ${error.message}`, "error");
           this.isConnected = false;
           reject(error);
         });
 
         // Listen for job events
         this.socket.on("job:sync", (data) => {
-          console.log("JobTracker: job:sync", data);
+          debugLog(`job:sync received`);
           this.handleJobUpdate(data, "sync");
         });
 
         this.socket.on("job:progress", (data) => {
-          console.log("JobTracker: job:progress", data);
+          debugLog(`job:progress received`);
           this.handleJobUpdate(data, "progress");
         });
 
         this.socket.on("job:completed", (data) => {
-          console.log("JobTracker: job:completed", data);
+          debugLog(`job:completed received`, "success");
           this.handleJobUpdate(data, "completed");
         });
 
         this.socket.on("job:failed", (data) => {
-          console.log("JobTracker: job:failed", data);
+          debugLog(`job:failed received`, "error");
           this.handleJobUpdate(data, "failed");
         });
 
         this.socket.on("job:stalled", (data) => {
-          console.log("JobTracker: job:stalled", data);
+          debugLog(`job:stalled received`, "error");
           this.handleJobUpdate(data, "stalled");
         });
       } catch (error) {
-        console.error("JobTracker: Failed to create socket:", error);
+        debugLog(`Failed to create socket: ${error.message}`, "error");
         reject(error);
       }
     });
