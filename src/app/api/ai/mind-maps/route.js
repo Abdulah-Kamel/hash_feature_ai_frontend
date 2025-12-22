@@ -17,8 +17,10 @@ export async function GET(req) {
   if (!token)
     return NextResponse.json({ message: "No token provided" }, { status: 401 });
   const { searchParams } = new URL(req.url);
-  const fileId = searchParams.get("fileId");
-  const url = `${base}/api/v1/ai/mind-maps?fileId=${encodeURIComponent(fileId)}`
+  const folderId = searchParams.get("folderId");
+  const url = `${base}/api/v1/ai/mind-maps?folderId=${encodeURIComponent(
+    folderId
+  )}`;
   const res = await fetch(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
