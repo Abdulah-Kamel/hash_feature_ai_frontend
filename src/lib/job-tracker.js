@@ -23,14 +23,13 @@ function debugLog(message, type = "info") {
 
 // Get Socket.IO URL at runtime
 function getSocketUrl() {
-//   const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
-//   if (apiUrl) {
-//     return apiUrl;
-//   }
-//   debugLog("No API URL configured", "error");
-//   return "";
-  return "https://hashplus.app"; // Just the base URL
-
+  //   const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+  //   if (apiUrl) {
+  //     return apiUrl;
+  //   }
+  //   debugLog("No API URL configured", "error");
+  //   return "";
+  return "https://hashplus.app/hash-flow"; // Just the base URL
 }
 
 class JobTracker {
@@ -90,29 +89,40 @@ class JobTracker {
           reject(error);
         });
 
+        // Debug: listen for ALL events to see what's coming in
+        this.socket.onAny((eventName, ...args) => {
+          console.log(`JobTracker: Received event "${eventName}"`, args);
+          debugLog(`Event: ${eventName}`);
+        });
+
         // Listen for job events
+        // Note: Backend emits to room (mongoId) but payload has queue jobId
+        // We need to match events by room, not by payload.jobId
         this.socket.on("job:sync", (data) => {
-          debugLog(`job:sync received`);
+          debugLog(`job:sync received: ${JSON.stringify(data)}`);
           this.handleJobUpdate(data, "sync");
         });
 
         this.socket.on("job:progress", (data) => {
-          debugLog(`job:progress received`);
+          debugLog(`job:progress received: ${JSON.stringify(data)}`);
           this.handleJobUpdate(data, "progress");
         });
 
         this.socket.on("job:completed", (data) => {
-          debugLog(`job:completed received`, "success");
+          debugLog(
+            `job:completed received: ${JSON.stringify(data)}`,
+            "success"
+          );
           this.handleJobUpdate(data, "completed");
         });
 
         this.socket.on("job:failed", (data) => {
-          debugLog(`job:failed received`, "error");
+          debugLog(`job:failed received: ${JSON.stringify(data)}`, "error");
           this.handleJobUpdate(data, "failed");
         });
 
         this.socket.on("job:stalled", (data) => {
-          debugLog(`job:stalled received`, "error");
+          debugLog(`job:stalled received: ${JSON.stringify(data)}`, "error");
           this.handleJobUpdate(data, "stalled");
         });
       } catch (error) {
@@ -123,17 +133,37 @@ class JobTracker {
   }
 
   handleJobUpdate(data, eventType) {
-    // Get jobId from data (backend sends mongoJobId which is the _id)
-    const jobId = data.mongoJobId || data.jobId || data._id;
+    // Get jobId from data - backend might send different ID formats
+    const payloadId = data.mongoJobId || data.jobId || data._id;
 
-    if (!jobId) {
-      console.warn("JobTracker: Event without jobId:", data);
-      return;
+    debugLog(
+      `handleJobUpdate: eventType=${eventType}, payloadId=${payloadId}, tracked=${[
+        ...this.callbacks.keys(),
+      ].join(",")}`
+    );
+
+    // Try to find callbacks - first by direct match, then by checking all tracked jobs
+    // (since Socket.IO room-based events go to clients who joined that room)
+    let cbs = this.callbacks.get(payloadId);
+    let matchedJobId = payloadId;
+
+    // If no direct match, and we only have one job tracked, use that
+    // (the event came to us because we're in the room)
+    if (!cbs && this.callbacks.size === 1) {
+      matchedJobId = [...this.callbacks.keys()][0];
+      cbs = this.callbacks.get(matchedJobId);
+      debugLog(`Using single tracked job: ${matchedJobId}`);
     }
 
-    const cbs = this.callbacks.get(jobId);
+    // If still no match but we have callbacks, try first one
+    if (!cbs && this.callbacks.size > 0) {
+      matchedJobId = [...this.callbacks.keys()][0];
+      cbs = this.callbacks.get(matchedJobId);
+      debugLog(`Fallback to first tracked job: ${matchedJobId}`);
+    }
+
     if (!cbs) {
-      console.log(`JobTracker: No callbacks for job ${jobId}`);
+      console.log(`JobTracker: No callbacks found`);
       return;
     }
 
@@ -144,11 +174,11 @@ class JobTracker {
         if (status === "completed") {
           cbs._completed = true;
           cbs.onComplete?.(data.result || data);
-          this.unsubscribe(jobId);
+          this.unsubscribe(matchedJobId);
         } else if (status === "failed") {
           cbs._completed = true;
           cbs.onError?.(data.error || "فشلت العملية");
-          this.unsubscribe(jobId);
+          this.unsubscribe(matchedJobId);
         } else {
           cbs.onProgress?.(data.progress || 0, status, data);
         }
@@ -161,19 +191,19 @@ class JobTracker {
       case "completed":
         cbs._completed = true;
         cbs.onComplete?.(data.result || data);
-        this.unsubscribe(jobId);
+        this.unsubscribe(matchedJobId);
         break;
 
       case "failed":
         cbs._completed = true;
         cbs.onError?.(data.error || "فشلت العملية");
-        this.unsubscribe(jobId);
+        this.unsubscribe(matchedJobId);
         break;
 
       case "stalled":
         cbs._completed = true;
         cbs.onError?.("توقفت العملية");
-        this.unsubscribe(jobId);
+        this.unsubscribe(matchedJobId);
         break;
     }
   }
