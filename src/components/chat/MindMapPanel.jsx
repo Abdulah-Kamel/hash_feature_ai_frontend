@@ -7,6 +7,8 @@ import StageCard from "./StageCard";
 import SkeletonCard from "./SkeletonCard";
 import { useFileStore } from "@/store/fileStore";
 import { useAiContentStore } from "@/store/aiContentStore";
+import { useJobStore } from "@/store/jobStore";
+import { jobTracker } from "@/lib/job-tracker";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import {
@@ -22,7 +24,6 @@ import MindMapContainer from "@/components/mindmap/mindMapContainer";
 
 export default function MindMapPanel() {
   const [mode, setMode] = React.useState("list"); // list | view
-  const [genBusy, setGenBusy] = React.useState(false);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [createTitle, setCreateTitle] = React.useState("");
   const [selectedMap, setSelectedMap] = React.useState(null);
@@ -39,6 +40,11 @@ export default function MindMapPanel() {
     (s) => s.setMindMapsGenerating
   );
 
+  const setJob = useJobStore((s) => s.setJob);
+  const clearJob = useJobStore((s) => s.clearJob);
+  const isJobActive = useJobStore((s) => s.isJobActive);
+  const genBusy = isJobActive("mindmap");
+
   const handleGenerateMindMap = async () => {
     if (genBusy) return;
     const ids = getSelectedIds();
@@ -54,7 +60,6 @@ export default function MindMapPanel() {
     setCreateOpen(false);
     setCreateTitle("");
 
-    setGenBusy(true);
     setMindMapsGenerating?.(true);
     const payload = { title, folderId, fileIds: ids };
 
@@ -65,28 +70,77 @@ export default function MindMapPanel() {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (!res.ok) {
         toast.error(json?.message || "فشل إنشاء الخريطة الذهنية", {
           position: "top-right",
           duration: 3000,
         });
-      } else {
-        toast.success("تم إنشاء الخريطة الذهنية بنجاح", {
+        setMindMapsGenerating?.(false);
+        return;
+      }
+
+      // Job accepted - start tracking
+      const jobId = json?.data?._id || json?.data?.jobId;
+      if (!jobId) {
+        toast.error("لم يتم استلام معرف الوظيفة", {
           position: "top-right",
           duration: 3000,
         });
-        try {
-          window.dispatchEvent(new Event("mindmap:refresh"));
-        } catch {}
+        setMindMapsGenerating?.(false);
+        return;
       }
+
+      toast.info("جاري إنشاء الخريطة الذهنية...", {
+        position: "top-right",
+        duration: 3000,
+      });
+
+      // Store job info
+      setJob("mindmap", {
+        jobId,
+        status: "queued",
+        progress: 0,
+        title,
+      });
+
+      // Start WebSocket tracking
+      jobTracker.track(jobId, {
+        onProgress: (progress, status) => {
+          setJob("mindmap", {
+            jobId,
+            status,
+            progress,
+            title,
+          });
+        },
+        onComplete: (result) => {
+          clearJob("mindmap");
+          setMindMapsGenerating?.(false);
+          toast.success("تم إنشاء الخريطة الذهنية بنجاح", {
+            position: "top-right",
+            duration: 3000,
+          });
+          try {
+            window.dispatchEvent(new Event("mindmap:refresh"));
+          } catch {}
+        },
+        onError: (error) => {
+          clearJob("mindmap");
+          setMindMapsGenerating?.(false);
+          toast.error(error || "فشل إنشاء الخريطة الذهنية", {
+            position: "top-right",
+            duration: 3000,
+          });
+        },
+      });
     } catch {
       toast.error("حدث خطأ غير متوقع", {
         position: "top-right",
         duration: 3000,
       });
+      setMindMapsGenerating?.(false);
     }
-    setGenBusy(false);
-    setMindMapsGenerating?.(false);
   };
 
   const loadMindMaps = React.useCallback(async () => {
