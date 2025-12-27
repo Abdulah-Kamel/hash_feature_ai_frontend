@@ -68,8 +68,8 @@ class JobTracker {
         // Connect to origin with path option
         this.socket = io(url.origin, {
           path: "/hash-flow/",
-          // transports: ["websocket"],
-          // withCredentials: true,
+          transports: ["websocket"],
+          withCredentials: true,
         });
 
         debugLog(`Socket created, waiting...`);
