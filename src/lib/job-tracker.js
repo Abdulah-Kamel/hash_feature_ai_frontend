@@ -1,13 +1,14 @@
 "use client";
-// Job tracker using Socket.IO for real-time AI job updates
-// Backend emits: job:completed, job:failed, job:progress, job:stalled, job:sync
-// Client emits: join-job to subscribe to a job
+// Job tracker using polling for AI job updates
+// Polls the API endpoint every 10 seconds to check job status
 
-import { io } from "socket.io-client";
 import { toast } from "sonner";
 
-// Debug mode - set to true to see toast notifications for socket events
+// Debug mode - set to true to see toast notifications for polling events
 const DEBUG_MODE = true;
+
+// Polling interval in milliseconds
+const POLL_INTERVAL = 10000; // 10 seconds
 
 function debugLog(message, type = "info") {
   console.log(`JobTracker: ${message}`);
@@ -18,204 +19,97 @@ function debugLog(message, type = "info") {
         : type === "success"
         ? toast.success
         : toast.info;
-    toastFn(`🔌 ${message}`, { duration: 3000, position: "bottom-left" });
+    toastFn(`� ${message}`, { duration: 3000, position: "bottom-left" });
   }
 }
 
-// Get Socket.IO URL at runtime
-function getSocketUrl() {
-  //   const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
-  //   if (apiUrl) {
-  //     return apiUrl;
-  //   }
-  //   debugLog("No API URL configured", "error");
-  //   return "";
-  return "https://hashplus.app"; // Just the base URL
+// Get API URL at runtime
+function getApiUrl() {
+  return process.env.NEXT_PUBLIC_BASE_API;
 }
 
 class JobTracker {
   constructor() {
-    this.socket = null;
+    this.pollingIntervals = new Map(); // jobId -> intervalId
     this.callbacks = new Map(); // jobId -> { onProgress, onComplete, onError }
-    this.isConnected = false;
   }
 
   /**
-   * Ensure Socket.IO connection is established
+   * Fetch job status from the API
+   * @param {string} jobId - The job ID to check
+   * @returns {Promise<object>} - The job data
    */
-  ensureConnection() {
-    if (this.socket?.connected) {
-      return Promise.resolve(true);
+  async fetchJobStatus(jobId) {
+    const apiUrl = getApiUrl();
+    const url = `${apiUrl}/api/v1/jobs/${jobId}`;
+    
+    debugLog(`Polling: ${url}`);
+    
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return new Promise((resolve, reject) => {
-      const socketUrl = getSocketUrl();
-
-      if (!socketUrl) {
-        reject(new Error("No Socket URL configured"));
-        return;
-      }
-
-      debugLog(`Connecting to ${socketUrl}`);
-
-      try {
-        // Parse URL to separate origin and path
-        // https://hashplus.app/hash-flow -> origin: https://hashplus.app, path: /hash-flow
-        const url = new URL(socketUrl);
-
-        debugLog(`Origin: ${url.origin}, Path: /hash-flow/`);
-
-        // Connect to origin with path option
-        this.socket = io(url.origin, {
-          path: "/hash-flow/",
-          transports: ["websocket"],
-          withCredentials: true,
-        });
-
-        debugLog(`Socket created, waiting...`);
-
-        this.socket.on("connect", () => {
-          debugLog("Socket.IO connected!", "success");
-          this.isConnected = true;
-          resolve(true);
-        });
-
-        this.socket.on("disconnect", (reason) => {
-          debugLog(`Disconnected: ${reason}`, "error");
-          this.isConnected = false;
-        });
-
-        this.socket.on("connect_error", (error) => {
-          debugLog(`Connection error: ${error.message}`, "error");
-          this.isConnected = false;
-          reject(error);
-        });
-
-        // Debug: listen for ALL events to see what's coming in
-        this.socket.onAny((eventName, ...args) => {
-          console.log(`JobTracker: Received event "${eventName}"`, args);
-          debugLog(`Event: ${eventName}`);
-        });
-        this.socket.on("test", () => {
-          debugLog(`Joined job room test`);
-          console.log("test");
-        });
-        // Listen for job events
-        // Note: Backend emits to room (mongoId) but payload has queue jobId
-        // We need to match events by room, not by payload.jobId
-        this.socket.on("job:sync", (data) => {
-          debugLog(`job:sync received: ${JSON.stringify(data)}`);
-          this.handleJobUpdate(data, "sync");
-        });
-
-        this.socket.on("job:progress", (data) => {
-          debugLog(`job:progress received: ${JSON.stringify(data)}`);
-          this.handleJobUpdate(data, "progress");
-        });
-
-        this.socket.on("job:completed", (data) => {
-          debugLog(
-            `job:completed received: ${JSON.stringify(data)}`,
-            "success"
-          );
-          this.handleJobUpdate(data, "completed");
-        });
-
-        this.socket.on("job:failed", (data) => {
-          debugLog(`job:failed received: ${JSON.stringify(data)}`, "error");
-          this.handleJobUpdate(data, "failed");
-        });
-
-        this.socket.on("job:stalled", (data) => {
-          debugLog(`job:stalled received: ${JSON.stringify(data)}`, "error");
-          this.handleJobUpdate(data, "stalled");
-        });
-      } catch (error) {
-        debugLog(`Failed to create socket: ${error.message}`, "error");
-        reject(error);
-      }
-    });
+    return response.json();
   }
 
-  handleJobUpdate(data, eventType) {
-    // Get jobId from data - backend might send different ID formats
-    const payloadId = data.mongoJobId || data.jobId || data._id;
-
-    debugLog(
-      `handleJobUpdate: eventType=${eventType}, payloadId=${payloadId}, tracked=${[
-        ...this.callbacks.keys(),
-      ].join(",")}`
-    );
-
-    // Try to find callbacks - first by direct match, then by checking all tracked jobs
-    // (since Socket.IO room-based events go to clients who joined that room)
-    let cbs = this.callbacks.get(payloadId);
-    let matchedJobId = payloadId;
-
-    // If no direct match, and we only have one job tracked, use that
-    // (the event came to us because we're in the room)
-    if (!cbs && this.callbacks.size === 1) {
-      matchedJobId = [...this.callbacks.keys()][0];
-      cbs = this.callbacks.get(matchedJobId);
-      debugLog(`Using single tracked job: ${matchedJobId}`);
-    }
-
-    // If still no match but we have callbacks, try first one
-    if (!cbs && this.callbacks.size > 0) {
-      matchedJobId = [...this.callbacks.keys()][0];
-      cbs = this.callbacks.get(matchedJobId);
-      debugLog(`Fallback to first tracked job: ${matchedJobId}`);
-    }
-
+  /**
+   * Handle the job response from polling
+   * @param {string} jobId - The job ID
+   * @param {object} data - The response data
+   */
+  handleJobResponse(jobId, data) {
+    const cbs = this.callbacks.get(jobId);
     if (!cbs) {
-      console.log(`JobTracker: No callbacks found`);
+      console.log(`JobTracker: No callbacks found for ${jobId}`);
       return;
     }
 
-    switch (eventType) {
-      case "sync":
-        // Initial sync - check status
-        const status = data.status;
-        if (status === "completed") {
-          cbs._completed = true;
-          cbs.onComplete?.(data.result || data);
-          this.unsubscribe(matchedJobId);
-        } else if (status === "failed") {
-          cbs._completed = true;
-          cbs.onError?.(data.error || "فشلت العملية");
-          this.unsubscribe(matchedJobId);
-        } else {
-          cbs.onProgress?.(data.progress || 0, status, data);
-        }
-        break;
+    debugLog(`Response for ${jobId}: status=${data.status}`);
 
-      case "progress":
-        cbs.onProgress?.(data.progress || 0, "processing", data);
-        break;
+    // Check if job has error
+    if (data.error) {
+      debugLog(`Job failed: ${data.error}`, "error");
+      cbs._completed = true;
+      cbs.onError?.(data.error);
+      this.unsubscribe(jobId);
+      return;
+    }
 
-      case "completed":
-        cbs._completed = true;
-        cbs.onComplete?.(data.result || data);
-        this.unsubscribe(matchedJobId);
-        break;
+    // Check job status
+    const status = data.status;
 
-      case "failed":
-        cbs._completed = true;
-        cbs.onError?.(data.error || "فشلت العملية");
-        this.unsubscribe(matchedJobId);
-        break;
-
-      case "stalled":
-        cbs._completed = true;
-        cbs.onError?.("توقفت العملية");
-        this.unsubscribe(matchedJobId);
-        break;
+    if (status === "completed") {
+      debugLog(`Job completed!`, "success");
+      cbs._completed = true;
+      cbs.onComplete?.(data.result || data);
+      this.unsubscribe(jobId);
+    } else if (status === "failed") {
+      debugLog(`Job failed`, "error");
+      cbs._completed = true;
+      cbs.onError?.(data.error || "فشلت العملية");
+      this.unsubscribe(jobId);
+    } else if (status === "stalled") {
+      debugLog(`Job stalled`, "error");
+      cbs._completed = true;
+      cbs.onError?.("توقفت العملية");
+      this.unsubscribe(jobId);
+    } else {
+      // Job is still processing
+      cbs.onProgress?.(data.progress || 0, status, data);
     }
   }
 
   /**
    * Start tracking a job
-   * @param {string} jobId - The job ID (mongoJobId/_id) to track
+   * @param {string} jobId - The job ID to track
    * @param {object} callbacks - { onProgress, onComplete, onError }
    * @returns {function} cleanup function to stop tracking
    */
@@ -228,30 +122,35 @@ class JobTracker {
     // Store callbacks
     this.callbacks.set(jobId, callbacks);
 
+    debugLog(`Starting to track job: ${jobId}`);
+
+    // Poll immediately on start
     try {
-      await this.ensureConnection();
-
-      // Join the job room to receive updates
-      this.socket.emit("join-job", jobId);
-
-      // Join the job room to receive updates
-
-      console.log("listening to job room");
-      this.socket.on(jobId, (data) => {
-        console.log("listening to job room 2");
-        debugLog(`Joined job room ${jobId}`);
-        console.log(data);
-      });
-      this.socket.on("test", () => {
-        debugLog(`Joined job room test`);
-        console.log("test");
-      });
-      console.log(`JobTracker: Joined job room ${jobId}`);
+      const data = await this.fetchJobStatus(jobId);
+      this.handleJobResponse(jobId, data);
+      
+      // If job is already completed/failed, don't start polling
+      if (callbacks._completed) {
+        return () => this.unsubscribe(jobId);
+      }
     } catch (error) {
-      console.error("JobTracker: Failed to connect:", error);
-      callbacks?.onError?.("فشل الاتصال بالخادم");
-      this.callbacks.delete(jobId);
+      debugLog(`Initial poll failed: ${error.message}`, "error");
+      // Continue to set up polling anyway
     }
+
+    // Set up polling interval
+    const intervalId = setInterval(async () => {
+      try {
+        const data = await this.fetchJobStatus(jobId);
+        this.handleJobResponse(jobId, data);
+      } catch (error) {
+        debugLog(`Poll error: ${error.message}`, "error");
+        // Don't stop polling on error, let it retry
+      }
+    }, POLL_INTERVAL);
+
+    this.pollingIntervals.set(jobId, intervalId);
+    debugLog(`Polling started for ${jobId} (every ${POLL_INTERVAL / 1000}s)`);
 
     // Return cleanup function
     return () => this.unsubscribe(jobId);
@@ -261,22 +160,16 @@ class JobTracker {
    * Unsubscribe from a job
    */
   unsubscribe(jobId) {
+    // Clear the polling interval
+    const intervalId = this.pollingIntervals.get(jobId);
+    if (intervalId) {
+      clearInterval(intervalId);
+      this.pollingIntervals.delete(jobId);
+      debugLog(`Stopped polling for ${jobId}`);
+    }
+
+    // Remove callbacks
     this.callbacks.delete(jobId);
-
-    // Leave the job room if connected
-    if (this.socket?.connected) {
-      // Remove the specific job event listener
-      this.socket.off(jobId);
-      // Tell server to leave the room
-      this.socket.emit("leave-job", jobId);
-    }
-
-    // Disconnect if no more jobs to track
-    if (this.callbacks.size === 0 && this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-      this.isConnected = false;
-    }
   }
 
   /**
