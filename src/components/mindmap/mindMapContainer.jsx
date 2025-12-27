@@ -38,14 +38,20 @@ function treeToFlow(MindMapData, onAction, onToggleExpand, filename = "File Name
     const id = nextId();
     const label = (node?.name ?? node?.title ?? node?.text ?? "").toString();
     const children = node?.children || [];
-    const hasChildren = children.length > 0;
-    
+    const items = node?.items || [];
+
+    // Check if children contain items (new structure) or are direct nodes (old structure)
+    const hasItemsInChildren = children.some(
+      (c) => c?.items && Array.isArray(c.items)
+    );
+    const hasChildren = children.length > 0 || items.length > 0;
+
     nodes.push({
       id,
       type: "custom",
-      data: { 
-        label, 
-        onAction, 
+      data: {
+        label,
+        onAction,
         onToggleExpand,
         hasChildren,
         parentId,
@@ -53,7 +59,7 @@ function treeToFlow(MindMapData, onAction, onToggleExpand, filename = "File Name
       position: { x: 0, y: 0 },
       measured: { width: 160, height: 40 },
     });
-    
+
     if (parentId) {
       edges.push({
         id: `e-${parentId}-${id}`,
@@ -65,8 +71,27 @@ function treeToFlow(MindMapData, onAction, onToggleExpand, filename = "File Name
       if (!childrenMap[parentId]) childrenMap[parentId] = [];
       childrenMap[parentId].push(id);
     }
+
+    // Handle new structure: children with items arrays
+    if (hasItemsInChildren) {
+      children.forEach((child) => {
+        // Process items inside the child
+        if (child?.items && Array.isArray(child.items)) {
+          child.items.forEach((item) => walk(item, id));
+        }
+        // Also process any nested children
+        if (child?.children && Array.isArray(child.children)) {
+          child.children.forEach((nestedChild) => walk(nestedChild, id));
+        }
+      });
+    } else {
+      // Handle old structure: direct children nodes
+      children.forEach((child) => walk(child, id));
+    }
+
+    // Handle items at current level (if any)
+    items.forEach((item) => walk(item, id));
     
-    children.forEach((child) => walk(child, id));
     return id;
   };
 

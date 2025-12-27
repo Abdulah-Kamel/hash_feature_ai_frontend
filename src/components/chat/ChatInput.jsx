@@ -25,7 +25,7 @@ function ChatInput({ value, onChange, onSend }) {
 
   return (
     <div className="bg-background px-4 py-3 rounded-b-2xl">
-      <div className="relative border border-[#515355] rounded-2xl bg-card p-4 min-h-[144px]">
+      <div className="relative border border-[#515355] rounded-2xl bg-card p-4">
         <textarea
           ref={ref}
           value={value}
@@ -35,7 +35,7 @@ function ChatInput({ value, onChange, onSend }) {
           aria-label="إدخال رسالة"
           placeholder="اكتب هنا"
           rows={1}
-          className="w-full h-full resize-none bg-transparent pr-2 pl-1 pt-1 pb-16 outline-none text-foreground"
+          className="w-full h-full resize-none bg-transparent pr-2 pl-1 pt-1 pb-10 outline-none text-foreground"
         />
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
           <Button

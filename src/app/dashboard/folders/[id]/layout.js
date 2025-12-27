@@ -75,6 +75,7 @@ export default function FolderLayout({ children }) {
         ),
       },
     ]);
+
     try {
       setInput("");
       const res = await apiClient(`/api/ai/chat`, {
@@ -83,25 +84,83 @@ export default function FolderLayout({ children }) {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      const answer = json?.data?.answer || json?.message || "";
-      const at = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === loadingId
-            ? {
-                id: `m-${Date.now()}`,
-                author: "assistant",
-                initials: "SL",
-                time: at,
-                outgoing: false,
-                content: <p>{answer}</p>,
-              }
-            : m
-        )
-      );
+
+      // Check if we got a jobId for polling
+      const jobId = json?.data?._id || json?.data?.jobId;
+
+      if (jobId) {
+        // Use job tracker to poll for result
+        const { jobTracker } = await import("@/lib/job-tracker");
+
+        jobTracker.track(jobId, {
+          onProgress: (progress, status) => {
+            // Optionally update loading message with progress
+            console.log(`Chat job progress: ${progress}% - ${status}`);
+          },
+          onComplete: (result) => {
+            const answer = result?.answer || result?.result?.answer || "";
+            const at = new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === loadingId
+                  ? {
+                      id: `m-${Date.now()}`,
+                      author: "assistant",
+                      initials: "SL",
+                      time: at,
+                      outgoing: false,
+                      content: <p className="whitespace-pre-wrap">{answer}</p>,
+                    }
+                  : m
+              )
+            );
+          },
+          onError: (error) => {
+            const at = new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === loadingId
+                  ? {
+                      id: `m-${Date.now()}`,
+                      author: "assistant",
+                      initials: "SL",
+                      time: at,
+                      outgoing: false,
+                      content: <p>{error || "تعذر الحصول على الرد الآن"}</p>,
+                    }
+                  : m
+              )
+            );
+          },
+        });
+      } else {
+        // No jobId - use direct response (fallback)
+        const answer = json?.data?.answer || json?.message || "";
+        const at = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === loadingId
+              ? {
+                  id: `m-${Date.now()}`,
+                  author: "assistant",
+                  initials: "SL",
+                  time: at,
+                  outgoing: false,
+                  content: <p>{answer}</p>,
+                }
+              : m
+          )
+        );
+      }
     } catch {
       const at = new Date().toLocaleTimeString([], {
         hour: "2-digit",
@@ -122,7 +181,6 @@ export default function FolderLayout({ children }) {
         )
       );
     }
-    setInput("");
   };
 
   const loadFiles = React.useCallback(async () => {
@@ -158,7 +216,7 @@ export default function FolderLayout({ children }) {
   const fetchChatHistory = React.useCallback(async () => {
     if (!id) return;
     try {
-      const res = await apiClient(`/api/ai/chat?folderId=${id}`, {
+      const res = await apiClient(`/api/ai/chat/${id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -166,40 +224,47 @@ export default function FolderLayout({ children }) {
 
       if (json?.data && Array.isArray(json.data) && json.data.length > 0) {
         const historyMessages = [];
-        const resource = json.data[0];
 
-        if (resource.messages && Array.isArray(resource.messages)) {
-          resource.messages.forEach((msg) => {
-            // Add user question
-            if (msg.question) {
-              historyMessages.push({
-                id: `msg-${msg._id}-q`,
-                author: "user",
-                initials: "م", // Me/User
-                time: new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                outgoing: true,
-                content: <p>{msg.question}</p>,
-              });
-            }
-            // Add AI answer
-            if (msg.answer) {
-              historyMessages.push({
-                id: `msg-${msg._id}-a`,
-                author: "assistant",
-                initials: "SL", // SL/AI
-                time: new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                outgoing: false,
-                content: <p className="whitespace-pre-wrap">{msg.answer}</p>,
-              });
-            }
-          });
-        }
+        // Loop through ALL resources, not just the first one
+        json.data.forEach((resource) => {
+          if (resource.messages && Array.isArray(resource.messages)) {
+            resource.messages.forEach((msg) => {
+              // Add user question
+              if (msg.question) {
+                historyMessages.push({
+                  id: `msg-${msg._id}-q`,
+                  author: "user",
+                  initials: "م", // Me/User
+                  time: new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  createdAt: new Date(msg.createdAt), // Keep for sorting
+                  outgoing: true,
+                  content: <p>{msg.question}</p>,
+                });
+              }
+              // Add AI answer
+              if (msg.answer) {
+                historyMessages.push({
+                  id: `msg-${msg._id}-a`,
+                  author: "assistant",
+                  initials: "SL", // SL/AI
+                  time: new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  createdAt: new Date(msg.createdAt), // Keep for sorting
+                  outgoing: false,
+                  content: <p className="whitespace-pre-wrap">{msg.answer}</p>,
+                });
+              }
+            });
+          }
+        });
+
+        // Sort messages by createdAt to show in chronological order
+        historyMessages.sort((a, b) => a.createdAt - b.createdAt);
 
         if (historyMessages.length > 0) {
           setMessages(historyMessages);
@@ -275,7 +340,7 @@ export default function FolderLayout({ children }) {
               activeTab === "content" ? "hidden xl:block" : ""
             }`}
           >
-            <div className="h-full shadow-sm overflow-hidden flex flex-col border-l">
+            <div className="h-[calc(100vh-4rem)] shadow-sm overflow-y-auto flex flex-col border-l">
               <ChatThread messages={messages} />
               <ChatInput
                 value={input}

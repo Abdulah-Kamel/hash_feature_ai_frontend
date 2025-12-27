@@ -5,10 +5,10 @@
 import { toast } from "sonner";
 
 // Debug mode - set to true to see toast notifications for polling events
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 // Polling interval in milliseconds
-const POLL_INTERVAL = 10000; // 10 seconds
+const POLL_INTERVAL = 5000; // 5 seconds
 
 function debugLog(message, type = "info") {
   console.log(`JobTracker: ${message}`);
@@ -40,17 +40,13 @@ class JobTracker {
    * @returns {Promise<object>} - The job data
    */
   async fetchJobStatus(jobId) {
-    const apiUrl = getApiUrl();
-    const url = `${apiUrl}/api/v1/jobs/${jobId}`;
-    
+    const url = `/api/jobs/${jobId}`;
+
     debugLog(`Polling: ${url}`);
-    
+
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     if (!response.ok) {
@@ -63,38 +59,36 @@ class JobTracker {
   /**
    * Handle the job response from polling
    * @param {string} jobId - The job ID
-   * @param {object} data - The response data
+   * @param {object} response - The API response { status: "success", data: {...} }
    */
-  handleJobResponse(jobId, data) {
+  handleJobResponse(jobId, response) {
     const cbs = this.callbacks.get(jobId);
     if (!cbs) {
       console.log(`JobTracker: No callbacks found for ${jobId}`);
       return;
     }
 
-    debugLog(`Response for ${jobId}: status=${data.status}`);
-
-    // Check if job has error
-    if (data.error) {
-      debugLog(`Job failed: ${data.error}`, "error");
-      cbs._completed = true;
-      cbs.onError?.(data.error);
-      this.unsubscribe(jobId);
+    // Extract job data from response
+    const job = response.data;
+    if (!job) {
+      debugLog(`No job data in response`, "error");
       return;
     }
 
+    debugLog(`Response for ${jobId}: status=${job.status}`);
+
     // Check job status
-    const status = data.status;
+    const status = job.status;
 
     if (status === "completed") {
       debugLog(`Job completed!`, "success");
       cbs._completed = true;
-      cbs.onComplete?.(data.result || data);
+      cbs.onComplete?.(job.result || job);
       this.unsubscribe(jobId);
     } else if (status === "failed") {
-      debugLog(`Job failed`, "error");
+      debugLog(`Job failed: ${job.error}`, "error");
       cbs._completed = true;
-      cbs.onError?.(data.error || "فشلت العملية");
+      cbs.onError?.(job.error || "فشلت العملية");
       this.unsubscribe(jobId);
     } else if (status === "stalled") {
       debugLog(`Job stalled`, "error");
@@ -102,8 +96,8 @@ class JobTracker {
       cbs.onError?.("توقفت العملية");
       this.unsubscribe(jobId);
     } else {
-      // Job is still processing
-      cbs.onProgress?.(data.progress || 0, status, data);
+      // Job is still processing (e.g., "active", "waiting", "delayed")
+      cbs.onProgress?.(job.progress || 0, status, job);
     }
   }
 
@@ -128,7 +122,7 @@ class JobTracker {
     try {
       const data = await this.fetchJobStatus(jobId);
       this.handleJobResponse(jobId, data);
-      
+
       // If job is already completed/failed, don't start polling
       if (callbacks._completed) {
         return () => this.unsubscribe(jobId);

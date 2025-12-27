@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+// Disable caching to ensure cookies are read fresh each time
+export const dynamic = "force-dynamic";
+
 const base = process.env.baseApi;
 
 // GET /api/jobs/[id] - Get job status
