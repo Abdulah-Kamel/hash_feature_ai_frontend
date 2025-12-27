@@ -1,3 +1,4 @@
+"use client";
 // Job tracker using Socket.IO for real-time AI job updates
 // Backend emits: job:completed, job:failed, job:progress, job:stalled, job:sync
 // Client emits: join-job to subscribe to a job
@@ -29,7 +30,7 @@ function getSocketUrl() {
   //   }
   //   debugLog("No API URL configured", "error");
   //   return "";
-  return "https://hashplus.app/hash-flow"; // Just the base URL
+  return "https://hashplus.app"; // Just the base URL
 }
 
 class JobTracker {
@@ -61,13 +62,14 @@ class JobTracker {
         // Parse URL to separate origin and path
         // https://hashplus.app/hash-flow -> origin: https://hashplus.app, path: /hash-flow
         const url = new URL(socketUrl);
-        const socketPath = url.pathname !== "/" ? url.pathname : "/socket.io";
 
-        debugLog(`Origin: ${url.origin}, Path: ${socketPath}`);
+        debugLog(`Origin: ${url.origin}, Path: /hash-flow/`);
 
         // Connect to origin with path option
         this.socket = io(url.origin, {
-          path: socketPath,
+          path: "/hash-flow/",
+          // transports: ["websocket"],
+          // withCredentials: true,
         });
 
         debugLog(`Socket created, waiting...`);
@@ -94,7 +96,10 @@ class JobTracker {
           console.log(`JobTracker: Received event "${eventName}"`, args);
           debugLog(`Event: ${eventName}`);
         });
-
+        this.socket.on("test", () => {
+          debugLog(`Joined job room test`);
+          console.log("test");
+        });
         // Listen for job events
         // Note: Backend emits to room (mongoId) but payload has queue jobId
         // We need to match events by room, not by payload.jobId
@@ -228,6 +233,19 @@ class JobTracker {
 
       // Join the job room to receive updates
       this.socket.emit("join-job", jobId);
+
+      // Join the job room to receive updates
+
+      console.log("listening to job room");
+      this.socket.on(jobId, (data) => {
+        console.log("listening to job room 2");
+        debugLog(`Joined job room ${jobId}`);
+        console.log(data);
+      });
+      this.socket.on("test", () => {
+        debugLog(`Joined job room test`);
+        console.log("test");
+      });
       console.log(`JobTracker: Joined job room ${jobId}`);
     } catch (error) {
       console.error("JobTracker: Failed to connect:", error);
@@ -247,6 +265,9 @@ class JobTracker {
 
     // Leave the job room if connected
     if (this.socket?.connected) {
+      // Remove the specific job event listener
+      this.socket.off(jobId);
+      // Tell server to leave the room
       this.socket.emit("leave-job", jobId);
     }
 
