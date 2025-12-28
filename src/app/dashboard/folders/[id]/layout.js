@@ -18,8 +18,6 @@ export default function FolderLayout({ children }) {
   const [input, setInput] = React.useState("");
   const [chatOpen, setChatOpen] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState("chat"); // 'chat' or 'content'
-  const pathname = usePathname();
-  const isMindMap = pathname?.includes("/mindmap");
   const { id } = useParams();
   const router = useRouter();
   const setFolderId = useFileStore((s) => s.setFolderId);
@@ -75,6 +73,29 @@ export default function FolderLayout({ children }) {
         ),
       },
     ]);
+
+    // Helper to update the loading message with final content
+    const updateLoadingMessage = (content) => {
+      const at = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId
+            ? {
+                id: `m-${Date.now()}`,
+                author: "assistant",
+                initials: "SL",
+                time: at,
+                outgoing: false,
+                content: <p className="whitespace-pre-wrap">{content}</p>,
+              }
+            : m
+        )
+      );
+    };
+
     try {
       setInput("");
       const res = await apiClient(`/api/ai/chat`, {
@@ -83,46 +104,44 @@ export default function FolderLayout({ children }) {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      const answer = json?.data?.answer || json?.message || "";
-      const at = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === loadingId
-            ? {
-                id: `m-${Date.now()}`,
-                author: "assistant",
-                initials: "SL",
-                time: at,
-                outgoing: false,
-                content: <p>{answer}</p>,
-              }
-            : m
-        )
-      );
+
+      // Check if backend returned a jobId for tracking
+      const jobId = json?.data?._id;
+
+      if (jobId) {
+        // Track job via WebSocket
+        const { jobTracker } = await import("@/lib/job-tracker");
+
+        jobTracker.track(jobId, {
+          onProgress: (progress, status) => {
+            console.log(`Chat job progress: ${progress}% - ${status}`);
+          },
+          onComplete: (result) => {
+            const answer =
+              result?.answer ||
+              result?.data?.answer ||
+              result?.message ||
+              "تم الانتهاء";
+            updateLoadingMessage(answer);
+          },
+          onError: (error) => {
+            const errorMsg =
+              typeof error === "string" ? error : "حدث خطأ في المعالجة";
+            updateLoadingMessage(errorMsg);
+          },
+        });
+      } else {
+        // No jobId - use direct response (fallback for immediate answers)
+        const answer = json?.data?.answer || json?.message || "";
+        if (answer) {
+          updateLoadingMessage(answer);
+        } else {
+          updateLoadingMessage("تعذر الحصول على الرد");
+        }
+      }
     } catch {
-      const at = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === loadingId
-            ? {
-                id: `m-${Date.now()}`,
-                author: "assistant",
-                initials: "SL",
-                time: at,
-                outgoing: false,
-                content: <p>تعذر الحصول على الرد الآن</p>,
-              }
-            : m
-        )
-      );
+      updateLoadingMessage("تعذر الحصول على الرد الآن");
     }
-    setInput("");
   };
 
   const loadFiles = React.useCallback(async () => {
@@ -158,7 +177,7 @@ export default function FolderLayout({ children }) {
   const fetchChatHistory = React.useCallback(async () => {
     if (!id) return;
     try {
-      const res = await apiClient(`/api/ai/chat?folderId=${id}`, {
+      const res = await apiClient(`/api/ai/chat/${id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -166,40 +185,48 @@ export default function FolderLayout({ children }) {
 
       if (json?.data && Array.isArray(json.data) && json.data.length > 0) {
         const historyMessages = [];
-        const resource = json.data[0];
 
-        if (resource.messages && Array.isArray(resource.messages)) {
-          resource.messages.forEach((msg) => {
-            // Add user question
-            if (msg.question) {
-              historyMessages.push({
-                id: `msg-${msg._id}-q`,
-                author: "user",
-                initials: "م", // Me/User
-                time: new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                outgoing: true,
-                content: <p>{msg.question}</p>,
-              });
-            }
-            // Add AI answer
-            if (msg.answer) {
-              historyMessages.push({
-                id: `msg-${msg._id}-a`,
-                author: "assistant",
-                initials: "SL", // SL/AI
-                time: new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                outgoing: false,
-                content: <p className="whitespace-pre-wrap">{msg.answer}</p>,
-              });
-            }
-          });
-        }
+        // Loop through ALL resources, not just the first one
+        json.data.forEach((resource) => {
+          if (resource.messages && Array.isArray(resource.messages)) {
+            resource.messages.forEach((msg) => {
+              const msgTime = new Date(msg.createdAt);
+              // Add user question
+              if (msg.question) {
+                historyMessages.push({
+                  id: `msg-${msg._id}-q`,
+                  author: "user",
+                  initials: "م", // Me/User
+                  time: msgTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  createdAt: msgTime,
+                  outgoing: true,
+                  content: <p>{msg.question}</p>,
+                });
+              }
+              // Add AI answer
+              if (msg.answer) {
+                historyMessages.push({
+                  id: `msg-${msg._id}-a`,
+                  author: "assistant",
+                  initials: "SL", // SL/AI
+                  time: msgTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  createdAt: msgTime,
+                  outgoing: false,
+                  content: <p className="whitespace-pre-wrap">{msg.answer}</p>,
+                });
+              }
+            });
+          }
+        });
+
+        // Sort by date chronologically
+        historyMessages.sort((a, b) => a.createdAt - b.createdAt);
 
         if (historyMessages.length > 0) {
           setMessages(historyMessages);
@@ -236,11 +263,9 @@ export default function FolderLayout({ children }) {
       <ChatHeader
         chatOpen={chatOpen}
         onToggle={() => setChatOpen((v) => !v)}
-        isMindMap={isMindMap}
       />
 
       {/* Mobile Tab Bar - Only visible on mobile */}
-      {!isMindMap && (
         <div className="xl:hidden border-b bg-background sticky top-0 z-10">
           <div className="flex">
             <button
@@ -265,17 +290,16 @@ export default function FolderLayout({ children }) {
             </button>
           </div>
         </div>
-      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-4 h-[calc(100vh-4rem)] overflow-hidden">
         {/* Chat Section - Hidden on mobile when content tab is active */}
-        {!isMindMap && chatOpen && (
+        {chatOpen && (
           <div
             className={`xl:col-span-2 h-full ${
               activeTab === "content" ? "hidden xl:block" : ""
             }`}
           >
-            <div className="h-full shadow-sm overflow-hidden flex flex-col border-l">
+            <div className="h-[calc(100vh-4rem)] shadow-sm overflow-hidden flex flex-col border-l">
               <ChatThread messages={messages} />
               <ChatInput
                 value={input}
@@ -289,13 +313,11 @@ export default function FolderLayout({ children }) {
         {/* Content Section - Hidden on mobile when chat tab is active */}
         <div
           className={`${
-            isMindMap
-              ? "xl:col-span-4"
-              : chatOpen
+            chatOpen
               ? "xl:col-span-2"
               : "xl:col-span-4"
           } ${
-            isMindMap ? "" : activeTab === "chat" ? "hidden xl:block" : ""
+            activeTab === "chat" ? "hidden xl:block" : ""
           } h-full overflow-hidden`}
         >
           <Card className="bg-background rounded-lg p-4 border-none flex flex-col h-full overflow-y-auto">

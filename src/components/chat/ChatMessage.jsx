@@ -7,28 +7,58 @@ import { Check, CheckCheck, MoreHorizontal } from "lucide-react";
 
 function ChatMessage({ author, initials, time, outgoing = false, children }) {
   return (
-    <div className={cn("flex items-start gap-3", outgoing ? "justify-start" : "justify-end")}>
-       {outgoing && (
-        <Avatar className="size-10 bg-primary/10">
-          <AvatarFallback className="bg-primary text-primary-foreground font-semibold">م</AvatarFallback>
+    <div
+      className={cn(
+        "flex items-start gap-3",
+        outgoing ? "justify-start" : "justify-end"
+      )}
+    >
+      {outgoing && (
+        <Avatar className="size-10 -primary/10">
+          <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+            م
+          </AvatarFallback>
         </Avatar>
       )}
-      <div className={cn("max-w-[640px] w-fit", outgoing && "items-end")}> 
-        <Card className={cn(
-          "rounded-2xl ps-4 pe-2 py-3 text-sm leading-relaxed shadow-xs",
-          outgoing ? "bg-primary text-primary-foreground text-center" : "bg-card"
-        )}>
+      <div
+        className={cn(
+          "max-sm:max-w-72 w-fit text-end",
+          outgoing && "items-end"
+        )}
+      >
+        <Card
+          className={cn(
+            "rounded-2xl ps-4 pe-2 py-3 text-sm leading-relaxed shadow-xs",
+            outgoing
+              ? "bg-primary text-primary-foreground text-center"
+              : "bg-card"
+          )}
+        >
           {children}
         </Card>
-        <div className={cn("mt-1 flex items-center gap-2", outgoing ? "justify-start" : "justify-end")}> 
-          <span className={"text-xs text-foreground/70 tabular-nums"}>{time}</span>
-          <CheckCheck className={cn("size-5", outgoing ? "text-primary-foreground/80" : "text-foreground/50")} />
+        <div
+          className={cn(
+            "mt-1 flex items-center gap-2",
+            outgoing ? "justify-start" : "justify-end"
+          )}
+        >
+          <span className={"text-xs text-foreground/70 tabular-nums"}>
+            {time}
+          </span>
+          <CheckCheck
+            className={cn(
+              "size-5",
+              outgoing ? "text-primary-foreground/80" : "text-foreground/50"
+            )}
+          />
         </div>
       </div>
-     
+
       {!outgoing && (
         <Avatar className="size-10 bg-primary/10">
-          <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
+          <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+            {initials}
+          </AvatarFallback>
         </Avatar>
       )}
     </div>

@@ -25,7 +25,7 @@ function ChatInput({ value, onChange, onSend }) {
 
   return (
     <div className="bg-background px-4 py-3 rounded-b-2xl">
-      <div className="relative border border-[#515355] rounded-2xl bg-card p-4 min-h-[144px]">
+      <div className="relative border border-[#515355] rounded-2xl bg-card p-1">
         <textarea
           ref={ref}
           value={value}

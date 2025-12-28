@@ -40,7 +40,7 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const folderId = searchParams.get("folderId");
 
-  const res = await fetch(`${base}/api/v1/ai/chat?folderId=${folderId}`, {
+  const res = await fetch(`${base}/api/v1/ai/chat/${folderId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -48,9 +48,12 @@ export async function GET(req) {
     },
   });
 
+  console.log(res);
+
   let final = null;
   try {
     final = await res.json();
+    console.log(final);
   } catch {}
   if (!res.ok)
     return NextResponse.json(final || { message: res.statusText }, {

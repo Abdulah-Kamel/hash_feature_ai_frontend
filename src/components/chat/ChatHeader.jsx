@@ -6,7 +6,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
 import { getFolder } from "@/server/actions/folders";
 
-function ChatHeader({ chatOpen, onToggle, isMindMap }) {
+function ChatHeader({ chatOpen, onToggle }) {
   const { toggleSidebar, open: sidebarOpen } = useSidebar();
   const params = useParams();
   const [folderName, setFolderName] = React.useState("");
@@ -42,22 +42,20 @@ function ChatHeader({ chatOpen, onToggle, isMindMap }) {
             <PanelLeftOpen className="size-5" />
           )}
         </Button>
-        {!isMindMap && (
-          <Button
-            variant="ghost"
-            className="rounded-lg cursor-pointer"
-            onClick={onToggle}
-          >
-            <span className="ml-1 text-sm">
-              {chatOpen ? (
-                <PanelRight className="size-5" />
-              ) : (
-                <PanelLeft className="size-5" />
-              )}
-            </span>
-            الشات
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          className="rounded-lg cursor-pointer"
+          onClick={onToggle}
+        >
+          <span className="ml-1 text-sm">
+            {chatOpen ? (
+              <PanelRight className="size-5" />
+            ) : (
+              <PanelLeft className="size-5" />
+            )}
+          </span>
+          الشات
+        </Button>
       </div>
 
       {/* Centered Folder Name */}

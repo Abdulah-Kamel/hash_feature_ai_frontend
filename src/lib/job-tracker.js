@@ -7,7 +7,7 @@ import { io } from "socket.io-client";
 import { toast } from "sonner";
 
 // Debug mode - set to true to see toast notifications for socket events
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 function debugLog(message, type = "info") {
   console.log(`JobTracker: ${message}`);
@@ -66,12 +66,14 @@ class JobTracker {
         debugLog(`Origin: ${url.origin}, Path: /hash-flow/socket.io`);
 
         // Connect to origin with path option
-        this.socket = io(url.origin, {
+        this.socket = io("https://hashplus.app", {
           path: "/hash-flow/socket.io",
-          transports: ["polling", "websocket"], // Try polling first, then upgrade
+          transports: ["websocket", "polling"],
           reconnection: true,
-          reconnectionDelay: 1000,
           reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          timeout: 20000,
         });
 
         debugLog(`Socket created, waiting...`);
