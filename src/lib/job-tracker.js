@@ -63,13 +63,15 @@ class JobTracker {
         // https://hashplus.app/hash-flow -> origin: https://hashplus.app, path: /hash-flow
         const url = new URL(socketUrl);
 
-        debugLog(`Origin: ${url.origin}, Path: /hash-flow/`);
+        debugLog(`Origin: ${url.origin}, Path: /hash-flow/socket.io`);
 
         // Connect to origin with path option
         this.socket = io(url.origin, {
-          path: "/hash-flow/",
-          transports: ["websocket"],
-          withCredentials: true,
+          path: "/hash-flow/socket.io",
+          transports: ["polling", "websocket"], // Try polling first, then upgrade
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionAttempts: 5,
         });
 
         debugLog(`Socket created, waiting...`);
