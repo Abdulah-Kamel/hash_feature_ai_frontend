@@ -4,7 +4,9 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import Sidebar from "@/components/SideBar";
 import { usePathname } from "next/navigation";
 import { useSidebarVariant } from "@/store/sidebarStore";
-const layout = ({ children }) => {
+import GlobalJobLoader from "@/components/GlobalJobLoader";
+
+const Layout = ({ children }) => {
   const pathname = usePathname();
   const variant = useSidebarVariant((s) => s.variant);
   const setVariant = useSidebarVariant((s) => s.setVariant);
@@ -23,8 +25,9 @@ const layout = ({ children }) => {
     >
       <Sidebar variant={variant} />
       <SidebarInset className="w-full h-full">{children}</SidebarInset>
+      <GlobalJobLoader />
     </SidebarProvider>
   );
 };
 
-export default layout;
+export default Layout;

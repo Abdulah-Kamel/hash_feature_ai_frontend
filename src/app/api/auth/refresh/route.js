@@ -46,6 +46,9 @@ export async function POST() {
     return NextResponse.json({ success: true, ...final });
   }
 
+  c.delete("refreshToken");
+  c.delete("authToken");
+
   return NextResponse.json(final || { message: "Refresh failed" }, {
     status: res.status,
   });

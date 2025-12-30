@@ -77,7 +77,7 @@ export default function PostUploadOptionsDialog({
   /**
    * Generate content with title and file IDs
    */
-  const handleGenerate = async (type, contentTitle) => {
+  const handleGenerate = async (type, contentTitle, navigate = true) => {
     if (!folderId) {
       toast.error("معرف المجلد مفقود");
       return false;
@@ -94,7 +94,7 @@ export default function PostUploadOptionsDialog({
         : type === "flashcards"
         ? "/api/ai/flashcards"
         : type === "mindmap"
-        ? "/api/ai/mindmap"
+        ? "/api/ai/mind-maps"
         : "/api/ai/mcq";
 
     try {
@@ -103,7 +103,6 @@ export default function PostUploadOptionsDialog({
         title: contentTitle.trim(),
         folderId: folderId,
         fileIds: fileIds,
-        fileId: fileIds?.[0], 
       };
 
       console.log("Generating content with:", requestBody);
@@ -120,23 +119,106 @@ export default function PostUploadOptionsDialog({
         throw new Error(data.message || `فشل إنشاء ${getTypeName(type)}`);
       }
 
-      toast.success(`تم إنشاء ${getTypeName(type)} بنجاح`, {
-        position: "top-right",
-        duration: 3000,
-      });
-
-      // Dispatch refresh event
-      const eventName =
+      // Determine content path for navigation
+      const contentPath =
         type === "stages"
-          ? "stages:refresh"
+          ? "stages"
           : type === "flashcards"
-          ? "flashcards:refresh"
+          ? "flashcards"
           : type === "mindmap"
-          ? "mindmap:refresh"
-          : "mcq:refresh";
-      window.dispatchEvent(new Event(eventName));
+          ? "mindmap"
+          : "tests";
 
-      return true;
+      // Check for jobId to track progress
+      const jobId = data.data?._id;
+
+      if (jobId) {
+        // Import store and tracker dynamically to avoid circular deps if any
+        const { useJobStore } = await import("@/store/jobStore");
+        const { jobTracker } = await import("@/lib/job-tracker");
+
+        // Set job in store to show global loader
+        useJobStore.getState().setJob(type, {
+          id: jobId,
+          status: "queued",
+          progress: 0,
+          type: type,
+        });
+
+        // Track job via WebSocket
+        jobTracker.track(jobId, {
+          onProgress: (progress, status) => {
+            useJobStore
+              .getState()
+              .updateJob(type, { progress, status: "processing" });
+          },
+          onComplete: (result) => {
+            useJobStore
+              .getState()
+              .updateJob(type, { status: "completed", progress: 100 });
+
+            toast.success(`تم إنشاء ${getTypeName(type)} بنجاح`, {
+              position: "top-right",
+              duration: 3000,
+            });
+
+            // Dispatch refresh event
+            const eventName =
+              type === "stages"
+                ? "stages:refresh"
+                : type === "flashcards"
+                ? "flashcards:refresh"
+                : type === "mindmap"
+                ? "mindmap:refresh"
+                : "mcq:refresh";
+            window.dispatchEvent(new Event(eventName));
+
+            // Clear job and navigate
+            setTimeout(() => {
+              useJobStore.getState().clearJob(type);
+              if (navigate) {
+                router.push(`/dashboard/folders/${folderId}/${contentPath}`);
+              }
+            }, 1000);
+          },
+          onError: (error) => {
+            useJobStore.getState().updateJob(type, { status: "failed" });
+            toast.error(
+              typeof error === "string"
+                ? error
+                : `فشل إنشاء ${getTypeName(type)}`
+            );
+            setTimeout(() => {
+              useJobStore.getState().clearJob(type);
+            }, 3000); // Keep failed state visible for a bit
+          },
+        });
+
+        return true;
+      } else {
+        // Fallback for immediate response (no jobId)
+        toast.success(`تم إنشاء ${getTypeName(type)} بنجاح`, {
+          position: "top-right",
+          duration: 3000,
+        });
+
+        // Dispatch refresh event
+        const eventName =
+          type === "stages"
+            ? "stages:refresh"
+            : type === "flashcards"
+            ? "flashcards:refresh"
+            : type === "mindmap"
+            ? "mindmap:refresh"
+            : "mcq:refresh";
+        window.dispatchEvent(new Event(eventName));
+
+        if (navigate) {
+          router.push(`/dashboard/folders/${folderId}/${contentPath}`);
+        }
+
+        return true;
+      }
     } catch (error) {
       console.error(`Generate ${type} error:`, error);
       toast.error(error.message || `حدث خطأ أثناء إنشاء ${getTypeName(type)}`);
@@ -160,42 +242,24 @@ export default function PostUploadOptionsDialog({
     if (selectedType === "all") {
       // Generate all types with the same title
       const results = await Promise.all([
-        handleGenerate("stages", title),
-        handleGenerate("flashcards", title),
-        handleGenerate("mcqs", title),
-        handleGenerate("mindmap", title),
+        handleGenerate("stages", title, true),
+        handleGenerate("flashcards", title, false),
+        handleGenerate("mcqs", title, false),
+        handleGenerate("mindmap", title, false),
       ]);
 
       if (results.every((r) => r)) {
-        toast.success("تم إنشاء جميع المحتويات بنجاح", {
+        toast.success("تم بدء إنشاء جميع المحتويات", {
           position: "top-right",
           duration: 3000,
         });
-
-        // Navigate to stages page (first generated content) after short delay
-        setTimeout(() => {
-          handleClose();
-          router.push(`/dashboard/folders/${folderId}/stages`);
-        }, 1000);
+        handleClose();
       }
     } else {
       // Generate single type
-      const success = await handleGenerate(selectedType, title);
+      const success = await handleGenerate(selectedType, title, true);
       if (success) {
-        // Navigate to the specific content type page
-        const contentPath =
-          selectedType === "stages"
-            ? "stages"
-            : selectedType === "flashcards"
-            ? "flashcards"
-            : selectedType === "mindmap"
-            ? "mind-maps"
-            : "mcq";
-
-        setTimeout(() => {
-          handleClose();
-          router.push(`/dashboard/folders/${folderId}/${contentPath}`);
-        }, 1000);
+        handleClose();
       }
     }
 
