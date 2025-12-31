@@ -93,7 +93,7 @@ const LoginForm = () => {
             ux_mode: "redirect",
             login_uri:
               typeof window !== "undefined"
-                ? `https://hash-feature-ai-frontend.onrender.com/api/auth/google/callback`
+                ? `${window.location.origin}/api/auth/google/callback`
                 : undefined,
           });
           try {

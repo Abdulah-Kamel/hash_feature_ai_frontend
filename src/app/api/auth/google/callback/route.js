@@ -16,9 +16,16 @@ function decodeEmailFromToken(token) {
     return "";
   }
 }
+function getAppUrl(req) {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+}
 
 export async function POST(req) {
   const base = apiBase();
+  const baseUrl = getAppUrl(req);
+
   if (!base)
     return NextResponse.json(
       { message: "API base URL not configured" },
@@ -33,7 +40,7 @@ export async function POST(req) {
   } catch {}
   if (!token)
     return NextResponse.redirect(
-      new URL("/login?error=no_credential", req.url)
+      new URL("/login?error=no_credential", baseUrl)
     );
 
   const res = await fetch(`${base}/api/v1/auth/google`, {
@@ -52,11 +59,11 @@ export async function POST(req) {
     if (/verify your otp code first/i.test(String(msg))) {
       const u = new URL(
         `/otp${email ? `?email=${encodeURIComponent(email)}` : ""}`,
-        req.url
+        baseUrl
       );
       return NextResponse.redirect(u);
     }
-    const u = new URL("/login?error=google_login_failed", req.url);
+    const u = new URL("/login?error=google_login_failed", baseUrl);
     return NextResponse.redirect(u);
   }
 
@@ -85,5 +92,5 @@ export async function POST(req) {
       expires: new Date(Date.now() + 15 * 60 * 1000),
     });
 
-  return NextResponse.redirect(new URL("/dashboard/overview", req.url));
+  return NextResponse.redirect(new URL("/dashboard/overview", baseUrl));
 }
