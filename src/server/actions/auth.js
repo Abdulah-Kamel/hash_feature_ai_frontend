@@ -21,9 +21,8 @@ export async function handleLogin(data) {
   const final = await res.json();
   if (!res.ok) return { success: false, error: final?.message || "Login failed" };
   const c = await cookies();
-  const token = final?.token || final?.accessToken;
+  const token = final?.token;
   const refreshToken = final?.refreshToken;
-  const user = final?.data || final?.user || null;
   if (token)
     c.set("authToken", token, {
       httpOnly: true,
@@ -32,13 +31,7 @@ export async function handleLogin(data) {
       expires: new Date(Date.now() + 15 * 60 * 1000),
     });
   if (refreshToken) c.set("refreshToken", refreshToken, { httpOnly: true, sameSite: "strict", path: "/" });
-  if (user)
-    c.set("user", JSON.stringify(user), {
-      httpOnly: true,
-      sameSite: "strict",
-      path: "/",
-      expires: new Date(Date.now() + 15 * 60 * 1000),
-    });
+
   return { success: true, data: final };
 }
 
@@ -70,7 +63,31 @@ export async function handleVerifyOtp(data) {
     headers: { "Content-Type": "application/json" },
   });
   const final = await res.json();
-  if (!res.ok) return { success: false, error: final?.message || "OTP verification failed" };
+  if (!res.ok)
+    return {
+      success: false,
+      error: final?.message || "OTP verification failed",
+    };
+
+  // Set cookies on success
+  const c = await cookies();
+  const token = final?.token;
+  const refreshToken = final?.refreshToken;
+
+  if (token)
+    c.set("authToken", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      expires: new Date(Date.now() + 15 * 60 * 1000),
+    });
+  if (refreshToken)
+    c.set("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+    });
+
   return { success: true, data: final };
 }
 
