@@ -411,9 +411,12 @@ export default function WorkspaceList() {
                       </Link>
 
                       {/* Mind Map Card */}
-                      <div
-                        onClick={() => handleOpenMindMapDialog(id)}
-                        className="group cursor-pointer"
+                      <Link
+                        href={`/dashboard/folders/${encodeURIComponent(
+                          id
+                        )}/mindmap`}
+                        prefetch={false}
+                        className="group"
                       >
                         <div className="bg-purple-500/10 hover:bg-purple-500/20 transition-colors rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/40">
                           <div className="flex items-center gap-2 mb-2">
@@ -426,7 +429,7 @@ export default function WorkspaceList() {
                             تحويل الملفات إلى خرائط ذهنية
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   </div>
                 </div>

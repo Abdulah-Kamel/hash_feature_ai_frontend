@@ -117,11 +117,7 @@ export default function FolderLayout({ children }) {
             console.log(`Chat job progress: ${progress}% - ${status}`);
           },
           onComplete: (result) => {
-            const answer =
-              result?.answer ||
-              result?.data?.answer ||
-              result?.message ||
-              "تم الانتهاء";
+            const answer = result?.answer;
             updateLoadingMessage(answer);
           },
           onError: (error) => {

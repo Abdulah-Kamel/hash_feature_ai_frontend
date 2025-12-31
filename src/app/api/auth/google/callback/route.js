@@ -25,13 +25,13 @@ export async function POST(req) {
       { status: 500 }
     );
 
-  let idToken = "";
+  let token = "";
   try {
     const form = await req.formData();
     console.log("Google callback request form data:", form);
-    idToken = form.get("credential") || form.get("id_token") || "";
+    token = form.get("credential") || form.get("id_token") || "";
   } catch {}
-  if (!idToken)
+  if (!token)
     return NextResponse.redirect(
       new URL("/login?error=no_credential", req.url)
     );
@@ -39,7 +39,7 @@ export async function POST(req) {
   const res = await fetch(`${base}/api/v1/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken }),
+    body: JSON.stringify({ token }),
   });
   let final = null;
   try {
@@ -48,7 +48,7 @@ export async function POST(req) {
 
   if (!res.ok) {
     const msg = final?.message || "Login failed";
-    const email = final?.data?.email || decodeEmailFromToken(idToken);
+    const email = final?.data?.email || decodeEmailFromToken(token);
     if (/verify your otp code first/i.test(String(msg))) {
       const u = new URL(
         `/otp${email ? `?email=${encodeURIComponent(email)}` : ""}`,
@@ -61,11 +61,11 @@ export async function POST(req) {
   }
 
   const c = await cookies();
-  const token = final?.token || final?.accessToken;
+  const authToken = final?.token || final?.accessToken;
   const refreshToken = final?.refreshToken;
   const user = final?.data || final?.user || null;
-  if (token)
-    c.set("authToken", token, {
+  if (authToken)
+    c.set("authToken", authToken, {
       httpOnly: true,
       sameSite: "strict",
       path: "/",

@@ -243,7 +243,7 @@ const LoginForm = () => {
             <Button
               variant="outline"
               className="w-full cursor-pointer px-5 py-2 sm:py-7 rounded-lg text-lg font-medium max-sm:text-xs"
-              disabled={loading || googleBusy}
+              disabled={loading || !googleReady}
               onClick={onGoogleLogin}
               type="button"
             >

@@ -3,76 +3,129 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Mic, Plus, X, Loader2, User, Bot } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
+import { jobTracker } from "@/lib/job-tracker";
 
-export default function MindMapChat({ 
-  isOpen, 
-  onClose, 
+export default function MindMapChat({
+  isOpen,
+  onClose,
   activeNode,
   onSendMessage,
   fileId,
-  folderId
+  folderId,
 }) {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
+  const cleanupRef = useRef(null);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Cleanup job tracker on unmount
+  useEffect(() => {
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current();
+      }
+    };
+  }, []);
+
   if (!isOpen) return null;
 
   const handleSend = async () => {
     if (!message.trim() || isLoading) return;
-    
+
     const userMessage = message;
-    const userPrompt = `اشرح لى ${message}`;
-    
+    const userPrompt = activeNode.label + message;
+
     // Add user message to chat
-    setMessages(prev => [...prev, { 
-      type: 'user', 
-      content: userMessage,
-      timestamp: new Date()
-    }]);
-    
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: "user",
+        content: userMessage,
+        timestamp: new Date(),
+      },
+    ]);
+
     setMessage("");
     setIsLoading(true);
-    
+
+    // Helper to add AI response
+    const addAIResponse = (content, isError = false) => {
+      setIsLoading(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "ai",
+          content: content,
+          isError: isError,
+          timestamp: new Date(),
+        },
+      ]);
+    };
+
     try {
-      const res = await apiClient('/api/ai/chat', {
-        method: 'POST',
+      const res = await apiClient("/api/ai/chat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userPrompt,
-          folderId: folderId || '',
+          folderId: folderId || "",
           fileIds: fileId ? [fileId] : [],
         }),
       });
-      
+
       const data = await res.json();
-      
-      // Add AI response to chat
-      setMessages(prev => [...prev, { 
-        type: 'ai', 
-        content: data.response || data.message || data.data || 'تم استلام الرد',
-        timestamp: new Date()
-      }]);
-      
-      onSendMessage?.(userMessage, activeNode, data);
+
+      // Check if backend returned a jobId for tracking
+      const jobId = data?.data?._id;
+
+      if (jobId) {
+        console.log(
+          "MindMapChat: Got jobId, starting WebSocket tracking:",
+          jobId
+        );
+
+        // Track job via WebSocket (dynamic import like layout.js)
+        const { jobTracker } = await import("@/lib/job-tracker");
+
+        jobTracker.track(jobId, {
+          onProgress: (progress, status) => {
+            console.log(`MindMapChat: Job progress ${progress}% - ${status}`);
+          },
+          onComplete: (result) => {
+            console.log("MindMapChat: Job completed", result);
+            const answer = result?.answer;
+            addAIResponse(answer || "تم الرد");
+            onSendMessage?.(userMessage, activeNode, result);
+          },
+          onError: (error) => {
+            console.log("MindMapChat: Job failed", error);
+            const errorMsg =
+              typeof error === "string" ? error : "حدث خطأ في المعالجة";
+            addAIResponse(errorMsg, true);
+          },
+        });
+      } else {
+        // No jobId - use direct response (fallback for immediate answers)
+        const answer =
+          data?.data?.answer || data?.response || data?.message || "";
+        if (answer) {
+          addAIResponse(answer);
+          onSendMessage?.(userMessage, activeNode, data);
+        } else {
+          addAIResponse("تعذر الحصول على الرد");
+        }
+      }
     } catch (error) {
-      console.error('Chat API error:', error);
-      setMessages(prev => [...prev, { 
-        type: 'ai', 
-        content: 'حدث خطأ أثناء المعالجة',
-        isError: true,
-        timestamp: new Date()
-      }]);
-    } finally {
-      setIsLoading(false);
+      console.error("Chat API error:", error);
+      addAIResponse("حدث خطأ أثناء المعالجة", true);
     }
   };
 
@@ -92,34 +145,43 @@ export default function MindMapChat({
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex gap-3 ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                className={`flex gap-3 ${
+                  msg.type === "user" ? "flex-row-reverse" : "flex-row"
+                }`}
               >
                 {/* Avatar */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  msg.type === 'user' ? 'bg-primary' : 'bg-gray-700'
-                }`}>
-                  {msg.type === 'user' ? (
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    msg.type === "user" ? "bg-primary" : "bg-gray-700"
+                  }`}
+                >
+                  {msg.type === "user" ? (
                     <User className="w-4 h-4 text-white" />
                   ) : (
                     <Bot className="w-4 h-4 text-white" />
                   )}
                 </div>
-                
+
                 {/* Message bubble */}
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                  msg.type === 'user' 
-                    ? 'bg-primary text-white' 
-                    : msg.isError 
-                      ? 'bg-red-900/50 text-red-300'
-                      : 'bg-gray-800 text-gray-200'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap text-right" dir="rtl">
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                    msg.type === "user"
+                      ? "bg-primary text-white"
+                      : msg.isError
+                      ? "bg-red-900/50 text-red-300"
+                      : "bg-gray-800 text-gray-200"
+                  }`}
+                >
+                  <p
+                    className="text-sm whitespace-pre-wrap text-right"
+                    dir="rtl"
+                  >
                     {msg.content}
                   </p>
                 </div>
               </div>
             ))}
-            
+
             {/* Loading indicator */}
             {isLoading && (
               <div className="flex gap-3">
@@ -128,29 +190,42 @@ export default function MindMapChat({
                 </div>
                 <div className="bg-gray-800 rounded-2xl px-4 py-3">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    <span
+                      className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    ></span>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
         </div>
       )}
-      
+
       {/* Chat input */}
-      <div className={`bg-[#1a1a1a] shadow-2xl border border-gray-700 overflow-hidden ${
-        messages.length > 0 ? 'rounded-b-2xl' : 'rounded-2xl'
-      }`}>
+      <div
+        className={`bg-[#1a1a1a] shadow-2xl border border-gray-700 overflow-hidden ${
+          messages.length > 0 ? "rounded-b-2xl" : "rounded-2xl"
+        }`}
+      >
         <div className="flex justify-between items-center gap-2 py-2 px-3 border-b border-gray-700">
           {/* Active node indicator */}
           {activeNode && (
             <div className="px-4">
               <span className="text-xs text-gray-500">السؤال عن:</span>
-              <span className="text-sm text-white mr-2">{activeNode.label}</span>
+              <span className="text-sm text-white mr-2">
+                {activeNode.label}
+              </span>
             </div>
           )}
 
