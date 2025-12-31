@@ -88,5 +88,7 @@ export async function fetchUserFiles() {
 
   if (!res.ok)
     return { success: false, error: final?.message || res.statusText };
+  console.log(final);
+  
   return { success: true, data: final };
 }
