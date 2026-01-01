@@ -254,7 +254,9 @@ const LoginForm = () => {
             )}
             <div
               id="gsi-login-btn"
-              className={`border border-primary/70 bg-card  ${googleReady ? "block" : "hidden"}`}
+              className={`max-w-full border border-primary/70 bg-card  ${
+                googleReady ? "block" : "hidden"
+              }`}
             />
           </div>
           <div className="mt-3 max-sm:text-xs text-center font-light">

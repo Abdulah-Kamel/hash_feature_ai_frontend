@@ -298,7 +298,7 @@ const RegisterForm = () => {
             )}
             <div
               id="gsi-register-btn"
-              className={`border border-primary/70 bg-card ${
+              className={`max-w-full border border-primary/70 bg-card ${
                 googleReady ? "block" : "hidden"
               }`}
             />
