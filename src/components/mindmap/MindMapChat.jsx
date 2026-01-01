@@ -101,8 +101,8 @@ export default function MindMapChat({
           },
           onComplete: (result) => {
             console.log("MindMapChat: Job completed", result);
-            const answer = result?.answer;
-            addAIResponse(answer || "تم الرد");
+            const answer = result;
+            addAIResponse(answer);
             onSendMessage?.(userMessage, activeNode, result);
           },
           onError: (error) => {
