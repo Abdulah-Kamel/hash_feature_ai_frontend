@@ -164,18 +164,19 @@ const Index = ({ variant = "global" }) => {
 
   return (
     <>
+      {/* Mobile toggle button - always visible on mobile, hidden when sidebar open on desktop */}
       <Button
         onClick={toggleSidebar}
         variant="ghost"
         size="icon"
-        className={`fixed top-4 right-4 ${
-          open ? "z-0" : "z-50"
-        } bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-accent cursor-pointer`}
+        className={`fixed top-4 right-4 z-50 bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-accent cursor-pointer ${
+          open ? "md:hidden" : ""
+        }`}
       >
         <Menu className="size-5" />
       </Button>
       <Sidebar aria-label="الشريط الجانبي العام">
-        <div className="justify-end me-3 mt-3 hidden md:flex absolute top-0 left-0">
+        <div className="justify-end me-3 mt-3 flex absolute top-0 left-0">
           <Button
             onClick={toggleSidebar}
             variant="ghost"

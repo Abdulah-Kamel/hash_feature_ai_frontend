@@ -61,8 +61,8 @@ const LoginForm = () => {
             theme: "filled_black",
             size: "large",
             text: "continue_with",
-            shape: "pill",
-            logo_alignment: "left",
+            shape: "rectangular",
+            width: 400,
           });
           try {
             btn.addEventListener(
@@ -103,8 +103,8 @@ const LoginForm = () => {
                 theme: "filled_black",
                 size: "large",
                 text: "continue_with",
-                shape: "pill",
-                logo_alignment: "left",
+                shape: "rectangular",
+                width: 400,
               });
               try {
                 btn.addEventListener(
@@ -239,30 +239,22 @@ const LoginForm = () => {
           >
             {loading ? <Spinner className="size-8" /> : "تسجيل الدخول"}
           </Button>
-          <div className="relative w-full mt-2">
-            <Button
-              variant="outline"
-              className="w-full cursor-pointer px-5 py-2 sm:py-7 rounded-lg text-lg font-medium max-sm:text-xs"
-              disabled={loading || !googleReady}
-              onClick={onGoogleLogin}
-              type="button"
-            >
-              {googleBusy ? (
-                <Spinner className="size-8" />
-              ) : (
-                "اكمل عن طريق جوجل"
-              )}
-              <Image
-                src={googleIcon}
-                alt="google logog icon"
-                className="h-5 w-5"
-              />
-            </Button>
+          {/* Google Sign-In Button - Original Google button in dark mode */}
+          <div className="w-full mt-2 flex justify-center">
+            {!googleReady && (
+              <Button
+                variant="outline"
+                className="w-full cursor-not-allowed px-5 py-2 sm:py-7 rounded-lg text-lg font-medium max-sm:text-xs"
+                disabled
+                type="button"
+              >
+                <Spinner className="size-5 mr-2" />
+                جاري التحميل...
+              </Button>
+            )}
             <div
               id="gsi-login-btn"
-              className={`absolute inset-0 z-10 opacity-0 ${
-                googleReady ? "pointer-events-auto" : "pointer-events-none"
-              }`}
+              className={`border border-primary/70 bg-card  ${googleReady ? "block" : "hidden"}`}
             />
           </div>
           <div className="mt-3 max-sm:text-xs text-center font-light">

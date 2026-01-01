@@ -166,7 +166,7 @@ export default function WorkspaceList() {
     <div className="mt-6 py-5">
       <div className="flex 2xl:flex-row flex-col gap-3 items-center justify-between mb-4">
         <h3 className="text-lg xl:text-xl font-semibold">مساحة العمل</h3>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
           <UploadDialogTrigger onUploadSuccess={load}>
             <Button
               size="lg"

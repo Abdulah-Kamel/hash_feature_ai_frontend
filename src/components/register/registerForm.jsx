@@ -81,8 +81,8 @@ const RegisterForm = () => {
             theme: "filled_black",
             size: "large",
             text: "continue_with",
-            shape: "pill",
-            logo_alignment: "left",
+            shape: "rectangular",
+            width: 400,
           });
           try {
             btn.addEventListener(
@@ -134,12 +134,7 @@ const RegisterForm = () => {
                       duration: 3000,
                       classNames: "toast-info mt-14",
                     });
-                    const email = json?.data?.email || "";
-                    router.push(
-                      `/otp${
-                        email ? `?email=${encodeURIComponent(email)}` : ""
-                      }`
-                    );
+                    router.push(`/otp`);
                     return;
                   }
                   toast.error(msg, {
@@ -157,12 +152,7 @@ const RegisterForm = () => {
                       duration: 3000,
                       classNames: "toast-info mt-14",
                     });
-                    const email = json?.data?.email || "";
-                    router.push(
-                      `/otp${
-                        email ? `?email=${encodeURIComponent(email)}` : ""
-                      }`
-                    );
+                    router.push(`/otp`);
                     return;
                   }
                   toast.success("تم تسجيل الدخول بنجاح", {
@@ -184,8 +174,8 @@ const RegisterForm = () => {
                 theme: "filled_black",
                 size: "large",
                 text: "continue_with",
-                shape: "pill",
-                logo_alignment: "left",
+                shape: "rectangular",
+                width: 400,
               });
               try {
                 btn.addEventListener(
@@ -293,29 +283,23 @@ const RegisterForm = () => {
           >
             {loading ? <Spinner className="size-8" /> : "إنشاء حساب"}
           </Button>
-          <div className="relative w-full mt-2">
-            <Button
-              variant="outline"
-              className="w-full cursor-pointer px-5 py-2 sm:py-6 rounded-lg max-sm:text-xs"
-              disabled={loading || googleBusy}
-              type="button"
-              onClick={onGoogleLogin}
-            >
-              {googleBusy ? (
-                <Spinner className="size-8" />
-              ) : (
-                "اكمل عن طريق جوجل"
-              )}
-              <Image
-                src={googleIcon}
-                alt="google logog icon"
-                className="h-5 w-5"
-              />
-            </Button>
+          {/* Google Sign-In Button - Original Google button in dark mode */}
+          <div className="w-full mt-2 flex justify-center">
+            {!googleReady && (
+              <Button
+                variant="outline"
+                className="w-full cursor-not-allowed px-5 py-2 sm:py-7 rounded-lg text-lg font-medium max-sm:text-xs"
+                disabled
+                type="button"
+              >
+                <Spinner className="size-5 mr-2" />
+                جاري التحميل...
+              </Button>
+            )}
             <div
               id="gsi-register-btn"
-              className={`absolute inset-0 z-10 opacity-0 ${
-                googleReady ? "pointer-events-auto" : "pointer-events-none"
+              className={`border border-primary/70 bg-card ${
+                googleReady ? "block" : "hidden"
               }`}
             />
           </div>

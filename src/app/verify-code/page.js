@@ -17,7 +17,7 @@ export default function VerifyResetCodePage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const schema = z.object({
-    resetCode: z.string().min(4, "رمز التحقق غير صحيح"),
+    resetCode: z.string().trim().min(4, "رمز التحقق غير صحيح"),
   });
   const { handleSubmit, control, reset } = useForm({
     resolver: zodResolver(schema),
