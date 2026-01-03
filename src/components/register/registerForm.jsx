@@ -175,7 +175,6 @@ const RegisterForm = () => {
                 size: "large",
                 text: "continue_with",
                 shape: "rectangular",
-                width: 400,
               });
               try {
                 btn.addEventListener(
@@ -298,7 +297,7 @@ const RegisterForm = () => {
             )}
             <div
               id="gsi-register-btn"
-              className={`max-w-full border border-primary/70 bg-card ${
+              className={`max-w-full overflow-hidden border border-primary/70 bg-card ${
                 googleReady ? "block" : "hidden"
               }`}
             />

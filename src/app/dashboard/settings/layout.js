@@ -35,7 +35,7 @@ export default function SettingsLayout({ children }) {
           );
         })}
       </div>
-      <div className="mt-6">{children}</div>
+      <div className="mt-6 container mx-auto max-w-6xl">{children}</div>
     </SidebarInset>
   );
 }

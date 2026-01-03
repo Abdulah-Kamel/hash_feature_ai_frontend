@@ -34,7 +34,7 @@ function OptionItem({ label, variant = "idle", onSelect, disabled = false }) {
   return (
     <button
       onClick={disabled ? undefined : onSelect}
-      className="w-full min-h-[100px] rounded-[15px] flex gap-2 items-center justify-between px-6 cursor-pointer"
+      className="w-full min-h-[50px] rounded-[15px] flex gap-2 items-center justify-between px-6 cursor-pointer"
       style={{
         background: styleMap.containerBg,
         border: `1px solid ${styleMap.containerBorder}`,
@@ -197,9 +197,9 @@ export default function TestView({
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      <Card className="rounded-2xl w-full bg-gradient-to-b from-[#bd6beecc] to-[#bd6bee] p-6 flex items-start justify-between">
-        <p className="text-white text-2xl">{question}</p>
+      <Card className="rounded-2xl w-full bg-linear-to-b from-[#bd6beecc] to-[#bd6bee] p-3 gap-4 flex flex-row items-center justify-between">
         <div className="size-8 rounded-full bg-white/20" />
+        <p className="text-white text-2xl">{question}</p>
       </Card>
 
       <div className="space-y-3 w-full">

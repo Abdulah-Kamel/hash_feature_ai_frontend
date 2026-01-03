@@ -59,7 +59,7 @@ export default function StreakCard() {
     "السبت",
   ];
   return (
-    <div className="bg-primary rounded-xl py-4 px-6 sm:px-10 ">
+    <div className="bg-primary rounded-xl py-4 px-6 sm:px-10 flex items-center justify-between">
       <div className="flex max-sm:flex-col items-center gap-3">
         <Flame className="size-10" />
         <div className="flex-1 space-y-1">
@@ -75,9 +75,8 @@ export default function StreakCard() {
             </p>
           )}
         </div>
-        <Image src={cute_octopus} className="size-25" alt="octopus" />
       </div>
-      <div className="mt-5 flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         {dayNames.map((d, i) => (
           <div key={d} className="flex flex-col items-center gap-2">
             <span

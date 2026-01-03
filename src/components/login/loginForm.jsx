@@ -62,7 +62,6 @@ const LoginForm = () => {
             size: "large",
             text: "continue_with",
             shape: "rectangular",
-            width: 400,
           });
           try {
             btn.addEventListener(
@@ -104,7 +103,6 @@ const LoginForm = () => {
                 size: "large",
                 text: "continue_with",
                 shape: "rectangular",
-                width: 400,
               });
               try {
                 btn.addEventListener(
@@ -254,7 +252,7 @@ const LoginForm = () => {
             )}
             <div
               id="gsi-login-btn"
-              className={`max-w-full border border-primary/70 bg-card  ${
+              className={`max-w-full overflow-hidden border border-primary/70 bg-card  ${
                 googleReady ? "block" : "hidden"
               }`}
             />

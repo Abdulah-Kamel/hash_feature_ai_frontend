@@ -113,6 +113,9 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
 
   // Update selected object when stages data changes
   useEffect(() => {
+    console.log(selected);
+    console.log(stages);
+    
     if (selected && stages.length > 0) {
       const updatedSelected = stages.find((s) => s.id === selected.id);
       if (
@@ -150,14 +153,19 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
           selectedStage?.stageNumber || 1
         }`}
         content={selectedStage?.stageContent || ""}
-        mcqs={
-          Array.isArray(selectedStage?.stageMcq) ? selectedStage.stageMcq : []
-        }
+        mcqs={[
+          ...(Array.isArray(selectedStage?.stageMcq)
+            ? selectedStage.stageMcq
+            : []),
+          ...(Array.isArray(selectedStage?.stageTF)
+            ? selectedStage.stageTF
+            : []),
+        ]}
         onOpenMcq={() => {
           const arr = Array.isArray(selectedStage?.stageMcq)
             ? selectedStage.stageMcq
             : [];
-          const mapped = arr.map((m) => {
+          const mappedMcq = arr.map((m) => {
             const opts = Array.isArray(m.options) ? m.options : [];
             const correctIdx = Math.max(
               0,
@@ -169,7 +177,17 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
               correct: correctIdx < 0 ? 0 : correctIdx,
             };
           });
-          setMcqData(mapped);
+
+          const tfArr = Array.isArray(selectedStage?.stageTF)
+            ? selectedStage.stageTF
+            : [];
+          const mappedTf = tfArr.map((tf) => ({
+            q: tf.statement,
+            options: ["صح", "خطأ"],
+            correct: tf.answer === true ? 0 : 1,
+          }));
+
+          setMcqData([...mappedMcq, ...mappedTf]);
           setMode("mcq");
         }}
       />

@@ -25,13 +25,13 @@ export default function StageCard({
 
   return (
     <Card
-      className={`rounded-2xl p-6 ${bgClass} text-white space-y-5 mb-0 ${
+      className={`rounded-2xl p-3 gap-4 ${bgClass} text-white space-y-5 mb-0 ${
         className || ""
       }`}
       dir="rtl"
     >
       <div
-        className="flex items-center justify-between cursor-pointer"
+        className="flex items-center justify-between cursor-pointer mb-0"
         onClick={onOpen}
       >
         <div className="size-9 grid place-items-center rounded-full border border-white">

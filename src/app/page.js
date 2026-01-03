@@ -48,14 +48,16 @@ export default function Home() {
   return (
     <>
       <NavBar />
-      <Container className="min-h-[85vh] bg-transparent flex flex-col items-center justify-center gap-12 px-5 lg:px-20 py-14">
-        <HeroSection />
-        <ToolsSection />
-        <FeaturesSection />
-        <TestimonialSection />
-        <PricingSection />
-        <QaSection />
-      </Container>
+      <div className="w-full overflow-x-hidden">
+        <Container className="min-h-[85vh] bg-transparent flex flex-col items-center justify-center gap-12 px-5 lg:px-20 py-14">
+          <HeroSection />
+          <ToolsSection />
+          <FeaturesSection />
+          <TestimonialSection />
+          <PricingSection />
+          <QaSection />
+        </Container>
+      </div>
       <Footer />
     </>
   );

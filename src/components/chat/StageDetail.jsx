@@ -12,11 +12,11 @@ export default function StageDetail({
   onOpenStage,
 }) {
   const activeStage = stages.find((st) => st.status === "opened") || stages[0];
-  const qCount = Array.isArray(activeStage?.stageMcq)
-    ? activeStage.stageMcq.length
-    : 0;
+  const qCount =
+    (Array.isArray(activeStage?.stageMcq) ? activeStage.stageMcq.length : 0) +
+    (Array.isArray(activeStage?.stageTF) ? activeStage.stageTF.length : 0);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 space-x-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
@@ -31,7 +31,7 @@ export default function StageDetail({
         <p className="text-lg font-semibold text-foreground">{title}</p>
       </div>
 
-      <Card className="rounded-2xl p-5 bg-gradient-to-b from-[#262626] to-[#262626cc] text-white">
+      <Card className="rounded-2xl p-3 gap-4 bg-linear-to-b from-[#262626] to-[#262626cc] text-white">
         <div className="flex items-center gap-3">
           <div className="ml-auto text-right">
             <p className="text-base font-medium">
@@ -60,7 +60,9 @@ export default function StageDetail({
             const isDone = st?.status === "completed";
             const isOpened = st?.status === "opened";
             const state = isDone ? "done" : isOpened ? "current" : "locked";
-            const total = Array.isArray(st.stageMcq) ? st.stageMcq.length : 0;
+            const total =
+              (Array.isArray(st.stageMcq) ? st.stageMcq.length : 0) +
+              (Array.isArray(st.stageTF) ? st.stageTF.length : 0);
             return (
               <div
                 key={st._id || n}

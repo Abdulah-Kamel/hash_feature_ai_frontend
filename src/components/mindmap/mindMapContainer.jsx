@@ -170,13 +170,11 @@ function extractMindMapData(json) {
   let filename = null;
   
   // Check for filename in different places
-   filename = json.data.fileName;
+   filename = json.data.title;
   // Also check in nested data array
   if (!filename && Array.isArray(json?.data)) {
     const first = json.data[0];
-    if (first?.fileName) filename = first.fileName;
-    else if (first?.originalName) filename = first.originalName;
-    else if (first?.name) filename = first.name;
+    if (first?.title) filename = first.title;
   }
   
   // Extract MindMapData roots
