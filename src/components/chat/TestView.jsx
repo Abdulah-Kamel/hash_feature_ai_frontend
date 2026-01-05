@@ -199,7 +199,7 @@ export default function TestView({
 
       <Card className="rounded-2xl w-full bg-linear-to-b from-[#bd6beecc] to-[#bd6bee] p-3 gap-4 flex flex-row items-center justify-between">
         <div className="size-8 rounded-full bg-white/20" />
-        <p className="text-white text-2xl">{question}</p>
+        <p className="text-white text-xl">{question}</p>
       </Card>
 
       <div className="space-y-3 w-full">

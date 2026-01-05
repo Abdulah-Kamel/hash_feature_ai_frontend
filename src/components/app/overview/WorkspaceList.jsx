@@ -259,7 +259,7 @@ export default function WorkspaceList() {
                 <div className="flex items-center justify-between">
                   {/* Link wrapper for the main content */}
                   <Link
-                    href={`/dashboard/folders/${encodeURIComponent(id)}/stages`}
+                    href={`/app/folders/${encodeURIComponent(id)}/stages`}
                     className="flex-1 block hover:opacity-80 transition-opacity"
                   >
                     <div className="grid grid-cols-3 gap-4">
@@ -343,7 +343,7 @@ export default function WorkspaceList() {
                   <div className="overflow-hidden">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <Link
-                        href={`/dashboard/folders/${encodeURIComponent(
+                        href={`/app/folders/${encodeURIComponent(
                           id
                         )}/stages`}
                         prefetch={false}
@@ -365,7 +365,7 @@ export default function WorkspaceList() {
                       </Link>
 
                       <Link
-                        href={`/dashboard/folders/${encodeURIComponent(
+                        href={`/app/folders/${encodeURIComponent(
                           id
                         )}/flashcards`}
                         prefetch={false}
@@ -389,7 +389,7 @@ export default function WorkspaceList() {
                       </Link>
 
                       <Link
-                        href={`/dashboard/folders/${encodeURIComponent(
+                        href={`/app/folders/${encodeURIComponent(
                           id
                         )}/tests`}
                         prefetch={false}
@@ -412,7 +412,7 @@ export default function WorkspaceList() {
 
                       {/* Mind Map Card */}
                       <Link
-                        href={`/dashboard/folders/${encodeURIComponent(
+                        href={`/app/folders/${encodeURIComponent(
                           id
                         )}/mindmap`}
                         prefetch={false}

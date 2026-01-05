@@ -39,7 +39,7 @@ import { redirect } from "next/navigation";
 export default async function loginPage() {
   const c = await cookies();
   const token = c.get("authToken")?.value;
-  if (token) redirect("/dashboard/overview");
+  if (token) redirect("/app/overview");
 
   return (
     <>

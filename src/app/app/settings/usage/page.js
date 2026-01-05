@@ -187,7 +187,7 @@ export default function UsageTabPage() {
         {profile?.plan === "pro" && (
           <div className="grid">
             <Link
-              href="/dashboard/settings/billing"
+              href="/app/settings/billing"
               className="rounded-xl h-12 bg-primary text-primary-foreground flex items-center justify-center"
             >
               <p>ترقية خطتك</p>

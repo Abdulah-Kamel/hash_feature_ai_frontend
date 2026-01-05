@@ -101,14 +101,14 @@ export default function CreateMindMapDialog({
       toast.success("تم إنشاء الخريطة الذهنية بنجاح");
       
       // Navigate to mind maps page or specific map
-      // Assuming /dashboard/folders/[id]/mind-maps exists or similar
+      // Assuming /app/folders/[id]/mind-maps exists or similar
       // The user just asked to create it. We'll verify navigation.
       // For now, refresh and close.
       window.dispatchEvent(new Event("mindmap:refresh"));
       onOpenChange(false);
       
       // Optional: Navigate to the folder's mind maps view if it exists
-      // router.push(`/dashboard/folders/${folderId}/mind-maps`);
+      // router.push(`/app/folders/${folderId}/mind-maps`);
 
     } catch (error) {
       console.error("Generate mind map error:", error);

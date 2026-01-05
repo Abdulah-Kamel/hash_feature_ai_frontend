@@ -187,7 +187,7 @@ export default function ChatSidebar() {
   return (
     <Sidebar aria-label="الشريط الجانبي العام">
       <SidebarHeader className="p-4">
-        <Link href="/dashboard/overview" className="flex items-center gap-3">
+        <Link href="/app/overview" className="flex items-center gap-3">
           <Image src={logo} alt="Hash Plus Logo" className="h-11 w-auto" />
         </Link>
       </SidebarHeader>
@@ -197,7 +197,7 @@ export default function ChatSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="py-5">
-                <Link href="/dashboard/overview">
+                <Link href="/app/overview">
                   <Home className="size-4" />
                   <span>الرئيسية</span>
                 </Link>
@@ -218,7 +218,7 @@ export default function ChatSidebar() {
                     className="py-5"
                     isActive={pathname?.includes("/stages")}
                   >
-                    <Link href={`/dashboard/folders/${folderId}/stages`}>
+                    <Link href={`/app/folders/${folderId}/stages`}>
                       <GitMerge className="size-4" />
                       <span>المراحل</span>
                     </Link>
@@ -230,7 +230,7 @@ export default function ChatSidebar() {
                     className="py-5"
                     isActive={pathname?.includes("/flashcards")}
                   >
-                    <Link href={`/dashboard/folders/${folderId}/flashcards`}>
+                    <Link href={`/app/folders/${folderId}/flashcards`}>
                       <Layers className="size-4" />
                       <span>البطاقات التعليمية</span>
                     </Link>
@@ -242,7 +242,7 @@ export default function ChatSidebar() {
                     className="py-5"
                     isActive={pathname?.includes("/tests")}
                   >
-                    <Link href={`/dashboard/folders/${folderId}/tests`}>
+                    <Link href={`/app/folders/${folderId}/tests`}>
                       <FileQuestion className="size-4" />
                       <span>الاختبارات</span>
                     </Link>
@@ -254,7 +254,7 @@ export default function ChatSidebar() {
                     className="py-5"
                     isActive={pathname?.includes("/mindmap")}
                   >
-                    <Link href={`/dashboard/folders/${folderId}/mindmap`}>
+                    <Link href={`/app/folders/${folderId}/mindmap`}>
                       <GitBranch className="size-4" />
                       <span>الخريطة الذهنية</span>
                     </Link>
@@ -335,7 +335,7 @@ export default function ChatSidebar() {
 
       <SidebarFooter className="p-4 space-y-4">
         {/* Plan Button */}
-        <Link href="/dashboard/settings/billing" className="block w-full">
+        <Link href="/app/settings/billing" className="block w-full">
           <Button
             variant="outline"
             className="w-full justify-start gap-2 border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
@@ -367,7 +367,7 @@ export default function ChatSidebar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/settings" className="cursor-pointer">
+              <Link href="/app/settings" className="cursor-pointer">
                 <Settings className="size-4 ml-2" />
                 الإعدادات
               </Link>

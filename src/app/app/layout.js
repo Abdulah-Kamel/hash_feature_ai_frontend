@@ -12,7 +12,7 @@ const Layout = ({ children }) => {
   const setVariant = useSidebarVariant((s) => s.setVariant);
 
   useEffect(() => {
-    const isChat = pathname?.startsWith("/dashboard/folders/");
+    const isChat = pathname?.startsWith("/app/folders/");
     setVariant(isChat ? "chat" : "global");
   }, [pathname, setVariant]);
 

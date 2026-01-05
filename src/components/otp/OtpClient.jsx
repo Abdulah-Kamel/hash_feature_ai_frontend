@@ -63,7 +63,7 @@ export default function OtpClient({ defaultEmail = "" }) {
     setLoading(false);
     if (result.success) {
       toast.success("تم التحقق بنجاح", { position: "top-right", duration: 3000, classNames: "toast-success mt-14" });
-      router.push("/dashboard/overview");
+      router.push("/app/overview");
       router.refresh();
     } else {
       toast.error(result.error || "حدث خطأ", { position: "top-right", duration: 3000, classNames: "toast-error mt-14" });

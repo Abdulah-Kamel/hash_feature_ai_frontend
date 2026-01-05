@@ -92,5 +92,5 @@ export async function POST(req) {
       expires: new Date(Date.now() + 15 * 60 * 1000),
     });
 
-  return NextResponse.redirect(new URL("/dashboard/overview", baseUrl));
+  return NextResponse.redirect(new URL("/app/overview", baseUrl));
 }

@@ -177,7 +177,7 @@ export default function PostUploadOptionsDialog({
             setTimeout(() => {
               useJobStore.getState().clearJob(type);
               if (navigate) {
-                router.push(`/dashboard/folders/${folderId}/${contentPath}`);
+                router.push(`/app/folders/${folderId}/${contentPath}`);
               }
             }, 1000);
           },
@@ -214,7 +214,7 @@ export default function PostUploadOptionsDialog({
         window.dispatchEvent(new Event(eventName));
 
         if (navigate) {
-          router.push(`/dashboard/folders/${folderId}/${contentPath}`);
+          router.push(`/app/folders/${folderId}/${contentPath}`);
         }
 
         return true;

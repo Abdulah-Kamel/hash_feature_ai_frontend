@@ -7,9 +7,9 @@ export default function FolderNav({ folderId }) {
   const pathname = usePathname();
   
   const tabs = [
-    { label: "المراحل", value: "stages", href: `/dashboard/folders/${folderId}/stages` },
-    { label: "كروت الفلاش", value: "flashcards", href: `/dashboard/folders/${folderId}/flashcards` },
-    { label: "الاختبارات", value: "tests", href: `/dashboard/folders/${folderId}/tests` },
+    { label: "المراحل", value: "stages", href: `/app/folders/${folderId}/stages` },
+    { label: "كروت الفلاش", value: "flashcards", href: `/app/folders/${folderId}/flashcards` },
+    { label: "الاختبارات", value: "tests", href: `/app/folders/${folderId}/tests` },
   ];
 
   return (

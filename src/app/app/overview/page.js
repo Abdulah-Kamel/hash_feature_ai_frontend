@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect } from "react";
-import OverviewHero from "@/components/dashboard/overview/OverviewHero";
-import WorkspaceList from "@/components/dashboard/overview/WorkspaceList";
-import StreakCard from "@/components/dashboard/overview/StreakCard";
-import OverviewCalendar from "@/components/dashboard/overview/OverviewCalendar";
+import OverviewHero from "@/components/app/overview/OverviewHero";
+import WorkspaceList from "@/components/app/overview/WorkspaceList";
+import StreakCard from "@/components/app/overview/StreakCard";
+import OverviewCalendar from "@/components/app/overview/OverviewCalendar";
 import useAuth from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";

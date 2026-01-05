@@ -27,7 +27,7 @@ function SubscriptionSuccessContent() {
   useEffect(() => {
     const hasAnyId = sessionId || paymentId;
     if (!hasAnyId) {
-      router.push("/dashboard/settings/billing");
+      router.push("/app/settings/billing");
       return;
     }
 
@@ -36,7 +36,7 @@ function SubscriptionSuccessContent() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          router.push("/dashboard/settings/billing");
+          router.push("/app/settings/billing");
           return 0;
         }
         return prev - 1;
@@ -149,7 +149,7 @@ function SubscriptionSuccessContent() {
 
         <div className="space-y-4 pt-4">
           <Button asChild className="w-full text-lg h-12" size="lg">
-            <Link href="/dashboard/settings/billing">العودة للوحة التحكم</Link>
+            <Link href="/app/settings/billing">العودة للوحة التحكم</Link>
           </Button>
 
           <p className="text-sm text-muted-foreground animate-pulse">

@@ -146,7 +146,7 @@ const LoginForm = () => {
         duration: 3000,
         classNames: "toast-success text-black mt-14",
       });
-      router.push("/dashboard/overview");
+      router.push("/app/overview");
     } else {
       setLoading(false);
       const msg = result.error || "";

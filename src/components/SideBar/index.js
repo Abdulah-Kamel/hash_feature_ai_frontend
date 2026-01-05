@@ -191,7 +191,7 @@ const Index = ({ variant = "global" }) => {
           </Button>
         </div>
         <SidebarHeader className="p-4">
-          <Link href="/dashboard/overview" className="flex items-center gap-3">
+          <Link href="/app/overview" className="flex items-center gap-3">
             <Image src={logo} alt="Hash Plus Logo" className="h-11 w-auto" />
           </Link>
         </SidebarHeader>
@@ -203,7 +203,7 @@ const Index = ({ variant = "global" }) => {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="py-5">
-                    <Link href="/dashboard/settings/billing">
+                    <Link href="/app/settings/billing">
                       <Zap className="size-4" />
                       <span>اشترك الآن</span>
                     </Link>
@@ -211,7 +211,7 @@ const Index = ({ variant = "global" }) => {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive className="py-5">
-                    <Link href="/dashboard/overview">
+                    <Link href="/app/overview">
                       <LayoutGrid className="size-4" />
                       <span>لوحة التحكم</span>
                     </Link>
@@ -222,7 +222,7 @@ const Index = ({ variant = "global" }) => {
                     onUploaded={(fid) => {
                       if (fid)
                         router.push(
-                          `/dashboard/folders/${encodeURIComponent(fid)}`
+                          `/app/folders/${encodeURIComponent(fid)}`
                         );
                       // Trigger refresh
                       window.dispatchEvent(new Event("folders:refresh"));
@@ -295,7 +295,7 @@ const Index = ({ variant = "global" }) => {
                             }`}
                           >
                             <Link
-                              href={`/dashboard/folders/${encodeURIComponent(
+                              href={`/app/folders/${encodeURIComponent(
                                 id
                               )}/stages`}
                               className="flex items-center justify-between w-full"
@@ -347,7 +347,7 @@ const Index = ({ variant = "global" }) => {
 
         <SidebarFooter className="p-4 space-y-4">
           {/* Plan Button */}
-          <Link href="/dashboard/settings/billing" className="block w-full">
+          <Link href="/app/settings/billing" className="block w-full">
             <Button
               variant="outline"
               className="w-full justify-start gap-2 border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
@@ -379,7 +379,7 @@ const Index = ({ variant = "global" }) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="cursor-pointer">
+                <Link href="/app/settings" className="cursor-pointer">
                   <Settings className="size-4 ml-2" />
                   الإعدادات
                 </Link>
