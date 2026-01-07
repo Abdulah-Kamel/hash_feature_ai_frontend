@@ -3,8 +3,8 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import RegisterForm from "@/components/register/registerForm";
 import Image from "next/image";
-import heroImage from "@/assets/hero-image.svg";
-import logo from "@/assets/logo.svg";
+import heroImage from "@/assets/landing_page/chat.png";
+import logo from "@/assets/HashFlowlogo.png";
 
 const RegisterCard = () => {
   return (
@@ -29,8 +29,8 @@ const RegisterCard = () => {
         />
       </div>
       <Card className="bg-background border border-gray-50/20 shadow-lg p-6 gap-2 rounded-md col-span-1">
-        <Image src={logo} alt="logo" width={48} className="mx-auto" />
-        <h1 className="mb-3 font-bold sm:text-3xl text-center">
+        <Image src={logo} alt="logo" width={100} className="mx-auto" />
+        <h1 className="my-3 font-bold sm:text-3xl text-center">
           سجل حسابك مع هاش بلس
         </h1>
         <CardContent>

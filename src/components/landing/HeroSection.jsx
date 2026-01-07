@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
-import LogoCarousel from "../hero/LogoCarousel";
 import heroImage from "@/assets/hero-image.svg";
 import skyImage from "@/assets/SkyImage.svg";
 import Image from "next/image";
@@ -47,10 +46,6 @@ const HeroSection = () => {
             </Button>
           </Link>
         </div>
-      </div>
-      <LogoCarousel />
-      <div>
-        <Image src={heroImage} alt="Hero Image" width={1000} />
       </div>
     </>
   );
