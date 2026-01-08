@@ -11,6 +11,8 @@ import { useProfileStore } from "@/store/profileStore";
 
 export default function ProfileDetails() {
   const { profile } = useProfileStore();
+  console.log(profile);
+  
   const [dialogOpen, setDialogOpen] = useState(false);
 
   if (!profile) return null;
@@ -37,7 +39,7 @@ export default function ProfileDetails() {
           {/* Profile Image - Read Only Display */}
           <div className="flex items-center justify-center">
             <Avatar className="w-56 h-56">
-              <AvatarImage src={profile?.profileImageUrl} alt={profile?.name} />
+              <AvatarImage src={profile?.avatar} alt={profile?.name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-4xl">
                 {initials}
               </AvatarFallback>

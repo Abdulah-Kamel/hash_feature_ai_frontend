@@ -32,7 +32,7 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { Button } from "../ui/button";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Skeleton } from "../ui/skeleton";
 import logo from "@/assets/HashFlowlogo.png";
 import ChatSidebar from "@/components/chat/ChatSidebar";
@@ -159,6 +159,8 @@ const Index = ({ variant = "global" }) => {
 
   const userName = profile?.name || "";
   const userEmail = profile?.email || "";
+  const userImage = profile?.avatar || profile?.profileImage?.url || "";
+
   const initials = userName?.trim()?.charAt(0) || "م";
   const plan = profile?.plan || "free";
 
@@ -221,9 +223,7 @@ const Index = ({ variant = "global" }) => {
                   <UploadDialogTrigger
                     onUploaded={(fid) => {
                       if (fid)
-                        router.push(
-                          `/app/folders/${encodeURIComponent(fid)}`
-                        );
+                        router.push(`/app/folders/${encodeURIComponent(fid)}`);
                       // Trigger refresh
                       window.dispatchEvent(new Event("folders:refresh"));
                     }}
@@ -362,6 +362,7 @@ const Index = ({ variant = "global" }) => {
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-3 p-2 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer">
                 <Avatar className="size-10 bg-primary">
+                  <AvatarImage src={userImage} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                     {initials}
                   </AvatarFallback>

@@ -37,7 +37,7 @@ export default function EditProfileDialog({ open, onOpenChange }) {
         major: profile.major || "",
         faculty: profile.faculty || "",
       });
-      setTempProfileImage(profile.profileImageUrl || null);
+      setTempProfileImage(profile.profileImageUrl || profile.avatar);
     }
   }, [profile, open]);
 
@@ -129,6 +129,7 @@ export default function EditProfileDialog({ open, onOpenChange }) {
       country: formData.country,
       major: formData.major,
       faculty: formData.faculty,
+      position: formData.position,
     });
 
     if (result.success) {

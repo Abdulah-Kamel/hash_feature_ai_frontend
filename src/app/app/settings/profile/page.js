@@ -29,26 +29,9 @@ export default function ProfileTabPage() {
         if (!active) return;
 
         if (result.success) {
-          const d = result.data || {};
-          console.log("Profile API Response:", d);
-          const profileData = {
-            name: d.name || "",
-            email: d.email || "",
-            phone: d.phone || "",
-            country: d.country || "",
-            profileImage: d.profileImage || null,
-            profileImageUrl: d.profileImageUrl || null,
-            position: d.role || "",
-            role: d.role || "",
-            major: d.major || "",
-            faculty: d.faculty || "",
-            type: d.type || "",
-            oldPassword: "",
-            newPassword: "",
-            newPassword2: "",
-          };
-          console.log("Setting profile data:", profileData);
-          setProfile(profileData);
+          const data = result.data || {};
+          console.log("Profile API Response:", data);
+          setProfile(data);
         } else {
           toast.error(result.error || "فشل تحميل البيانات");
         }

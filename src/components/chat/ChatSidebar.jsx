@@ -49,6 +49,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { fixArabicFilename } from "@/lib/utils";
+import { AvatarImage } from "@radix-ui/react-avatar";
 
 function SidebarSection({ title, children }) {
   return (
@@ -84,7 +85,7 @@ function SourceItem({ label, checked, onToggle, onDelete, isDeleting }) {
           onDelete?.();
         }}
         disabled={isDeleting}
-        className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+        className="text-muted-foreground hover:text-destructive transition-opacity cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isDeleting ? (
           <div className="size-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
@@ -181,6 +182,7 @@ export default function ChatSidebar() {
 
   const userName = profile?.name || "";
   const userEmail = profile?.email || "";
+  const userImage = profile?.avatar || profile?.profileImage?.url || "";
   const initials = userName?.trim()?.charAt(0) || "م";
   const plan = profile?.plan || "free";
 
@@ -350,6 +352,7 @@ export default function ChatSidebar() {
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-3 p-2 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer">
               <Avatar className="size-10 bg-primary">
+                <AvatarImage src={userImage} />
                 <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                   {initials}
                 </AvatarFallback>

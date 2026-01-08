@@ -44,7 +44,7 @@ function ChatHeader({ chatOpen, onToggle }) {
         </Button>
         <Button
           variant="ghost"
-          className="rounded-lg cursor-pointer"
+          className="rounded-lg cursor-pointer hidden sm:flex"
           onClick={onToggle}
         >
           <span className="ml-1 text-sm">
