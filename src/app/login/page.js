@@ -4,25 +4,25 @@ import Container from "@/components/container";
 export const metadata = {
   title: "تسجيل الدخول",
   description:
-    "سجل دخولك إلى حسابك في Hash Plus للوصول إلى دوراتك المسجل بها ومتابعة تقدمك التعليمي.",
+    "سجل دخولك إلى حسابك في Hash Flow للوصول إلى دوراتك المسجل بها ومتابعة تقدمك التعليمي.",
   keywords: [
     "تسجيل الدخول",
     "دخول الحساب",
-    "تسجيل دخول Hash Plus",
+    "تسجيل دخول Hash Flow",
     "الوصول للحساب",
     "دوراتي",
     "حسابي",
   ],
   openGraph: {
-    title: "Hash Plus - تسجيل الدخول",
+    title: "Hash Flow - تسجيل الدخول",
     description: "سجل دخولك للوصول إلى دوراتك ومتابعة تقدمك التعليمي",
-    url: "https://hashplus.com/login",
+    url: "https://ihashflow.com/login",
     images: [
       {
         url: "/og-login.jpg",
         width: 1200,
         height: 630,
-        alt: "Hash Plus - تسجيل الدخول",
+        alt: "Hash Flow - تسجيل الدخول",
       },
     ],
   },

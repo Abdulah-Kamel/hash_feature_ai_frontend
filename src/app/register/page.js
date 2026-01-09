@@ -7,17 +7,17 @@ import RegisterCard from "@/components/register/registerCard";
 export const metadata = {
   title: "إنشاء حساب جديد",
   description:
-    "أنشئ حسابك الجديد في Hash Plus وابدأ رحلتك التعليمية مع أفضل الدورات التدريبية المتخصصة.",
+    "أنشئ حسابك الجديد في Hash Flow وابدأ رحلتك التعليمية مع أفضل الدورات التدريبية المتخصصة.",
   keywords: [
     "إنشاء حساب",
     "تسجيل جديد",
-    "حساب Hash Plus",
+    "حساب Hash Flow",
     "التسجيل",
     "عضوية جديدة",
     "انضم إلينا",
   ],
   openGraph: {
-    title: "Hash Plus - إنشاء حساب جديد",
+    title: "Hash Flow - إنشاء حساب جديد",
     description: "أنشئ حسابك الجديد وابدأ رحلتك التعليمية معنا",
     url: "https://hashplus.com/register",
     images: [
@@ -25,7 +25,7 @@ export const metadata = {
         url: "/og-register.jpg",
         width: 1200,
         height: 630,
-        alt: "Hash Plus - إنشاء حساب جديد",
+        alt: "Hash Flow - إنشاء حساب جديد",
       },
     ],
   },
