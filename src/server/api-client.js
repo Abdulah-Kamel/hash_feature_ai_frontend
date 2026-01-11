@@ -65,7 +65,6 @@ export async function serverApiClient(endpoint, options = {}) {
             httpOnly: true,
             sameSite: "strict",
             path: "/",
-            expires: new Date(Date.now() + 15 * 60 * 1000), // 15 mins
           });
 
           // Update refresh token if rotated

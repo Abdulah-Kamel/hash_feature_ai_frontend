@@ -12,20 +12,40 @@ export async function uploadFiles(formData) {
   const fd = new FormData();
   for (const file of files) fd.append("files", file);
 
-  // serverApiClient will automatically handle Content-Type for FormData
-  const res = await serverApiClient(`/api/v1/folders/${folderId}/files`, {
-    method: "POST",
-    body: fd,
-  });
-
-  let final = null;
   try {
-    final = await res.json();
-  } catch {}
+    // serverApiClient will automatically handle Content-Type for FormData
+    // Add timeout for large file uploads (5 minutes)
+    const res = await serverApiClient(`/api/v1/folders/${folderId}/files`, {
+      method: "POST",
+      body: fd,
+      signal: AbortSignal.timeout(300000), // 5 minutes timeout
+    });
 
-  if (!res.ok)
-    return { success: false, error: final?.message || res.statusText };
-  return { success: true, data: final };
+    let final = null;
+    try {
+      final = await res.json();
+    } catch (parseError) {
+      console.error("Failed to parse response:", parseError);
+    }
+
+    if (!res.ok) {
+      return { success: false, error: final?.message || res.statusText };
+    }
+    return { success: true, data: final };
+  } catch (error) {
+    // Handle timeout and network errors
+    if (error.name === "TimeoutError") {
+      return {
+        success: false,
+        error: "Upload timeout - file may be too large or connection too slow",
+      };
+    }
+    if (error.name === "AbortError") {
+      return { success: false, error: "Upload was cancelled" };
+    }
+    console.error("Upload error:", error);
+    return { success: false, error: error.message || "Upload failed" };
+  }
 }
 
 export async function fetchFolderFiles(folderId) {

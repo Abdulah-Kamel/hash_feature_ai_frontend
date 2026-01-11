@@ -170,7 +170,6 @@ export async function changeMyPassword(passwordData) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
   }
 
@@ -193,10 +192,6 @@ export async function deleteMyAccount() {
     };
   }
   
-  // Clear cookies upon successful deletion
-  const cookieStore = await cookies();
-  cookieStore.delete("authToken");
-  cookieStore.delete("refreshToken");
 
   return { success: true, message: "Account deleted successfully" };
 }
