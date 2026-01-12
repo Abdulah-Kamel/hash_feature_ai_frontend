@@ -9,6 +9,7 @@ import { Hourglass } from "react-loader-spinner";
 
 export default function GlobalJobLoader() {
   const jobs = useJobStore((s) => s.jobs);
+  const [simulatedProgress, setSimulatedProgress] = React.useState(0);
 
   // Find any active job
   const activeJobType = Object.keys(jobs).find((type) => {
@@ -23,7 +24,45 @@ export default function GlobalJobLoader() {
 
   const activeJob = activeJobType ? jobs[activeJobType] : null;
 
+  // Reset simulated progress when job changes or completes
+  React.useEffect(() => {
+    if (activeJob) {
+      setSimulatedProgress(activeJob.progress || 0);
+    } else {
+      setSimulatedProgress(0);
+    }
+  }, [activeJob?.id]); // Depend on ID to reset for new jobs
+
+  // Simulate progress
+  React.useEffect(() => {
+    if (!activeJob) return;
+
+    // If we have actual progress from API, prioritize it if it's greater
+    if (activeJob.progress > simulatedProgress) {
+      setSimulatedProgress(activeJob.progress);
+    }
+
+    // Don't simulate past 90%
+    if (simulatedProgress >= 90) return;
+
+    const interval = setInterval(() => {
+      setSimulatedProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(interval);
+          return 90;
+        }
+        // Add random increment between 1 and 3
+        const increment = Math.random() * 2 + 1;
+        return Math.min(prev + increment, 90);
+      });
+    }, 800); // Update every 800ms
+
+    return () => clearInterval(interval);
+  }, [activeJob, simulatedProgress]);
+
   if (!activeJob) return null;
+
+  const displayProgress = Math.max(activeJob?.progress || 0, simulatedProgress);
 
   const messages = {
     stages: "جاري تصميم المراحل التعليمية...",
@@ -57,12 +96,12 @@ export default function GlobalJobLoader() {
             </p>
           </div>
           <div className="w-full max-w-xs space-y-2">
-            <Progress value={activeJob.progress || 0} className="h-2" />
+            <Progress value={displayProgress} className="h-2" />
             <p
               className="text-xs text-muted-foreground text-left tabular-nums"
               dir="ltr"
             >
-              {Math.round(activeJob.progress || 0)}%
+              {Math.round(displayProgress)}%
             </p>
           </div>
         </div>

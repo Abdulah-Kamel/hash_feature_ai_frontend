@@ -156,34 +156,35 @@ function UploadDialogTrigger({ children, onUploaded }) {
                     if (summary.duplicates > 0 && summary.uploaded === 0) {
                       toast.warning(`تم تجاهل ${summary.duplicates} ملف مكرر`, {
                         position: "top-right",
-                        duration: 3000,
+                        duration: 5000,
                       });
                     } else if (summary.duplicates > 0) {
-                      toast.warning(`تم رفع ${summary.uploaded} ملف، ${summary.duplicates} ملف مكرر`, {
-                        position: "top-right",
-                        duration: 3000,
-                      });
-                    } else {
-                      toast.success("تم رفع الملفات بنجاح", {
-                        position: "top-right",
-                        duration: 3000,
-                      });
+                      toast.warning(
+                        `تم رفع ${summary.uploaded} ملف، ${summary.duplicates} ملف مكرر`,
+                        {
+                          position: "top-right",
+                          duration: 5000,
+                        }
+                      );
                     }
-                    
                     if (summary.failed > 0) {
                       toast.error(`فشل رفع ${summary.failed} ملف`, {
                         position: "top-right",
-                        duration: 3000,
+                        duration: 5000,
+                        description: res?.data?.results.failed[0]?.error,
                       });
+                      setShowOptions(false);
                     }
                   }
-                  
+
                   // Wait a moment then show options dialog
                   setTimeout(() => {
                     setShowProgress(false);
-                    setUploadedFolderId(res.folderId || selectedFolderId);
-                    setUploadedFileIds(fileIds);
-                    setShowOptions(true);
+                    if (fileIds.length > 0) {
+                      setUploadedFolderId(res.folderId || selectedFolderId);
+                      setUploadedFileIds(fileIds);
+                      setShowOptions(true);
+                    }
                   }, 800);
                   
                   try {
