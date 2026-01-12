@@ -168,19 +168,21 @@ const getLayoutedElements = (nodes, edges, options, existingPositions = {}) => {
 function extractMindMapData(json) {
   // Try to extract filename from various possible locations
   let filename = null;
-  
+
   // Check for filename in different places
-   filename = json.data.title;
+  filename = json.data?.mindMap?.title || json.data?.fileName;
   // Also check in nested data array
   if (!filename && Array.isArray(json?.data)) {
     const first = json.data[0];
     if (first?.title) filename = first.title;
   }
-  
+
   // Extract MindMapData roots
   let roots = null;
   if (Array.isArray(json?.data?.MindMapData)) roots = json.data.MindMapData;
   else if (Array.isArray(json?.MindMapData)) roots = json.MindMapData;
+  else if (Array.isArray(json?.data?.mindMap?.MindMapData))
+    roots = json.data.mindMap.MindMapData;
   else if (Array.isArray(json?.data)) {
     const combined = json.data.flatMap((it) =>
       Array.isArray(it?.MindMapData) ? it.MindMapData : []
@@ -194,7 +196,7 @@ function extractMindMapData(json) {
     );
     if (combined.length) roots = combined;
   }
-  
+
   return { roots, filename };
 }
 
@@ -529,7 +531,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         setEdges([...skLayout.edges]);
 
         const url = fileId
-          ? `/api/ai/mind-maps?fileId=${encodeURIComponent(fileId)}`
+          ? `/api/ai/mind-maps/${encodeURIComponent(fileId)}`
           : `/api/ai/mind-maps`;
         const res = await apiClient(url);
         const json = await res.json().catch(() => null);
@@ -542,7 +544,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
             `Failed to load mind map (${res.status})`;
           throw new Error(errorMessage);
         }
-        if(res.count === 0){
+        if (res.count === 0) {
           setError("لا يوجد  mind map انشئ واحد");
           setIsLoading(false);
           return;
@@ -551,9 +553,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         const { roots, filename } = extractMindMapData(json);
         if (!Array.isArray(roots) || !roots.length || cancelled) {
           if (!cancelled) {
-            setError(
-              "لا يوجد  mind map انشئ واحد"
-            );
+            setError("لا يوجد  mind map انشئ واحد");
             setIsLoading(false);
           }
           return;
@@ -643,9 +643,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">
-           {error}
-          </h3>
+          <h3 className="text-lg font-semibold text-white mb-2">{error}</h3>
         </div>
       </div>
     );
