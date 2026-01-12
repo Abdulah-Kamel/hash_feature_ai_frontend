@@ -243,7 +243,7 @@ function getDescendants(nodeId, childrenMap, result = new Set()) {
   return result;
 }
 
-const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
+const MindMapContent = ({ initialNodes, initialEdges, fileId, mindMapId }) => {
   const { fitView } = useReactFlow();
   const params = useParams();
   const folderId = params?.id || "";
@@ -530,8 +530,8 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
         setNodes([...skLayout.nodes]);
         setEdges([...skLayout.edges]);
 
-        const url = fileId
-          ? `/api/ai/mind-maps/${encodeURIComponent(fileId)}`
+        const url = mindMapId
+          ? `/api/ai/mind-maps/${encodeURIComponent(mindMapId)}`
           : `/api/ai/mind-maps`;
         const res = await apiClient(url);
         const json = await res.json().catch(() => null);
@@ -589,7 +589,7 @@ const MindMapContent = ({ initialNodes, initialEdges, fileId }) => {
       cancelled = true;
     };
   }, [
-    fileId,
+    mindMapId,
     handleNodeAction,
     handleToggleExpand,
     skeleton.nodes,
