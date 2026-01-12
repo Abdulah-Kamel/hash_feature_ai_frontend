@@ -214,7 +214,7 @@ export default function MindMapPanel() {
 
         {/* MindMap Container */}
         <div className="flex-1">
-          <MindMapContainer fileId={selectedMap._id || selectedMap.id} />
+          <MindMapContainer fileId={selectedMap.fileId} mindMapId={selectedMap._id} />
         </div>
       </div>
     );
