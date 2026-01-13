@@ -67,8 +67,6 @@ export default function PostUploadOptionsDialog({
         return "الأسئلة";
       case "mindmap":
         return "الخريطة الذهنية";
-      case "all":
-        return "الكل";
       default:
         return "المحتوى";
     }
@@ -372,24 +370,6 @@ export default function PostUploadOptionsDialog({
                   </div>
                 </Button>
               </div>
-
-            <Card
-              className="p-4 cursor-pointer hover:bg-accent transition-colors border-primary/50"
-              onClick={() => handleSelectType("all")}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-linear-to-br from-primary to-blue-500 p-3">
-                  <Sparkles className="size-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">إنشاء الكل</p>
-                  <p className="text-xs text-muted-foreground">
-                    إنشاء جميع أنواع المحتوى
-                  </p>
-                </div>
-                <ArrowLeft className="size-5 text-muted-foreground" />
-              </div>
-            </Card>
           </div>
         ) : (
           // Step 2: Enter title

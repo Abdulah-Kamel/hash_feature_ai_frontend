@@ -23,5 +23,19 @@ export const useFileStore = create((set, get) => ({
     }),
   deselectAll: () => set({ selectedIds: new Set() }),
   clearSelection: () => set({ selectedIds: new Set() }),
+  removeFile: (id) =>
+    set((state) => {
+      const nextFiles = state.files.filter((f) => f.id !== id);
+      const nextSelected = new Set(state.selectedIds);
+      nextSelected.delete(id);
+      return { files: nextFiles, selectedIds: nextSelected };
+    }),
+  clear: () =>
+    set({
+      folderId: null,
+      files: [],
+      selectedIds: new Set(),
+      isUploading: false,
+    }),
   getSelectedIds: () => Array.from(get().selectedIds),
 }));

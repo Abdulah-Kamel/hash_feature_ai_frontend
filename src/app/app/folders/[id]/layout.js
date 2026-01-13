@@ -24,6 +24,15 @@ export default function FolderLayout({ children }) {
   const setFiles = useFileStore((s) => s.setFiles);
   const folderId = useFileStore((s) => s.folderId);
   const getSelectedIds = useFileStore((s) => s.getSelectedIds);
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    if (pathname?.includes("/mindmap")) {
+      setChatOpen(false);
+    } else {
+      setChatOpen(true);
+    }
+  }, [pathname]);
   const [messages, setMessages] = React.useState([
     {
       id: "m1",

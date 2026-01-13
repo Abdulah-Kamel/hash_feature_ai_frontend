@@ -31,7 +31,7 @@ const RegisterCard = () => {
       <Card className="bg-background border border-gray-50/20 shadow-lg p-6 gap-2 rounded-md col-span-1">
         <Image src={logo} alt="logo" width={100} className="mx-auto" />
         <h1 className="my-3 font-bold sm:text-3xl text-center">
-          سجل حسابك مع هاش بلس
+          سجل حسابك مع هاش فلو
         </h1>
         <CardContent>
           <RegisterForm />

@@ -133,6 +133,7 @@ export default function ChatSidebar() {
       const res = await deleteFile(folderId, fileId);
       if (res?.success) {
         toast.success("تم حذف الملف بنجاح", { id: toastId });
+        useFileStore.getState().removeFile(fileId);
         try {
           window.dispatchEvent(new Event("files:refresh"));
         } catch {}
@@ -174,6 +175,7 @@ export default function ChatSidebar() {
 
   const handleLogout = async () => {
     try {
+      useFileStore.getState().clear();
       await logout();
     } catch (error) {
       toast.error("حدث خطأ أثناء تسجيل الخروج");
@@ -202,6 +204,14 @@ export default function ChatSidebar() {
                 <Link href="/app/overview">
                   <Home className="size-4" />
                   <span>الرئيسية</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className="py-5">
+                <Link href="/app/settings" className="cursor-pointer">
+                  <Settings className="size-4 ml-2" />
+                  الإعدادات
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -275,7 +285,9 @@ export default function ChatSidebar() {
               <Button
                 variant="secondary"
                 size="sm"
-                className="h-7 px-2 text-xs gap-1 cursor-pointer hover:bg-secondary/80"
+                className={`h-7 px-2 text-xs gap-1 cursor-pointer hover:bg-secondary/80 ${
+                  !pathname.includes("/folders") && "hidden"
+                }`}
               >
                 <span>إضافة</span>
                 <Plus className="size-3" />

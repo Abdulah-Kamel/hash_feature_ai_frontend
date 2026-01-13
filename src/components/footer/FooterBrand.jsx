@@ -10,7 +10,7 @@ const FooterBrand = ({ brand, appDownload }) => {
     <div className="space-y-6 text-center md:text-right">
       <div className="flex items-center gap-3 justify-center md:justify-start">
         <Image src={logo} alt="Hash Plus Logo" className="h-12 w-auto" width={48} height={48} />
-        <span className="text-2xl font-bold">هاش بلس</span>
+        <span className="text-2xl font-bold">هاش فلو</span>
       </div>
       
       <p className="text-muted-foreground leading-relaxed max-w-xs mx-auto md:mx-0">

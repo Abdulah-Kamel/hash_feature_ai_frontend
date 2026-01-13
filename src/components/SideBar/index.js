@@ -220,6 +220,14 @@ const Index = ({ variant = "global" }) => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="py-5">
+                    <Link href="/app/settings" className="cursor-pointer">
+                      <Settings className="size-4 ml-2" />
+                      الإعدادات
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
                   <UploadDialogTrigger
                     onUploaded={(fid) => {
                       if (fid)

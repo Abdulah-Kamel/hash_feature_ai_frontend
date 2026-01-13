@@ -127,7 +127,7 @@ export default function UsageTabPage() {
                 : 0,
             },
             {
-              label: "عدد tokens",
+              label: "الاستهلاك اليومي",
               value: `${tokens}/${tokensMax}`,
               percent: tokensMax ? Math.round((tokens / tokensMax) * 100) : 0,
             },

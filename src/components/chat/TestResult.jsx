@@ -60,7 +60,6 @@ export default function TestResult({
         }`}
       >
         <div className="flex flex-col items-center gap-4">
-          <p className="text-3xl font-bold">!مبروك</p>
           <p className="text-xl">لقد أنهيت الاختبار</p>
           <div className="relative size-36">
             <div

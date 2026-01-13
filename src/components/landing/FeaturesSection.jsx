@@ -6,7 +6,7 @@ const FeaturesSection = () => {
     <div id="learning" className="w-full mt-20 scroll-mt-24">
       <div className="flex flex-col items-center justify-center gap-6 mb-12">
         <h3 className="text-4xl md:text-5xl font-bold text-white text-center">
-          مميزات هاش بلس
+          مميزات هاش فلو
         </h3>
         <p className="text-lg md:text-xl text-white/80 text-center max-w-3xl leading-relaxed">
           حوّل أي مادة دراسية إلى تجربة تعليمية تفاعلية. تساعدك أدواتنا المدعمة

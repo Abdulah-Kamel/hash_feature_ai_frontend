@@ -41,7 +41,7 @@ export default function BillingTabPage() {
           </p>
           <p className="text-sm text-white/90">
             وفّر ساعات من إعداد البطاقات التعليمية والملاحظات وأسئلة الامتحانات
-            يوميًا مع هاش بلس.
+            يوميًا مع هاش فلو.
           </p>
         </div>
         <BillingPlans currentPlan={currentPlan} />
