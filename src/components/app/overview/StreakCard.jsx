@@ -59,7 +59,7 @@ export default function StreakCard() {
     "السبت",
   ];
   return (
-    <div className="bg-primary rounded-xl py-4 px-6 sm:px-10 flex sm:flex-row flex-col gap-6 items-center justify-between">
+    <div className="bg-primary rounded-xl py-4 px-6 flex 2xl:flex-row flex-col gap-6 items-center justify-between">
       <div className="flex items-center gap-3">
         <Flame className="size-10" />
         <div className="flex-1 space-y-1">
