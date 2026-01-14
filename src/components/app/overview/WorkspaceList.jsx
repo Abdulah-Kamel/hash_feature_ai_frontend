@@ -177,36 +177,6 @@ export default function WorkspaceList() {
               <span className="text-base font-semibold">ملف جديد</span>
             </Button>
           </UploadDialogTrigger>
-          <WorkspaceDialogTrigger
-            onSave={async (name) => {
-              const result = await createFolder({ name });
-              if (result?.success) {
-                toast.success("تم إنشاء المجلد بنجاح", {
-                  position: "top-right",
-                  duration: 3000,
-                  classNames: "toast-success mt-14",
-                });
-                if (typeof window !== "undefined") {
-                  window.dispatchEvent(new CustomEvent("folders:refresh"));
-                }
-              } else {
-                toast.error(result?.error || "فشل إنشاء المجلد", {
-                  position: "top-right",
-                  duration: 3000,
-                  classNames: "toast-error mt-14",
-                });
-              }
-            }}
-          >
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-primary hover:bg-primary/80 shadow-lg p-4 text-white cursor-pointer border-white/30"
-            >
-              <FolderClosed className="size-6" />
-              <span className="text-base font-semibold">انشاء مجلد</span>
-            </Button>
-          </WorkspaceDialogTrigger>
         </div>
       </div>
       {loading && (
@@ -625,18 +595,6 @@ export default function WorkspaceList() {
                         <div className="flex items-center">
                           <button
                             onClick={() =>
-                              handleOpenMindMapDialog(
-                                selected._id || selected.id,
-                                file._id || file.id
-                              )
-                            }
-                            className="text-muted-foreground hover:text-purple-500 transition-colors p-2 cursor-pointer"
-                            title="إنشاء خريطة ذهنية"
-                          >
-                            <Brain className="size-4" />
-                          </button>
-                          <button
-                            onClick={() =>
                               handleDeleteFile(file._id || file.id)
                             }
                             className="text-muted-foreground hover:text-destructive transition-colors p-2 cursor-pointer"
@@ -658,14 +616,6 @@ export default function WorkspaceList() {
           </div>
         </DialogContent>
       </Dialog>
-      <CreateMindMapDialog
-        open={mindMapOpen}
-        onOpenChange={setMindMapOpen}
-        folderId={mindMapFolderId}
-        initialFileId={mindMapInitialFileId}
-        initialFiles={folderFiles}
-      />
-     
     </div>
   );
 }

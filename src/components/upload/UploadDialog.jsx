@@ -105,7 +105,7 @@ function UploadDialogTrigger({ children, onUploaded }) {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const canSubmit = selectedFolderId && selectedFiles.length > 0 && !uploadBusy;
+  const canSubmit = selectedFiles.length > 0 && !uploadBusy;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -195,10 +195,19 @@ function UploadDialogTrigger({ children, onUploaded }) {
         // Wait a moment then show options dialog
         setTimeout(() => {
           setShowProgress(false);
+
           if (fileIds.length > 0) {
-            setUploadedFolderId(res.folderId || selectedFolderId);
+            // Get folderId from response if new folder was created, or use selectedFolderId
+            const responseFolderId = uploadedFiles[0]?.folderId;
+            const targetFolderId = responseFolderId || selectedFolderId;
+
+            setUploadedFolderId(targetFolderId);
             setUploadedFileIds(fileIds);
-            setShowOptions(true);
+
+            // Only show options if we have a valid folderId
+            if (targetFolderId) {
+              setShowOptions(true);
+            }
           }
         }, 800);
 
@@ -227,72 +236,30 @@ function UploadDialogTrigger({ children, onUploaded }) {
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6">
+        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-[50vw] w-full flex flex-col">
           <DialogHeader className="justify-center">
+            <DialogClose asChild>
+              <button className="absolute top-4 right-4 size-8 grid place-items-center rounded-md bg-card">
+                <X className="size-4 cursor-pointer" />
+              </button>
+            </DialogClose>
             <DialogTitle className="text-xl font-semibold text-muted-foreground">
               ارفع الملف
             </DialogTitle>
           </DialogHeader>
-          <DialogClose asChild>
-            <button className="absolute top-4 right-4 size-8 grid place-items-center rounded-md bg-card">
-              <X className="size-4 cursor-pointer" />
-            </button>
-          </DialogClose>
-          <div className="space-y-4">
-            {!folderId && (
-              <div className="space-y-2">
-                <p className="text-sm">مساحة العمل</p>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center justify-between h-12 w-full rounded-xl border px-3 bg-card border-[#515355] cursor-pointer">
-                      <span className="text-sm text-foreground/80">
-                        {workspace || "اختر مساحة العمل"}
-                      </span>
-                      <ChevronDown className="size-4 text-muted-foreground" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-full">
-                    <DropdownMenuLabel>اختار مساحة العمل</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {foldersLoading && (
-                      <div className="p-2 space-y-2">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-32" />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {!foldersLoading &&
-                      folders.length > 0 &&
-                      folders.map((f) => (
-                        <DropdownMenuItem
-                          className="w-full cursor-pointer"
-                          key={f._id || f.id || f.name}
-                          onSelect={() => onSelectFolder(f)}
-                        >
-                          {f.name}
-                        </DropdownMenuItem>
-                      ))}
-                    {!foldersLoading && folders.length === 0 && (
-                      <div className="p-2 text-sm text-muted-foreground">
-                        لا توجد مجلدات
-                      </div>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-            <form onSubmit={handleSubmit}>
-              <input type="hidden" name="folderId" value={selectedFolderId} />
+          <div className="space-y-2 mt-3 h-full flex-1 flex-col justify-center">
+            <div className="space-y-4 flex-1 flex flex-col">
+              <form
+                onSubmit={handleSubmit}
+                className="flex-1 flex flex-col min-h-0"
+              >
+                <input type="hidden" name="folderId" value={selectedFolderId} />
 
-              {/* Only show file upload section if folder is selected */}
-              {selectedFolderId ? (
                 <div
                   {...getRootProps({
-                    className: `rounded-2xl border border-dashed border-[#515355] bg-card p-8 grid place-items-center text-center gap-4 transition-all duration-300 ${
+                    className: `rounded-2xl border border-dashed border-[#515355] bg-card p-8 grid place-items-center text-center gap-4 transition-all duration-300 flex-1 flex flex-col justify-center ${
                       isDragActive
-                        ? "border-primary bg-primary/5 scale-105 shadow-lg"
+                        ? "border-primary bg-primary/5 scale-[1.01] shadow-lg"
                         : "hover:border-primary/50"
                     }`,
                   })}
@@ -360,15 +327,8 @@ function UploadDialogTrigger({ children, onUploaded }) {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-[#515355] bg-card/50 p-8 grid place-items-center text-center">
-                  <Upload className="size-8 text-muted-foreground/50 mb-4" />
-                  <p className="text-sm text-muted-foreground">
-                    الرجاء اختيار مساحة العمل أولاً
-                  </p>
-                </div>
-              )}
-            </form>
+              </form>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -5,17 +5,19 @@ import { redirect } from "next/navigation";
 export async function uploadFiles(formData) {
   const folderId = formData.get("folderId");
   const files = formData.getAll("files");
-  if (!folderId) return { success: false, error: "Missing folderId" };
+  // if (!folderId) return { success: false, error: "Missing folderId" }; // Allow missing folderId
   if (!files || files.length === 0)
     return { success: false, error: "No files provided" };
 
   const fd = new FormData();
+  if (folderId) fd.append("folderId", folderId);
   for (const file of files) fd.append("files", file);
 
   try {
     // serverApiClient will automatically handle Content-Type for FormData
     // Add timeout for large file uploads (5 minutes)
-    const res = await serverApiClient(`/api/v1/folders/${folderId}/files`, {
+    // Always use the folders/files endpoint, folderId is in the formData
+    const res = await serverApiClient(`/api/v1/folders/files`, {
       method: "POST",
       body: fd,
       signal: AbortSignal.timeout(300000), // 5 minutes timeout
