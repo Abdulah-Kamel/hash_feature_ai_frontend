@@ -236,7 +236,7 @@ function UploadDialogTrigger({ children, onUploaded }) {
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 max-w-[50vw] w-full flex flex-col">
+        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 sm:max-w-[50vw] w-full flex flex-col">
           <DialogHeader className="justify-center">
             <DialogClose asChild>
               <button className="absolute top-4 right-4 size-8 grid place-items-center rounded-md bg-card">
@@ -281,7 +281,7 @@ function UploadDialogTrigger({ children, onUploaded }) {
                       ? "أسقط الملفات هنا"
                       : "اسحب وأفلت الملفات هنا أو اخترها"}
                   </p>
-                  <div className="flex items-center gap-3">
+                  <div className="flex sm:flex-row flex-col items-center gap-3">
                     <Button
                       type="button"
                       onClick={() => openFileDialog()}
