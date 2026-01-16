@@ -10,14 +10,12 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Upload, X } from "lucide-react";
+import { ChevronDown, Upload, X, FileIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { getFolders } from "@/server/actions/folders";
 import useAuth from "@/hooks/use-auth";
@@ -70,6 +68,10 @@ function UploadDialogTrigger({ children, onUploaded }) {
   React.useEffect(() => {
     if (dialogOpen) {
       if (folderId) {
+        const folder = folders.find((f) => (f._id || f.id) === folderId);
+        if (folder) {
+          setWorkspace(folder.name);
+        }
         setSelectedFolderId(folderId);
       }
       loadFolders();
@@ -83,7 +85,7 @@ function UploadDialogTrigger({ children, onUploaded }) {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [dialogOpen, loadFolders, folderId]);
+  }, [dialogOpen, loadFolders, folderId, folders]);
 
   const onSelectFolder = (f) => {
     setWorkspace(f.name);
@@ -154,7 +156,6 @@ function UploadDialogTrigger({ children, onUploaded }) {
         setUploadProgress(100);
 
         // Extract file IDs from response
-        // API returns: { results: { uploaded: [...], duplicates: [...], failed: [...] } }
         const uploadedFiles = res.data?.results?.uploaded || [];
         const duplicateFiles = res.data?.results?.duplicates || [];
         const failedFiles = res.data?.results?.failed || [];
@@ -236,100 +237,104 @@ function UploadDialogTrigger({ children, onUploaded }) {
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="border-[#515355] bg-background rounded-2xl p-6 sm:max-w-[50vw] w-full flex flex-col">
-          <DialogHeader className="justify-center">
+        <DialogContent className="bg-[#1a1a1a] border-none rounded-3xl p-0 sm:max-w-[600px] w-full overflow-hidden">
+          {/* Header */}
+          <DialogHeader className="p-6 pb-4 relative">
             <DialogClose asChild>
-              <button className="absolute top-4 right-4 size-8 grid place-items-center rounded-md bg-card">
-                <X className="size-4 cursor-pointer" />
+              <button className="absolute top-6 left-6 size-8 grid place-items-center rounded-lg hover:bg-white/10 transition-colors">
+                <X className="size-5 text-white cursor-pointer" />
               </button>
             </DialogClose>
-            <DialogTitle className="text-xl font-semibold text-muted-foreground">
+            <DialogTitle className="text-2xl font-semibold text-white text-right">
               ارفع الملف
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 mt-3 h-full flex-1 flex-col justify-center">
-            <div className="space-y-4 flex-1 flex flex-col">
-              <form
-                onSubmit={handleSubmit}
-                className="flex-1 flex flex-col min-h-0"
-              >
-                <input type="hidden" name="folderId" value={selectedFolderId} />
 
-                <div
-                  {...getRootProps({
-                    className: `rounded-2xl border border-dashed border-[#515355] bg-card p-8 grid place-items-center text-center gap-4 transition-all duration-300 flex-1 flex flex-col justify-center ${
-                      isDragActive
-                        ? "border-primary bg-primary/5 scale-[1.01] shadow-lg"
-                        : "hover:border-primary/50"
-                    }`,
-                  })}
-                >
-                  <input {...getInputProps({ name: "files" })} />
-                  <Upload
-                    className={`size-8 transition-all duration-300 ${
-                      isDragActive
-                        ? "text-primary scale-110"
-                        : "text-muted-foreground"
-                    }`}
-                  />
-                  <p
-                    className={`text-sm transition-colors duration-300 ${
-                      isDragActive ? "text-primary font-medium" : ""
-                    }`}
-                  >
-                    {isDragActive
-                      ? "أسقط الملفات هنا"
-                      : "اسحب وأفلت الملفات هنا أو اخترها"}
-                  </p>
-                  <div className="flex sm:flex-row flex-col items-center gap-3">
-                    <Button
-                      type="button"
-                      onClick={() => openFileDialog()}
-                      className="bg-primary text-primary-foreground px-10 py-5 cursor-pointer"
-                    >
-                      اختر الملفات
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={!canSubmit || uploadBusy}
-                      className="bg-secondary text-white px-10 py-5 cursor-pointer disabled:opacity-60"
-                    >
-                      ارفع الملف
-                    </Button>
+          <form onSubmit={handleSubmit} className="flex flex-col">
+            <div className="px-6 space-y-4">
+              {/* Drop Zone */}
+              <div
+                {...getRootProps({
+                  className: `rounded-2xl border-2 border-dashed ${
+                    isDragActive
+                      ? "border-primary bg-primary/10"
+                      : "border-[#3a3a3a]"
+                  } bg-[#252525] p-12 flex flex-col items-center justify-center gap-4 transition-all duration-300 cursor-pointer hover:border-primary/50`,
+                })}
+              >
+                <input {...getInputProps({ name: "files" })} />
+                <div className="relative">
+                  <div className="size-16 rounded-full bg-[#2a2a2a] flex items-center justify-center">
+                    <Upload
+                      className={`size-8 transition-all duration-300 ${
+                        isDragActive ? "text-primary scale-110" : "text-white"
+                      }`}
+                    />
                   </div>
-                  {selectedFiles.length > 0 && (
-                    <div className="mt-4 text-left w-full">
-                      <p className="text-sm mb-2">الملفات المختارة:</p>
-                      <ul className="text-xs space-y-2">
-                        {selectedFiles.map((f, i) => (
-                          <li
-                            key={i}
-                            className="flex items-center justify-between bg-background/50 p-2 rounded border border-border/50"
-                          >
-                            <span className="text-muted-foreground truncate max-w-[200px]">
-                              {f.name} (
-                              {Math.round((f.size / 1024 / 1024) * 100) / 100}{" "}
-                              MB)
-                            </span>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeFile(i);
-                              }}
-                              className="text-muted-foreground hover:text-destructive transition-colors p-1 cursor-pointer"
-                            >
-                              <X className="size-3" />
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                 </div>
-              </form>
+                <p className="text-white text-base text-center">
+                  {isDragActive ? "أسقط الملف هنا" : "أرفق الملف هنا"}
+                </p>
+                <Button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openFileDialog();
+                  }}
+                  className="bg-primary hover:bg-primary/90 text-white rounded-xl px-12 py-3 text-base font-medium cursor-pointer"
+                >
+                  ارفع الملف
+                </Button>
+              </div>
+
+              {/* Selected Files List */}
+              {selectedFiles.length > 0 && (
+                <div className="space-y-3 max-h-[200px] overflow-y-auto">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#252525] rounded-xl p-3 flex items-center justify-between group hover:bg-[#2a2a2a] transition-colors"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="size-8 rounded-lg bg-[#2a2a2a] hover:bg-red-500/20 flex items-center justify-center transition-colors cursor-pointer"
+                      >
+                        <X className="size-4 text-white/70 group-hover:text-red-500" />
+                      </button>
+                      <div className="flex-1 text-right mr-3">
+                        <p className="text-white text-sm font-medium truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-white/50 text-xs">
+                          {Math.round((file.size / 1024 / 1024) * 100) / 100}{" "}
+                          كيلو بايت من{" "}
+                          {Math.round((file.size / 1024 / 1024) * 100) / 100}{" "}
+                          كيلو بايت
+                        </p>
+                      </div>
+                      <div className="size-10 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0 ml-3">
+                        <span className="text-green-500 font-bold text-sm">
+                          {file.name.split(".").pop()?.toUpperCase() || "X"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+
+            {/* Footer Button */}
+            <div className="p-6 pt-4">
+              <Button
+                type="submit"
+                disabled={!canSubmit || uploadBusy}
+                className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl py-4 text-base font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploadBusy ? "جاري الرفع..." : "ابدأ الآن"}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
 

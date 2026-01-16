@@ -7,6 +7,9 @@ import {
   ChevronDown,
   FileText,
   FolderClosed,
+  Layers,
+  CreditCard,
+  ClipboardCheck,
 } from "lucide-react"; // Added ChevronDown
 import {
   getFolders,
@@ -55,7 +58,7 @@ export default function WorkspaceList() {
   const [busy, setBusy] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState(new Set()); // Track expanded folders
   const { isAuthenticated, loading: authLoading } = useAuth();
-  
+
   // Mind Map Dialog State
   const [mindMapOpen, setMindMapOpen] = useState(false);
   const [mindMapFolderId, setMindMapFolderId] = useState(null);
@@ -313,18 +316,14 @@ export default function WorkspaceList() {
                   <div className="overflow-hidden">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <Link
-                        href={`/app/folders/${encodeURIComponent(
-                          id
-                        )}/stages`}
+                        href={`/app/folders/${encodeURIComponent(id)}/stages`}
                         prefetch={false}
                         className="group"
                       >
                         <div className="bg-primary/10 hover:bg-primary/20 transition-colors rounded-lg p-4 border border-primary/20 hover:border-primary/40">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center">
-                              <span className="text-primary text-sm font-bold">
-                                M
-                              </span>
+                              <Layers className="size-4 text-primary" />
                             </div>
                             <h3 className="font-medium text-sm">المراحل</h3>
                           </div>
@@ -344,9 +343,7 @@ export default function WorkspaceList() {
                         <div className="bg-secondary/10 hover:bg-secondary/20 transition-colors rounded-lg p-4 border border-secondary/20 hover:border-secondary/40">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="size-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                              <span className="text-secondary text-sm font-bold">
-                                F
-                              </span>
+                              <CreditCard className="size-4 text-secondary" />
                             </div>
                             <h3 className="font-medium text-sm">
                               البطاقات التعليمية
@@ -359,18 +356,14 @@ export default function WorkspaceList() {
                       </Link>
 
                       <Link
-                        href={`/app/folders/${encodeURIComponent(
-                          id
-                        )}/tests`}
+                        href={`/app/folders/${encodeURIComponent(id)}/tests`}
                         prefetch={false}
                         className="group"
                       >
                         <div className="bg-[#278F5C]/10 hover:bg-[#278F5C]/20 transition-colors rounded-lg p-4 border border-[#278F5C]/20 hover:border-[#278F5C]/40">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="size-8 rounded-full bg-[#278F5C]/20 flex items-center justify-center">
-                              <span className="text-[#278F5C] text-sm font-bold">
-                                T
-                              </span>
+                              <ClipboardCheck className="size-4 text-[#278F5C]" />
                             </div>
                             <h3 className="font-medium text-sm">الاختبارات</h3>
                           </div>
@@ -382,9 +375,7 @@ export default function WorkspaceList() {
 
                       {/* Mind Map Card */}
                       <Link
-                        href={`/app/folders/${encodeURIComponent(
-                          id
-                        )}/mindmap`}
+                        href={`/app/folders/${encodeURIComponent(id)}/mindmap`}
                         prefetch={false}
                         className="group"
                       >
@@ -393,7 +384,9 @@ export default function WorkspaceList() {
                             <div className="size-8 rounded-full bg-purple-500/20 flex items-center justify-center">
                               <Brain className="w-4 h-4 text-purple-500" />
                             </div>
-                            <h3 className="font-medium text-sm">الخريطة الذهنية</h3>
+                            <h3 className="font-medium text-sm">
+                              الخريطة الذهنية
+                            </h3>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             تحويل الملفات إلى خرائط ذهنية

@@ -149,7 +149,7 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
     return (
       <StageLearn
         onBack={() => setMode("detail")}
-        title={`${selected?.title || "القسم"} - المرحلة ${
+        title={`المرحلة ${selected?.title || "القسم"} -  ${
           selectedStage?.stageNumber || 1
         }`}
         content={selectedStage?.stageContent || ""}
@@ -214,11 +214,6 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
         setMode("learn");
         setMcqData([]);
       } else {
-        // No more stages, go back to detail view
-        toast.info("لقد أكملت جميع المراحل!", {
-          position: "top-right",
-          duration: 3000,
-        });
         setMode("detail");
         setMcqData([]);
       }
@@ -227,7 +222,7 @@ export default function StageSwitcher({ shouldLoad = false, onModeChange }) {
     return (
       <TestView
         onBack={() => setMode("learn")}
-        title={`${selected?.title || "القسم"} - اختبار المرحلة ${
+        title={`اختبار المرحلة ${selected?.title || "القسم"} - ${
           selectedStage?.stageNumber || 1
         }`}
         total={Array.isArray(mcqData) ? mcqData.length : 0}

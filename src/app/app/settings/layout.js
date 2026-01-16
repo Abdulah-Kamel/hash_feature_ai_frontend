@@ -26,8 +26,8 @@ export default function SettingsLayout({ children }) {
               href={t.href}
               className={
                 active
-                  ? "rounded-lg px-6 py-3 bg-primary text-primary-foreground"
-                  : "rounded-lg px-6 py-3 bg-background text-white"
+                  ? "rounded-lg px-6 py-3 bg-primary text-primary-foreground text-center"
+                  : "rounded-lg px-6 py-3 bg-background text-white text-center"
               }
             >
               {t.label}

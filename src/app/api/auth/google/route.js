@@ -35,7 +35,6 @@ export async function POST(req) {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
-      expires: new Date(Date.now() + 15 * 60 * 1000),
     });
   if (refreshToken)
     c.set("refreshToken", refreshToken, { httpOnly: true, sameSite: "strict", path: "/" });
@@ -44,7 +43,6 @@ export async function POST(req) {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
-      expires: new Date(Date.now() + 15 * 60 * 1000),
     });
   return NextResponse.json(final);
 }

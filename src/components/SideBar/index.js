@@ -42,7 +42,7 @@ import { getFolders, deleteFolder } from "@/server/actions/folders";
 import { toast } from "sonner";
 import UploadDialogTrigger from "@/components/upload/UploadDialog";
 import { useFileStore } from "@/store/fileStore";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +61,7 @@ const Index = ({ variant = "global" }) => {
   const [deletingIds, setDeletingIds] = React.useState(new Set());
   const [profile, setProfile] = React.useState(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Fetch user folders on mount
   React.useEffect(() => {
@@ -204,7 +205,11 @@ const Index = ({ variant = "global" }) => {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="py-5">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname?.startsWith("/app/settings/billing")}
+                    className="py-5"
+                  >
                     <Link href="/app/settings/billing">
                       <Zap className="size-4" />
                       <span>اشترك الآن</span>
@@ -212,7 +217,11 @@ const Index = ({ variant = "global" }) => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive className="py-5">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/app/overview"}
+                    className="py-5"
+                  >
                     <Link href="/app/overview">
                       <LayoutGrid className="size-4" />
                       <span>لوحة التحكم</span>
@@ -220,7 +229,11 @@ const Index = ({ variant = "global" }) => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="py-5">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname?.startsWith("/app/settings")}
+                    className="py-5"
+                  >
                     <Link href="/app/settings" className="cursor-pointer">
                       <Settings className="size-4 ml-2" />
                       الإعدادات
@@ -258,7 +271,7 @@ const Index = ({ variant = "global" }) => {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild={false}
-                    isActive
+                    isActive={pathname?.startsWith("/app/folders")}
                     className="py-5 cursor-pointer"
                     onClick={() => setFoldersExpanded(!foldersExpanded)}
                   >
@@ -298,6 +311,9 @@ const Index = ({ variant = "global" }) => {
                         <SidebarMenuItem key={id || f.name}>
                           <SidebarMenuButton
                             asChild
+                            isActive={pathname?.includes(
+                              `/app/folders/${encodeURIComponent(id)}`
+                            )}
                             className={`py-4 justify-between group transition-all duration-300 ${
                               isDeleting ? "opacity-50 pointer-events-none" : ""
                             }`}

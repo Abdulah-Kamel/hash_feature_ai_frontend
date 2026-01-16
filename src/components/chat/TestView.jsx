@@ -197,9 +197,9 @@ export default function TestView({
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      <Card className="rounded-2xl w-full bg-linear-to-b from-[#bd6beecc] to-[#bd6bee] p-3 gap-4 flex flex-row items-center justify-between">
-        <div className="size-8 rounded-full bg-white/20" />
-        <p className="text-white text-xl">{question}</p>
+      <Card className="rounded-2xl w-full bg-linear-to-b from-[#bd6beecc] to-[#bd6bee] p-3 gap-4 flex flex-row items-center">
+        <div className="px-2 text-2xl text-center rounded-full bg-white/20">{current}</div>
+        <p className="text-white text-sm sm:text-xl text-right">{question}</p>
       </Card>
 
       <div className="space-y-3 w-full">
@@ -218,13 +218,13 @@ export default function TestView({
         {status === "correct" || status === "wrong" ? (
           <button
             onClick={onNext}
-            className="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-white"
+            className="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-white cursor-pointer"
             style={{
               background: status === "correct" ? "#278f5c" : "#ff0000",
             }}
           >
-            <ArrowLeft className="size-5" />
             التالي
+            <ArrowLeft className="size-5" />
           </button>
         ) : (
           <Button

@@ -76,7 +76,6 @@ export async function POST(req) {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
-      expires: new Date(Date.now() + 15 * 60 * 1000),
     });
   if (refreshToken)
     c.set("refreshToken", refreshToken, {
@@ -89,7 +88,6 @@ export async function POST(req) {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
-      expires: new Date(Date.now() + 15 * 60 * 1000),
     });
 
   return NextResponse.redirect(new URL("/app/overview", baseUrl));
