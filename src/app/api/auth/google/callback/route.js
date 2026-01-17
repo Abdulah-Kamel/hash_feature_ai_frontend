@@ -23,6 +23,7 @@ function getAppUrl(req) {
 }
 
 export async function POST(req) {
+  console.log("Google callback request:", req);
   const base = apiBase();
   const baseUrl = getAppUrl(req);
 

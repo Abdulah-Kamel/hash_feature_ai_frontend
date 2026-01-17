@@ -24,12 +24,11 @@ import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect as useEffectReact, useState as useStateReact } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const RegisterForm = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleBusy, setGoogleBusy] = useState(false);
-  const [googleReady, setGoogleReady] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
   const router = useRouter();
   const formSchema = z.object({
@@ -68,140 +67,62 @@ const RegisterForm = () => {
     });
   }, [reset]);
 
-  useEffect(() => {
-    const existing = document.getElementById("google-signin-script");
-    if (existing) {
+  const googleLogin = useGoogleLogin({
+    flow: "auth-code",
+    scope: "openid email profile",
+    onSuccess: async (codeResponse) => {
+      console.log("Google Auth Code Response:", codeResponse);
       try {
-        if (
-          window.google?.accounts?.id &&
-          document.getElementById("gsi-register-btn")
-        ) {
-          const btn = document.getElementById("gsi-register-btn");
-          window.google.accounts.id.renderButton(btn, {
-            theme: "filled_black",
-            size: "large",
-            text: "continue_with",
-            shape: "rectangular",
-            width: 400,
+        const res = await fetch("/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: codeResponse.code }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          const msg = json?.message || "فشل تسجيل الدخول بواسطة جوجل";
+          if (/verify your otp code first/i.test(String(msg))) {
+            toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
+              position: "top-right",
+              duration: 3000,
+              classNames: "toast-info mt-14",
+            });
+            router.push(`/otp`);
+            return;
+          }
+          toast.error(msg, {
+            position: "top-right",
+            duration: 3000,
+            classNames: "toast-error mt-14",
           });
-          try {
-            btn.addEventListener(
-              "click",
-              () => {
-                setGoogleBusy(true);
-              },
-              true
-            );
-          } catch {}
-          setGoogleReady(true);
-          setGoogleBusy(false);
-          return;
-        }
-      } catch {}
-    }
-    const s = document.createElement("script");
-    s.src = "https://accounts.google.com/gsi/client";
-    s.async = true;
-    s.defer = true;
-    s.id = "google-signin-script";
-    s.onload = () => {
-      try {
-        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-        if (window.google && clientId) {
-          window.google.accounts.id.initialize({
-            client_id: clientId,
-            ux_mode: "redirect",
-            login_uri:
-              typeof window !== "undefined"
-                ? `${window.location.origin}/api/auth/google/callback`
-                : undefined,
-            callback: async (response) => {
-              const credential = response?.credential;
-              if (!credential) return;
-              setGoogleBusy(true);
-              try {
-                const res = await fetch("/api/auth/google", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ idToken: credential }),
-                });
-                const json = await res.json();
-                if (!res.ok) {
-                  const msg = json?.message || "فشل تسجيل الدخول بواسطة جوجل";
-                  if (/verify your otp code first/i.test(String(msg))) {
-                    toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
-                      position: "top-right",
-                      duration: 3000,
-                      classNames: "toast-info mt-14",
-                    });
-                    router.push(`/otp`);
-                    return;
-                  }
-                  toast.error(msg, {
-                    position: "top-right",
-                    duration: 3000,
-                    classNames: "toast-error mt-14",
-                  });
-                } else {
-                  const active = !!(
-                    json?.data?.isActive || json?.user?.isActive
-                  );
-                  if (!active) {
-                    toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
-                      position: "top-right",
-                      duration: 3000,
-                      classNames: "toast-info mt-14",
-                    });
-                    router.push(`/otp`);
-                    return;
-                  }
-                  toast.success("تم تسجيل الدخول بنجاح", {
-                    position: "top-right",
-                    duration: 3000,
-                    classNames: "toast-success mt-14",
-                  });
-                  router.push("/app/overview");
-                }
-              } finally {
-                setGoogleBusy(false);
-              }
-            },
+        } else {
+          const active = !!(json?.data?.isActive || json?.user?.isActive);
+          if (!active) {
+            toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
+              position: "top-right",
+              duration: 3000,
+              classNames: "toast-info mt-14",
+            });
+            router.push(`/otp`);
+            return;
+          }
+          toast.success("تم تسجيل الدخول بنجاح", {
+            position: "top-right",
+            duration: 3000,
+            classNames: "toast-success mt-14",
           });
-          try {
-            const btn = document.getElementById("gsi-register-btn");
-            if (btn && window.google?.accounts?.id?.renderButton) {
-              window.google.accounts.id.renderButton(btn, {
-                theme: "filled_black",
-                size: "large",
-                text: "continue_with",
-                shape: "rectangular",
-              });
-              try {
-                btn.addEventListener(
-                  "click",
-                  () => {
-                    setGoogleBusy(true);
-                  },
-                  true
-                );
-              } catch {}
-            }
-          } catch {}
-          setGoogleReady(true);
+          router.push("/app/overview");
         }
-      } catch {}
-    };
-    document.body.appendChild(s);
-  }, [router]);
-
-  const onGoogleLogin = () => {
-    if (googleBusy) return;
-    if (window.google && googleReady) {
-      try {
-        window.google.accounts.id.prompt();
-      } catch {}
-    }
-  };
+      } catch (error) {
+        console.error("Error during Google login:", error);
+        toast.error("حدث خطأ أثناء تسجيل الدخول");
+      }
+    },
+    onError: (errorResponse) => {
+      console.error("Google Login Error:", errorResponse);
+      toast.error("فشل تسجيل الدخول بواسطة جوجل");
+    },
+  });
 
   async function onSubmit(data) {
     console.log("data", data);
@@ -282,26 +203,28 @@ const RegisterForm = () => {
           >
             {loading ? <Spinner className="size-8" /> : "إنشاء حساب"}
           </Button>
-          {/* Google Sign-In Button - Original Google button in dark mode */}
-          <div className="w-full mt-2 flex justify-center">
-            {!googleReady && (
-              <Button
-                variant="outline"
-                className="w-full cursor-not-allowed px-5 py-2 sm:py-7 rounded-lg text-lg font-medium max-sm:text-xs"
-                disabled
-                type="button"
-              >
-                <Spinner className="size-5 mr-2" />
-                جاري التحميل...
-              </Button>
-            )}
-            <div
-              id="gsi-register-btn"
-              className={`max-w-full overflow-hidden border border-primary/70 bg-card ${
-                googleReady ? "block" : "hidden"
-              }`}
-            />
+
+          {/* Custom Google Sign-In Button */}
+          <div className="w-full mt-2">
+            <div className="relative flex py-2 items-center">
+              <div className="flex-grow border-t border-gray-600"></div>
+              <span className="flex-shrink-0 mx-4 text-gray-400">أو</span>
+              <div className="flex-grow border-t border-gray-600"></div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => googleLogin()}
+              className="w-full h-12 bg-[#2D2D2D] hover:bg-[#3D3D3D] text-white flex items-center px-4 rounded-lg group border border-[#404040] cursor-pointer"
+              variant="custom"
+            >
+              <span className="flex-1 flex items-center justify-center gap-2 text-center font-medium text-base">
+                أكمل عن طريق جوجل
+                <Image src={googleIcon} alt="Google" width={24} height={24} />
+              </span>
+            </Button>
           </div>
+
           <div className="max-sm:text-xs text-center mt-6 font-light">
             لديك حساب بالفعل؟
             <Link href="/login" className="ms-2 text-primary hover:underline">
