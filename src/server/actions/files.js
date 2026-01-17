@@ -91,10 +91,15 @@ export async function logout() {
   // Previous implementation just cleared cookie.
   // We can't access `cookies().delete` directly in api-client helper easily without passing context.
   // So we keep original logic here but importing cookies.
-  const { cookies } = await import("next/headers");
-  const c = await cookies();
-  c.delete("authToken");
-  c.delete("refreshToken");
+  try {
+    const { cookies } = await import("next/headers");
+    const c = await cookies();
+    c.delete("authToken");
+    c.delete("refreshToken");
+  } catch (error) {
+    console.error("Logout error:", error);
+    return { success: false, error: error.message || "Logout failed" };
+  }
   redirect("/login");
 }
 

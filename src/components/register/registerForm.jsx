@@ -85,7 +85,7 @@ const RegisterForm = () => {
             toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
               position: "top-right",
               duration: 3000,
-              classNames: "toast-info mt-14",
+              classNames: "toast-info text-black mt-14",
             });
             router.push(`/otp`);
             return;
@@ -93,23 +93,13 @@ const RegisterForm = () => {
           toast.error(msg, {
             position: "top-right",
             duration: 3000,
-            classNames: "toast-error mt-14",
+            classNames: "toast-error text-black mt-14",
           });
         } else {
-          const active = !!(json?.data?.isActive || json?.user?.isActive);
-          if (!active) {
-            toast.info("يرجى التحقق من الحساب عبر الرمز المرسل", {
-              position: "top-right",
-              duration: 3000,
-              classNames: "toast-info mt-14",
-            });
-            router.push(`/otp`);
-            return;
-          }
           toast.success("تم تسجيل الدخول بنجاح", {
             position: "top-right",
             duration: 3000,
-            classNames: "toast-success mt-14",
+            classNames: "toast-success text-black mt-14",
           });
           router.push("/app/overview");
         }
