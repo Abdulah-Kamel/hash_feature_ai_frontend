@@ -83,12 +83,18 @@ export default function PaymentForm({ planMonths = "1" }) {
           callback_url: `${
             window.location.origin
           }/api/payments/callback?planMonths=${encodeURIComponent(
-            String(planMonths)
+            String(planMonths),
           )}`,
           amount: amountFor(planMonths),
           currency: "SAR",
           description: `HashPlus Pro – ${planMonths} months`,
-          methods: ["creditcard"],
+          methods: ["creditcard", "applepay"],
+          apple_pay: {
+            country: "SA",
+            label: "HashPlus",
+            validate_merchant_url:
+              "https://api.moyasar.com/v1/applepay/initiate",
+          },
           supported_networks: ["visa", "mastercard", "mada", "amex"],
           on_completed: async () => {},
         });
