@@ -13,9 +13,10 @@ const useAuth = () => {
       .then((r) => r.json())
       .then((d) => {
         if (!active) return;
+        console.log(d);
         setIsAuthenticated(!!d?.isAuthenticated);
         setHasRefreshToken(!!d?.hasRefreshToken);
-        setUser(d?.user || null);
+        setUser(d?.user);
       })
       .catch(() => {})
       .finally(() => {

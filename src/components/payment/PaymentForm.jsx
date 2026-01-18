@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
+import useAuth from "@/hooks/use-auth";
+import { useProfileStore } from "@/store/profileStore";
 
 function amountFor(planMonths) {
   if (String(planMonths) === "1") return 29 * 100;
@@ -10,9 +12,21 @@ function amountFor(planMonths) {
   return 29 * 100;
 }
 
-export default function PaymentForm({ planMonths = "1" }) {
+export default function PaymentForm({ planMonths = "1", onApplePayStart }) {
   const [loading, setLoading] = useState(false);
   const containerRef = useRef(null);
+  const user = useAuth();
+  useEffect(() => {
+    console.log(user);
+    console.log(
+      {
+        customer_id: user?.user?._id,
+        plan_name: "Pro",
+        plan_amount: amountFor(planMonths),
+        plan_months: planMonths,
+      },
+    );
+  }, [user]);
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY;
@@ -23,7 +37,7 @@ export default function PaymentForm({ planMonths = "1" }) {
 
     const ensureCss = () => {
       const exists = Array.from(document.styleSheets).some((s) =>
-        String(s.href || "").includes("moyasar.css")
+        String(s.href || "").includes("moyasar.css"),
       );
       if (exists) return;
       const link = document.createElement("link");
@@ -99,12 +113,38 @@ export default function PaymentForm({ planMonths = "1" }) {
               "https://api.moyasar.com/v1/applepay/initiate",
           },
           supported_networks: ["visa", "mastercard", "mada", "amex"],
-          on_completed: async () => {},
+          metadata: {
+            customer_id: user?.user?._id,
+            plan_name: "Pro",
+            plan_amount: amountFor(planMonths),
+            plan_months: planMonths,
+          },
+          on_completed: async function (payment) {
+            console.log(payment);
+          },
         });
       } catch (e) {
         toast.error("تعذر تهيئة نموذج الدفع");
       }
     };
+
+    const handleApplePayInteraction = (e) => {
+      // Moyasar renders Apple Pay button with specific classes or roles
+      const isApplePay =
+        e.target.closest(".apple-pay") ||
+        e.target.closest("[role='apple-pay-button']") ||
+        e.target.closest(".mysr-apple-pay-btn");
+
+      if (isApplePay && onApplePayStart) {
+        onApplePayStart();
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("click", handleApplePayInteraction);
+      container.addEventListener("touchstart", handleApplePayInteraction);
+    }
 
     ensureCss();
     ensureOverrides();
@@ -122,9 +162,13 @@ export default function PaymentForm({ planMonths = "1" }) {
     }
 
     return () => {
-      if (containerRef.current) containerRef.current.innerHTML = "";
+      if (container) {
+        container.removeEventListener("click", handleApplePayInteraction);
+        container.removeEventListener("touchstart", handleApplePayInteraction);
+      }
+      if (container) container.innerHTML = "";
     };
-  }, [planMonths]);
+  }, [planMonths, user, onApplePayStart]);
 
   return (
     <div className="space-y-4">

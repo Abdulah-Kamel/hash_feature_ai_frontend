@@ -28,6 +28,7 @@ export default function BillingPlans({ currentPlan = "free" }) {
   const [period, setPeriod] = React.useState("month");
   const [loading, setLoading] = React.useState(false);
   const [showPayment, setShowPayment] = React.useState(false);
+  const [isApplePayActive, setIsApplePayActive] = React.useState(false);
   const price = period === "month" ? 29 : period === "quarter" ? 79 : 179; // Keep price logic for display or update if needed
   const options = [
     { v: "month", label: "شهر" },
@@ -144,12 +145,24 @@ export default function BillingPlans({ currentPlan = "free" }) {
             {loading
               ? "جاري التحويل..."
               : isProPlan
-              ? "الخطة الحالية"
-              : "اشترك الآن"}
+                ? "الخطة الحالية"
+                : "اشترك الآن"}
           </Button>
           {!isProPlan && (
-            <Dialog open={showPayment} onOpenChange={setShowPayment}>
-              <DialogContent className="bg-[#1f1f1f] text-white border-[#383839] max-w-[700px]">
+            <Dialog
+              open={showPayment}
+              onOpenChange={(open) => {
+                setShowPayment(open);
+                if (!open) setIsApplePayActive(false);
+              }}
+            >
+              <DialogContent
+                className={`bg-[#1f1f1f] text-white border-[#383839] max-w-[700px] transition-opacity duration-300 ${
+                  isApplePayActive
+                    ? "opacity-0 pointer-events-none"
+                    : "opacity-100"
+                }`}
+              >
                 <DialogHeader>
                   <DialogTitle className="text-white">
                     الدفع عبر Moyasar
@@ -159,8 +172,21 @@ export default function BillingPlans({ currentPlan = "free" }) {
                   planMonths={
                     period === "month" ? "1" : period === "quarter" ? "3" : "12"
                   }
+                  onApplePayStart={() => setIsApplePayActive(true)}
                 />
               </DialogContent>
+
+              {isApplePayActive && (
+                <div className="fixed inset-0 z-[100] flex items-end justify-center pb-10 pointer-events-none">
+                  <Button
+                    variant="outline"
+                    className="pointer-events-auto bg-[#1f1f1f]/80 backdrop-blur border-white/20 text-white hover:bg-white/10"
+                    onClick={() => setIsApplePayActive(false)}
+                  >
+                    العودة لخيارات الدفع الأخرى
+                  </Button>
+                </div>
+              )}
             </Dialog>
           )}
         </Card>
