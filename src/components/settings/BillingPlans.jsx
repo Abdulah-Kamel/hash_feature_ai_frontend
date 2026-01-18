@@ -149,7 +149,7 @@ export default function BillingPlans({ currentPlan = "free" }) {
           </Button>
           {!isProPlan && (
             <Dialog open={showPayment} onOpenChange={setShowPayment}>
-              <DialogContent className="bg-[#1f1f1f] text-white border-[#383839]">
+              <DialogContent className="bg-[#1f1f1f] text-white border-[#383839] max-w-[700px]">
                 <DialogHeader>
                   <DialogTitle className="text-white">
                     الدفع عبر Moyasar
