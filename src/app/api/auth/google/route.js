@@ -14,18 +14,19 @@ export async function POST(req) {
     );
   let body = {};
   try { body = await req.json(); } catch {}
-  const idToken = body?.idToken;
   const code = body?.code;
 
-  if (!idToken && !code) {
-    console.error("Missing idToken or code in request");
+  if (!code) {
+    console.error("Missing code in request");
     return NextResponse.json(
-      { message: "Missing idToken or code" },
+      { message: "Missing code" },
       { status: 400 }
     );
   }
 
-  let finalIdToken = idToken;
+  let finalIdToken = "";
+  console.log("Received code:", code);
+  
 
   // If we received an authorization code, exchange it for an ID token
   if (code) {
@@ -52,6 +53,7 @@ export async function POST(req) {
           grant_type: "authorization_code",
         }),
       });
+      console.log("Token exchange response:", tokenResponse);
       
       if (!tokenResponse.ok) {
         const error = await tokenResponse.text();
@@ -64,6 +66,7 @@ export async function POST(req) {
 
       const tokens = await tokenResponse.json();
       finalIdToken = tokens.id_token;
+      console.log("Received id_token:", finalIdToken);
 
       if (!finalIdToken) {
         console.error("No id_token in response:", tokens);
@@ -90,7 +93,7 @@ export async function POST(req) {
     );
   }
 
-  const payload = { token: finalIdToken };
+  const payload = { id_token: finalIdToken };
 
   const res = await fetch(`${base}/api/v1/auth/google`, {
     method: "POST",
