@@ -66,6 +66,9 @@ export default function PaymentForm({ planMonths = "1" }) {
         .mysr-form button[type="submit"] {
           color: #fff !important;
         }
+          .mysr-form [role="main"] {
+           color : #fff !important;
+          }
       `;
       document.head.appendChild(style);
     };
